@@ -35,7 +35,7 @@ export const tasks = pgTable(
     'task',
     {
         id: uuid('id').defaultRandom().notNull(),
-        userId: uuid('user_id')
+        userId: text('user_id')
             .notNull()
             .references(() => users.id),
 

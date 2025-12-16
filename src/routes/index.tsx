@@ -1,18 +1,12 @@
-import { createFileRoute, redirect } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { CheckCircle2, Code2, ShieldCheck, Zap } from 'lucide-react';
-import { SignInButton } from '@clerk/clerk-react';
-import { auth } from '@clerk/tanstack-react-start/server';
+import { SignInButton } from '@clerk/tanstack-react-start';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { authStateFn } from '@/utils.ts/auth';
 
 export const Route = createFileRoute('/')({
-  beforeLoad: async () => {
-    const { userId } = await auth();
-
-    if (userId) {
-      throw redirect({ to: '/app/todolist' });
-    }
-  },
+  beforeLoad: async () => authStateFn(),
   component: App
 });
 

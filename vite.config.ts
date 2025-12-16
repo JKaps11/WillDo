@@ -10,6 +10,7 @@ import neon from './neon-vite-plugin.ts'
 const config = defineConfig({
   server: {
     port: 3000,
+    allowedHosts: ['localhost', 'lupita-cathedrallike-angla.ngrok-free.dev'],
   },
   plugins: [
     devtools(),

@@ -6,6 +6,7 @@ const initialState: UIStoreState = {
     todoListOptions: {
         sortBy: 'date',
         timeSpan: 'week',
+        showCompleted: true,
     },
 };
 

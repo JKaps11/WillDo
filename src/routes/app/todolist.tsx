@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useStore } from '@tanstack/react-store'
-import { addDays, endOfWeek, format, isSameDay, startOfWeek } from 'date-fns'
 
 import { useQuery } from '@tanstack/react-query'
 import type { UserSettings } from '@/db/schemas/user.schema'
@@ -16,6 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { useTRPC } from '@/integrations/trpc/react'
+import { addDays, endOfWeek, format, isSameDay, startOfWeek } from '@/utils.ts/dates'
 
 interface SingleTodoListProps {
   todoList: TodoList

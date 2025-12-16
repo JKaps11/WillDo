@@ -1,4 +1,4 @@
-import { jsonb, pgEnum, pgTable, text, uuid } from 'drizzle-orm/pg-core';
+import { jsonb, pgEnum, pgTable, text } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 /* ---------- Enums ---------- */
@@ -33,7 +33,7 @@ export interface UserSettings {
 /* ---------- Table ---------- */
 
 export const users = pgTable('user', {
-    id: uuid('id').primaryKey(),
+    id: text('id').primaryKey(),
     email: text('email').notNull().unique(),
     name: text('name').notNull(),
 

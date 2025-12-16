@@ -2,13 +2,13 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { and, eq, gte, lte } from 'drizzle-orm';
 import { protectedProcedure } from '../init';
-import { endOfWeek, startOfWeek } from './utils';
 import type { TRPCRouterRecord } from '@trpc/server';
 
 import type { TodoList } from '@/db/schemas/todo_list.schema';
 import type { Task } from '@/db/schemas/task.schema';
 import { todoLists } from '@/db/schemas/todo_list.schema';
 import { tasks } from '@/db/schemas/task.schema';
+import { endOfWeek, startOfWeek } from '@/utils.ts/dates';
 
 
 /* ---------- Input Types (DB-driven) ---------- */

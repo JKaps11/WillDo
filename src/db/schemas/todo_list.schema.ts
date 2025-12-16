@@ -2,7 +2,7 @@ import {
   date,
   pgTable,
   primaryKey,
-  uuid,
+  text,
 } from 'drizzle-orm/pg-core';
 
 import { resourceTimestamps } from './utils.schema';
@@ -13,7 +13,7 @@ import { users } from './user.schema';
 export const todoLists = pgTable(
   'todo_list',
   {
-    userId: uuid('user_id')
+    userId: text('user_id')
       .notNull()
       .references(() => users.id),
 
