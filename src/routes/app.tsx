@@ -18,7 +18,7 @@ export function AppLayout() {
       <SidebarProvider defaultOpen={false}>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-14 items-center gap-2 px-4">
+          <header className="fixed flex h-14 items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <div className="font-medium">{title}</div>
           </header>

@@ -25,9 +25,10 @@ export default function App() {
               who live in their editor and terminal.
             </p>
             <div className="flex gap-4">
-              <Button asChild size="lg">
-                <SignInButton forceRedirectUrl={'/app/todolist'} />
-              </Button>
+              {/* <Link to="app/todolist">Get Started</Link> */}
+              <SignInButton forceRedirectUrl={'/app/todolist'}>
+                <Button size="lg">Sign In</Button>
+              </SignInButton>
               <Button asChild size="lg" variant="outline">
                 {/* <Link to="/docs">Docs</Link> */}
               </Button>
