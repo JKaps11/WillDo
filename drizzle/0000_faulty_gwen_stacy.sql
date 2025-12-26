@@ -2,8 +2,8 @@ CREATE TYPE "public"."priority" AS ENUM('Very_Low', 'Low', 'Medium', 'High', 'Ve
 CREATE TYPE "public"."todo_list_sort_by" AS ENUM('date', 'priority', 'alphabetical');--> statement-breakpoint
 CREATE TYPE "public"."todo_list_time_span" AS ENUM('day', 'week');--> statement-breakpoint
 CREATE TABLE "task" (
-	"id" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" uuid NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" text NOT NULL,
 	"todo_list_date" date NOT NULL,
 	"name" text NOT NULL,
 	"description" text,
@@ -11,12 +11,11 @@ CREATE TABLE "task" (
 	"due_date" timestamp,
 	"completed" boolean DEFAULT false NOT NULL,
 	"updated_at" timestamp,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "task_id_user_id_pk" PRIMARY KEY("id","user_id")
+	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "todo_list" (
-	"user_id" uuid NOT NULL,
+	"user_id" text NOT NULL,
 	"date" date NOT NULL,
 	"updated_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -24,7 +23,7 @@ CREATE TABLE "todo_list" (
 );
 --> statement-breakpoint
 CREATE TABLE "user" (
-	"id" uuid PRIMARY KEY NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
 	"email" text NOT NULL,
 	"name" text NOT NULL,
 	"settings" jsonb DEFAULT '{"todoList":{"sortBy":"priority","timeSpan":"week","showCompleted": true}}'::jsonb NOT NULL,

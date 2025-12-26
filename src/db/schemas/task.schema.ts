@@ -4,7 +4,6 @@ import {
     foreignKey,
     pgEnum,
     pgTable,
-    primaryKey,
     text,
     timestamp,
     uuid,
@@ -34,7 +33,7 @@ export type Priority =
 export const tasks = pgTable(
     'task',
     {
-        id: uuid('id').defaultRandom().notNull(),
+        id: uuid('id').defaultRandom().primaryKey(),
         userId: text('user_id')
             .notNull()
             .references(() => users.id),
@@ -51,10 +50,6 @@ export const tasks = pgTable(
         ...resourceTimestamps,
     },
     (table) => ({
-        pk: primaryKey({
-            columns: [table.id, table.userId],
-        }),
-
         todoListFk: foreignKey({
             columns: [table.todoListDate, table.userId],
             foreignColumns: [todoLists.date, todoLists.userId],

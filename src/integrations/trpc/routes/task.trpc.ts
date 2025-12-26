@@ -1,71 +1,28 @@
-import { z } from 'zod';
-import { and, eq } from 'drizzle-orm';
 import { TRPCError } from '@trpc/server';
 import { protectedProcedure } from '../init';
-import type { NewTask, Task } from '@/db/schemas/task.schema';
-import { priorityEnum, tasks } from '@/db/schemas/task.schema';
-
-/* ---------- Shared Zod Helpers ---------- */
-
-// Single source of truth for enum
-const prioritySchema = z.enum(priorityEnum.enumValues);
-
-/* ---------- Input Types (derived, not redefined) */
-
-type CreateTaskInput = Omit<
-    NewTask,
-    'id' | 'userId' | 'createdAt' | 'updatedAt'
->;
-
-type UpdateTaskInput = Partial<CreateTaskInput> & {
-    id: Task['id'];
-};
-
-/* ---------- Zod Schemas (constrained to types) */
-
-const createTaskSchema: z.ZodType<CreateTaskInput> = z.object({
-    todoListDate: z.date(),
-    name: z.string(),
-    description: z.string().optional(),
-    priority: prioritySchema.optional(),
-    dueDate: z.date().optional(),
-    completed: z.boolean().optional(),
-});
-
-const updateTaskSchema: z.ZodType<UpdateTaskInput> = z.object({
-    id: z.uuid(),
-    todoListDate: z.date().optional(),
-    name: z.string().optional(),
-    description: z.string().nullable().optional(),
-    priority: prioritySchema.optional(),
-    dueDate: z.date().nullable().optional(),
-    completed: z.boolean().optional(),
-});
-
-/* ---------- Router ---------- */
+import type { TodoList } from '@/db/schemas/todo_list.schema';
+import { taskRepository } from '@/db/repositories/task.repository';
+import {
+    createTaskSchema,
+    deleteTaskSchema,
+    getTaskSchema,
+    updateTaskSchema,
+} from '@/lib/zod-schemas';
+import { todoListRepository } from '@/db/repositories/todo_list.repository';
 
 export const taskRouter = {
     /** GET /task */
     get: protectedProcedure
-        .input(z.object({ id: z.uuid() }))
+        .input(getTaskSchema)
         .query(async ({ ctx, input }) => {
             const userId = ctx.userId;
-            const result = await ctx.db
-                .select()
-                .from(tasks)
-                .where(
-                    and(
-                        eq(tasks.id, input.id),
-                        eq(tasks.userId, userId),
-                    ),
-                )
-                .limit(1);
+            const task = await taskRepository.findById(input.id, userId);
 
-            if (result.length === 0) {
+            if (!task) {
                 throw new TRPCError({ code: 'NOT_FOUND' });
             }
 
-            return result[0];
+            return task;
         }),
 
     /** POST /task */
@@ -73,13 +30,25 @@ export const taskRouter = {
         .input(createTaskSchema)
         .mutation(async ({ ctx, input }) => {
             const userId = ctx.userId;
-            const [task] = await ctx.db
-                .insert(tasks)
-                .values({
-                    ...input,
-                    userId,
-                })
-                .returning();
+
+            // Ensure Todolist is created
+            const todoList: TodoList | null = await todoListRepository.findByDate(userId, input.todoListDate)
+            if (!todoList) await todoListRepository.create({
+                userId, 
+                date: input.todoListDate
+            })
+
+            const task = await taskRepository.create({
+                ...input,
+                userId,
+            });
+
+            if (!task) {
+                throw new TRPCError({
+                    code: 'INTERNAL_SERVER_ERROR',
+                    message: 'Failed to create task',
+                });
+            }
 
             return task;
         }),
@@ -91,43 +60,37 @@ export const taskRouter = {
             const userId = ctx.userId;
             const { id, ...updates } = input;
 
-            const result = await ctx.db
-                .update(tasks)
-                .set(updates)
-                .where(
-                    and(
-                        eq(tasks.id, id),
-                        eq(tasks.userId, userId),
-                    ),
-                )
-                .returning();
+            // If moving to a new date, ensure TodoList exists
+            if (updates.todoListDate) {
+                const todoList = await todoListRepository.findByDate(userId, updates.todoListDate);
+                if (!todoList) {
+                    await todoListRepository.create({
+                        userId,
+                        date: updates.todoListDate,
+                    });
+                }
+            }
 
-            if (result.length === 0) {
+            const task = await taskRepository.update(id, userId, updates);
+
+            if (!task) {
                 throw new TRPCError({ code: 'NOT_FOUND' });
             }
 
-            return result[0];
+            return task;
         }),
 
     /** DELETE /task */
     delete: protectedProcedure
-        .input(z.object({ id: z.string().uuid() }))
+        .input(deleteTaskSchema)
         .mutation(async ({ ctx, input }) => {
             const userId = ctx.userId;
-            const result = await ctx.db
-                .delete(tasks)
-                .where(
-                    and(
-                        eq(tasks.id, input.id),
-                        eq(tasks.userId, userId),
-                    ),
-                )
-                .returning();
+            const task = await taskRepository.delete(input.id, userId);
 
-            if (result.length === 0) {
+            if (!task) {
                 throw new TRPCError({ code: 'NOT_FOUND' });
             }
 
-            return result[0];
+            return task;
         }),
 };

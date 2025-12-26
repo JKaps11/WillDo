@@ -1,7 +1,12 @@
 import { jsonb, pgEnum, pgTable, text } from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
 
 /* ---------- Enums ---------- */
+
+export const appearanceThemeEnum = pgEnum('appearance_theme', [
+    'light',
+    'dark',
+    'system',
+])
 
 export const todoListTimeSpanEnum = pgEnum('todo_list_time_span', [
     'day',
@@ -15,6 +20,8 @@ export const todoListSortByEnum = pgEnum('todo_list_sort_by', [
 ]);
 
 /* ---------- Types ---------- */
+export type AppearanceTheme =
+    (typeof appearanceThemeEnum.enumValues)[number]
 
 export type TodoListTimeSpan =
     (typeof todoListTimeSpanEnum.enumValues)[number];
@@ -23,6 +30,9 @@ export type TodoListSortBy =
     (typeof todoListSortByEnum.enumValues)[number];
 
 export interface UserSettings {
+    appearance: {
+        theme: AppearanceTheme;
+    };
     todoList: {
         sortBy: TodoListSortBy;
         timeSpan: TodoListTimeSpan;
@@ -36,12 +46,20 @@ export const users = pgTable('user', {
     id: text('id').primaryKey(),
     email: text('email').notNull().unique(),
     name: text('name').notNull(),
-
     settings: jsonb('settings')
         .$type<UserSettings>()
         .notNull()
         .default(
-            sql`'{"todoList":{"sortBy":"priority","timeSpan":"week","showCompleted": true}}'::jsonb`
+            {
+                appearance: {
+                    theme: 'system'
+                },
+                todoList: {
+                    sortBy: 'priority',
+                    timeSpan: 'week',
+                    showCompleted: true
+                }
+            }
         ),
 });
 

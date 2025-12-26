@@ -1,3 +1,22 @@
+/* ---------- Day helpers ---------- */
+
+export function startOfDay(date: Date): Date {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    return d;
+}
+
+/**
+ * Converts a UTC-midnight date (from database DATE columns) to a local date object
+ * that represents the same calendar date in local time.
+ *
+ * Example: 2024-12-25T00:00:00Z -> 2024-12-25T00:00:00 local
+ */
+export function utcDateToLocal(date: Date | string): Date {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+}
+
 /* ---------- Week helpers (Monday-based) ---------- */
 
 export function startOfWeek(date: Date): Date {
@@ -31,25 +50,3 @@ export function isSameDay(a: Date, b: Date): boolean {
     );
 }
 
-/**
- * Minimal formatter (covers common cases)
- * Supported tokens:
- * yyyy MM dd HH mm ss
- */
-export function format(date: Date, pattern: string): string {
-    const pad = (n: number) => String(n).padStart(2, '0');
-
-    const replacements: Record<string, string> = {
-        yyyy: String(date.getFullYear()),
-        MM: pad(date.getMonth() + 1),
-        dd: pad(date.getDate()),
-        HH: pad(date.getHours()),
-        mm: pad(date.getMinutes()),
-        ss: pad(date.getSeconds()),
-    };
-
-    return pattern.replace(
-        /yyyy|MM|dd|HH|mm|ss/g,
-        (token) => replacements[token]
-    );
-}

@@ -3,7 +3,7 @@ import { CheckCircle2, Code2, ShieldCheck, Zap } from 'lucide-react';
 import { SignInButton } from '@clerk/tanstack-react-start';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { authStateFn } from '@/utils.ts/auth';
+import { authStateFn } from '@/utils/auth';
 
 export const Route = createFileRoute('/')({
   beforeLoad: async () => authStateFn(),

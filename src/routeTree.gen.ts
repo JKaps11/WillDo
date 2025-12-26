@@ -12,7 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppTodolistRouteImport } from './routes/app/todolist'
-import { Route as ApiWebhooksClerkRouteImport } from './routes/api/webhooks/clerk'
+import { Route as AppSettingsRouteImport } from './routes/app/settings'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
 
 const AppRoute = AppRouteImport.update({
@@ -30,10 +30,10 @@ const AppTodolistRoute = AppTodolistRouteImport.update({
   path: '/todolist',
   getParentRoute: () => AppRoute,
 } as any)
-const ApiWebhooksClerkRoute = ApiWebhooksClerkRouteImport.update({
-  id: '/api/webhooks/clerk',
-  path: '/api/webhooks/clerk',
-  getParentRoute: () => rootRouteImport,
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
 } as any)
 const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
   id: '/api/trpc/$',
@@ -44,49 +44,43 @@ const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/settings': typeof AppSettingsRoute
   '/app/todolist': typeof AppTodolistRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
-  '/api/webhooks/clerk': typeof ApiWebhooksClerkRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/settings': typeof AppSettingsRoute
   '/app/todolist': typeof AppTodolistRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
-  '/api/webhooks/clerk': typeof ApiWebhooksClerkRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/settings': typeof AppSettingsRoute
   '/app/todolist': typeof AppTodolistRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
-  '/api/webhooks/clerk': typeof ApiWebhooksClerkRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/app'
-    | '/app/todolist'
-    | '/api/trpc/$'
-    | '/api/webhooks/clerk'
+  fullPaths: '/' | '/app' | '/app/settings' | '/app/todolist' | '/api/trpc/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/app/todolist' | '/api/trpc/$' | '/api/webhooks/clerk'
+  to: '/' | '/app' | '/app/settings' | '/app/todolist' | '/api/trpc/$'
   id:
     | '__root__'
     | '/'
     | '/app'
+    | '/app/settings'
     | '/app/todolist'
     | '/api/trpc/$'
-    | '/api/webhooks/clerk'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   ApiTrpcSplatRoute: typeof ApiTrpcSplatRoute
-  ApiWebhooksClerkRoute: typeof ApiWebhooksClerkRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -112,12 +106,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTodolistRouteImport
       parentRoute: typeof AppRoute
     }
-    '/api/webhooks/clerk': {
-      id: '/api/webhooks/clerk'
-      path: '/api/webhooks/clerk'
-      fullPath: '/api/webhooks/clerk'
-      preLoaderRoute: typeof ApiWebhooksClerkRouteImport
-      parentRoute: typeof rootRouteImport
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
     }
     '/api/trpc/$': {
       id: '/api/trpc/$'
@@ -130,10 +124,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppSettingsRoute: typeof AppSettingsRoute
   AppTodolistRoute: typeof AppTodolistRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppSettingsRoute: AppSettingsRoute,
   AppTodolistRoute: AppTodolistRoute,
 }
 
@@ -143,7 +139,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   ApiTrpcSplatRoute: ApiTrpcSplatRoute,
-  ApiWebhooksClerkRoute: ApiWebhooksClerkRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

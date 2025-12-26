@@ -1,5 +1,5 @@
 {
-  "id": "5e39807b-3a39-42cf-9e97-17135eeee25c",
+  "id": "c9245f88-8e7f-4721-86a6-9725ef5b15ed",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -11,13 +11,13 @@
         "id": {
           "name": "id",
           "type": "uuid",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
         },
         "user_id": {
           "name": "user_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -105,15 +105,7 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "task_id_user_id_pk": {
-          "name": "task_id_user_id_pk",
-          "columns": [
-            "id",
-            "user_id"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -125,7 +117,7 @@
       "columns": {
         "user_id": {
           "name": "user_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -185,7 +177,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
           "notNull": true
         },
