@@ -1,8 +1,8 @@
 import { useDroppable } from '@dnd-kit/core';
+import type { ReactNode } from 'react';
 import { useDndState } from '@/components/dnd';
 import { cn } from '@/lib/utils';
 
-import type { ReactNode } from 'react';
 
 interface TodoListDropZoneProps {
     children: ReactNode;
@@ -21,9 +21,9 @@ export function TodoListDropZone({ children, date, className }: TodoListDropZone
         <div
             ref={setNodeRef}
             className={cn(
-                'h-full transition-all rounded-md',
-                isDragging && 'ring-2 ring-primary/30 ring-inset',
-                isOver && 'ring-2 ring-primary ring-inset',
+                'h-full transition-all duration-200 rounded-lg',
+                isDragging && 'outline outline-2 outline-primary/40 outline-offset-2',
+                isOver && 'outline outline-2 outline-primary outline-offset-2 scale-[1.02]',
                 className
             )}
         >

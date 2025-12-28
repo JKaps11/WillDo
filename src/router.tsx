@@ -8,6 +8,7 @@ import * as TanstackQuery from './integrations/tanstack-query/root-provider'
 import { routeTree } from './routeTree.gen'
 import { NotFoundPage } from './components/common/NotFound'
 import { DefaultErrorPage } from './components/common/Error'
+import LoadingSpinner from './components/common/LoadingSpinner'
 
 // Create a new router instance
 export const getRouter = () => {
@@ -20,6 +21,7 @@ export const getRouter = () => {
     defaultPreload: 'intent',
     defaultNotFoundComponent: NotFoundPage,
     defaultErrorComponent: DefaultErrorPage,
+    defaultPendingComponent: LoadingSpinner,
     Wrap: (props: { children: React.ReactNode }) => {
       return (
         <TanstackQuery.Provider {...rqContext}>

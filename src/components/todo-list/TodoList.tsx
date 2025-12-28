@@ -17,8 +17,7 @@ import {
 import { Task } from '@/components/task';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
+// import { Skeleton } from '@/components/ui/skeleton';
 
 /* ---------- Root ---------- */
 
@@ -31,7 +30,7 @@ interface RootProps {
 function Root({ children, options, baseDate }: RootProps): ReactNode {
     return (
         <TodoListContext.Provider value={{ options, baseDate }}>
-            <div className="mx-auto w-full max-w-6xl px-4 py-6">{children}</div>
+            <div className="mx-auto w-full px-4 py-6">{children}</div>
         </TodoListContext.Provider>
     );
 }
@@ -117,7 +116,7 @@ function WeekView({ lists }: WeekViewProps): ReactNode {
     }
 
     return (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 auto-rows-fr">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 auto-rows-fr">
             {days.map((d) => {
                 const key = format(d, 'yyyy-MM-dd');
                 const entry = byDay.get(key);
@@ -209,15 +208,12 @@ interface TaskListProps {
 function TaskList({ tasks }: TaskListProps): ReactNode {
     return (
         <div className="rounded-md border overflow-hidden">
-            <div className="max-h-[420px] overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]">
-                {tasks.map((task, idx) => (
+            <div className="flex flex-col gap-1 p-1 max-h-[420px] overflow-y-auto overflow-x-hidden">
+                {tasks.map((task) => (
                     <div key={task.id} className="relative overflow-hidden">
                         <Task.Root task={task}>
-                            <Task.Draggable>
-                                <Task.Card />
-                            </Task.Draggable>
+                            <Task.Card />
                         </Task.Root>
-                        {idx !== tasks.length - 1 && <Separator />}
                     </div>
                 ))}
             </div>
@@ -225,23 +221,24 @@ function TaskList({ tasks }: TaskListProps): ReactNode {
     );
 }
 
-/* ---------- Loading Skeleton ---------- */
+/* ---------- Loading  ---------- */
 
-function LoadingSkeleton(): ReactNode {
-    return (
-        <div className="space-y-4">
-            <Skeleton className="h-8 w-32" />
-            <Skeleton className="h-4 w-48" />
-            <Card>
-                <CardContent className="space-y-3 py-6">
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                </CardContent>
-            </Card>
-        </div>
-    );
-}
+/** fix styling if you want to use */
+// function LoadingSkeleton(): ReactNode {
+//     return (
+//         <div className="space-y-4">
+//             <Skeleton className="h-8 w-32" />
+//             <Skeleton className="h-4 w-48" />
+//             <Card>
+//                 <CardContent className="space-y-3 py-6">
+//                     <Skeleton className="h-12 w-full" />
+//                     <Skeleton className="h-12 w-full" />
+//                     <Skeleton className="h-12 w-full" />
+//                 </CardContent>
+//             </Card>
+//         </div>
+//     );
+// }
 
 /* ---------- Error State ---------- */
 
@@ -268,6 +265,5 @@ export const TodoList = {
     WeekView,
     TodoListCard,
     EmptyDayCard,
-    LoadingSkeleton,
     ErrorState,
 };

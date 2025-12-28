@@ -9,6 +9,7 @@ import { useTRPC } from '@/integrations/trpc/react';
 import { DndProvider } from '@/components/dnd';
 import { TodoList } from '@/components/todo-list';
 import { uiStore, uiStoreActions } from '@/lib/store';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 export const Route = createFileRoute('/app/todolist')({
     loader: () => ensureUser(),
@@ -30,26 +31,20 @@ function RouteComponent(): React.ReactNode {
         uiStoreActions.setHeaderName('Todo List');
     }, []);
 
-    if (isUserError || isUserLoading || !user) {
+    if (isUserLoading) {
+        return <LoadingSpinner />;
+    }
+
+    if (isUserError || !user) {
         return (
             <div className="flex items-center justify-center p-8">
-                <p className="text-muted-foreground">
-                    {isUserLoading ? 'Loading...' : 'Unable to load user settings'}
-                </p>
+                <p className="text-muted-foreground">Unable to load user settings</p>
             </div>
         );
     }
 
     const todoOptions = user.settings.todoList;
     const lists = (data ?? []) as Array<TodoListWithTasks>;
-
-    if (isLoading) {
-        return (
-            <TodoList.Root options={todoOptions} baseDate={baseDate}>
-                <TodoList.LoadingSkeleton />
-            </TodoList.Root>
-        );
-    }
 
     if (isError) {
         return (

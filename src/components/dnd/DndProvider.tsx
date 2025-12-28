@@ -1,25 +1,21 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { DndContext, DragOverlay, pointerWithin } from '@dnd-kit/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useStore } from '@tanstack/react-store';
 
 import { DndStateContext } from './context';
-import { useTRPC } from '@/integrations/trpc/react';
-import { startOfDay } from '@/utils/dates';
-import { Badge } from '@/components/ui/badge';
-import { formatPriority } from '@/components/todo-list/utils';
-import { cn } from '@/lib/utils';
-import { uiStore } from '@/lib/store';
 
 import type { ReactNode } from 'react';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import type { Task } from '@/db/schemas/task.schema';
 import type { TodoListWithTasks } from '@/components/todo-list/types';
-import type { z } from 'zod';
-import type { updateTaskSchema } from '@/lib/zod-schemas/task';
 import type { DndContextValue } from './context';
-
-type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
+import { uiStore } from '@/lib/store';
+import { cn } from '@/lib/utils';
+import { formatPriority } from '@/components/todo-list/utils';
+import { Badge } from '@/components/ui/badge';
+import { startOfDay, utcDateToLocal } from '@/utils/dates';
+import { useTRPC } from '@/integrations/trpc/react';
 
 interface DndProviderProps {
     children: ReactNode;
@@ -36,77 +32,21 @@ export function DndProvider({ children }: DndProviderProps): ReactNode {
         [activeTask]
     );
 
+    // Store previous data for rollback on error
+    const previousDataRef = useRef<Array<TodoListWithTasks> | null>(null);
+
     const updateTaskMutation = useMutation(
         trpc.task.update.mutationOptions({
-            onMutate: async (variables) => {
-                const { id, todoListDate } = variables as UpdateTaskInput;
-                const queryKey = trpc.todoList.list.queryKey(baseDate);
-                await queryClient.cancelQueries({ queryKey });
-                const previous = queryClient.getQueryData(queryKey);
-
-                queryClient.setQueryData(
-                    queryKey,
-                    (old: Array<TodoListWithTasks> | undefined) => {
-                        if (!old || !todoListDate) return old;
-
-                        // Find the task being moved
-                        let movedTask: Task | undefined;
-                        for (const list of old) {
-                            const found = list.tasks.find((t) => t.id === id);
-                            if (found) {
-                                movedTask = found;
-                                break;
-                            }
-                        }
-
-                        if (!movedTask) return old;
-
-                        const targetDateStr = todoListDate.toDateString();
-                        const targetListExists = old.some(
-                            (list) => new Date(list.date).toDateString() === targetDateStr
-                        );
-
-                        // Remove task from old list
-                        let result = old.map((list) => ({
-                            ...list,
-                            tasks: list.tasks.filter((t) => t.id !== id),
-                        }));
-
-                        if (targetListExists) {
-                            // Add task to existing target list
-                            result = result.map((list) => {
-                                if (new Date(list.date).toDateString() === targetDateStr) {
-                                    return {
-                                        ...list,
-                                        tasks: [...list.tasks, { ...movedTask!, todoListDate }],
-                                    };
-                                }
-                                return list;
-                            });
-                        } else {
-                            // Create new todolist entry with the task
-                            const newList: TodoListWithTasks = {
-                                userId: movedTask.userId,
-                                date: todoListDate,
-                                created_at: new Date(),
-                                updated_at: new Date(),
-                                tasks: [{ ...movedTask, todoListDate }],
-                            };
-                            result = [...result, newList];
-                        }
-
-                        return result;
-                    }
-                );
-
-                return { previous, queryKey };
-            },
-            onError: (_err, _vars, context) => {
-                if (context?.previous && context?.queryKey) {
-                    queryClient.setQueryData(context.queryKey, context.previous);
+            onError: () => {
+                // Rollback to previous data on error
+                if (previousDataRef.current) {
+                    const queryKey = trpc.todoList.list.queryKey(baseDate);
+                    queryClient.setQueryData(queryKey, previousDataRef.current);
+                    previousDataRef.current = null;
                 }
             },
             onSettled: () => {
+                previousDataRef.current = null;
                 // Invalidate all todoList.list queries regardless of date parameter
                 queryClient.invalidateQueries({
                     queryKey: trpc.todoList.list.pathKey()
@@ -114,6 +54,69 @@ export function DndProvider({ children }: DndProviderProps): ReactNode {
             },
         })
     );
+
+    /** Synchronously update the cache before mutation to prevent flash */
+    function optimisticMoveTask(taskId: string, todoListDate: Date): void {
+        const queryKey = trpc.todoList.list.queryKey(baseDate);
+
+        // Save previous data for potential rollback
+        previousDataRef.current = queryClient.getQueryData(queryKey) ?? null;
+
+        queryClient.setQueryData(
+            queryKey,
+            (old: Array<TodoListWithTasks> | undefined) => {
+                if (!old) return old;
+
+                // Find the task being moved
+                let movedTask: Task | undefined;
+                for (const list of old) {
+                    const found = list.tasks.find((t) => t.id === taskId);
+                    if (found) {
+                        movedTask = found;
+                        break;
+                    }
+                }
+
+                if (!movedTask) return old;
+
+                const targetDateStr = todoListDate.toDateString();
+                const targetListExists = old.some(
+                    (list) => utcDateToLocal(list.date).toDateString() === targetDateStr
+                );
+
+                // Remove task from old list
+                let result = old.map((list) => ({
+                    ...list,
+                    tasks: list.tasks.filter((t) => t.id !== taskId),
+                }));
+
+                if (targetListExists) {
+                    // Add task to existing target list
+                    result = result.map((list) => {
+                        if (utcDateToLocal(list.date).toDateString() === targetDateStr) {
+                            return {
+                                ...list,
+                                tasks: [...list.tasks, { ...movedTask, todoListDate }],
+                            };
+                        }
+                        return list;
+                    });
+                } else {
+                    // Create new todolist entry with the task
+                    const newList: TodoListWithTasks = {
+                        userId: movedTask.userId,
+                        date: todoListDate,
+                        created_at: new Date(),
+                        updated_at: new Date(),
+                        tasks: [{ ...movedTask, todoListDate }],
+                    };
+                    result = [...result, newList];
+                }
+
+                return result;
+            }
+        );
+    }
 
     function handleDragStart(event: DragStartEvent): void {
         const task = event.active.data.current?.task as Task | undefined;
@@ -124,24 +127,32 @@ export function DndProvider({ children }: DndProviderProps): ReactNode {
 
     function handleDragEnd(event: DragEndEvent): void {
         const { active, over } = event;
-        setActiveTask(null);
-
-        if (!over) return;
 
         const task = active.data.current?.task as Task | undefined;
-        const targetDate = over.data.current?.date as Date | undefined;
+        const targetDate = over?.data.current?.date as Date | undefined;
 
-        if (!task || !targetDate) return;
+        // Check if this is a valid drop that requires an update
+        const shouldUpdate = (() => {
+            if (!over || !task || !targetDate) return false;
+            const taskDate = utcDateToLocal(task.todoListDate).toDateString();
+            const dropDate = targetDate.toDateString();
+            return taskDate !== dropDate;
+        })();
 
-        // Don't update if dropped on the same date
-        const taskDate = new Date(task.todoListDate).toDateString();
-        const dropDate = targetDate.toDateString();
-        if (taskDate === dropDate) return;
+        if (shouldUpdate && task && targetDate) {
+            const newDate = startOfDay(targetDate);
 
-        updateTaskMutation.mutate({
-            id: task.id,
-            todoListDate: startOfDay(targetDate),
-        });
+            // Synchronously update cache BEFORE React re-renders
+            optimisticMoveTask(task.id, newDate);
+
+            // Then trigger the server mutation
+            updateTaskMutation.mutate({
+                id: task.id,
+                todoListDate: newDate,
+            });
+        }
+
+        setActiveTask(null);
     }
 
     return (
@@ -152,7 +163,7 @@ export function DndProvider({ children }: DndProviderProps): ReactNode {
                 onDragEnd={handleDragEnd}
             >
                 {children}
-                <DragOverlay>
+                <DragOverlay dropAnimation={null}>
                     {activeTask && (
                         <div className="bg-background border rounded-md shadow-lg px-4 py-3 w-64">
                             <div className="flex items-start justify-between gap-3">

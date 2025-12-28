@@ -15,7 +15,7 @@ export function NotFoundPage() {
     const pathname = useRouterState({ select: (s) => s.location.pathname });
 
     return (
-        <div className="flex min-h-screen items-center justify-center p-6">
+        <div className="flex h-full items-center justify-center p-6">
             <Empty className="max-w-xl">
                 <EmptyHeader>
                     <EmptyMedia variant="icon">
