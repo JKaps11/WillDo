@@ -1,5 +1,5 @@
 import { Link, useRouterState } from '@tanstack/react-router';
-import { CalendarDays, CheckSquare, LogOut, Settings } from 'lucide-react';
+import { CalendarDays, CheckSquare, Inbox, LogOut, Settings } from 'lucide-react';
 
 import { SignOutButton, UserButton } from '@clerk/tanstack-react-start';
 import type { ForwardRefExoticComponent, RefAttributes } from 'react';
@@ -19,6 +19,7 @@ import {
 
 const navItems: Array<{ title: UIStoreHeaderName, to: string, icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>> }> = [
     { title: 'Todo List', to: '/app/todolist', icon: CheckSquare },
+    { title: 'Unassigned', to: '/app/unassigned', icon: Inbox },
     { title: 'Calendar', to: '/app/calendar', icon: CalendarDays },
     { title: 'Settings', to: '/app/settings', icon: Settings },
 ];

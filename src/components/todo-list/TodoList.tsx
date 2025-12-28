@@ -211,9 +211,7 @@ function TaskList({ tasks }: TaskListProps): ReactNode {
             <div className="flex flex-col gap-1 p-1 max-h-[420px] overflow-y-auto overflow-x-hidden">
                 {tasks.map((task) => (
                     <div key={task.id} className="relative overflow-hidden">
-                        <Task.Root task={task}>
-                            <Task.Card />
-                        </Task.Root>
+                        <Task task={task} />
                     </div>
                 ))}
             </div>

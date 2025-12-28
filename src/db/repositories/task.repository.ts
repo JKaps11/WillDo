@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import type {NewTask, Task} from '@/db/schemas/task.schema';
 import { db } from '@/db/index';
 import {   tasks } from '@/db/schemas/task.schema';
@@ -61,5 +61,19 @@ export const taskRepository = {
             .returning();
 
         return result[0] ?? null;
+    },
+
+    findUnassigned: async (userId: string): Promise<Task[]> => {
+        const result = await db
+            .select()
+            .from(tasks)
+            .where(
+                and(
+                    eq(tasks.userId, userId),
+                    isNull(tasks.dueDate),
+                ),
+            );
+
+        return result;
     },
 };

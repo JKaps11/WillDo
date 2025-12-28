@@ -14,7 +14,7 @@ import {
 
 export function DefaultErrorPage({ error: _error }: ErrorComponentProps) {
     return (
-        <div className="flex min-h-screen items-center justify-center p-6">
+        <div className="flex h-full items-center justify-center">
             <Empty className="max-w-lg">
                 <EmptyHeader>
                     <EmptyMedia variant="icon">

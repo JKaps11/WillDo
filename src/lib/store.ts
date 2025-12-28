@@ -4,6 +4,7 @@ import { addDays, startOfDay } from '@/utils/dates';
 
 export const UI_STORE_HEADER_NAMES = [
   'Todo List',
+  'Unassigned',
   'Calendar',
   'Settings',
 ] as const;

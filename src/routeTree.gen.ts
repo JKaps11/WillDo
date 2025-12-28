@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppUnassignedRouteImport } from './routes/app/unassigned'
 import { Route as AppTodolistRouteImport } from './routes/app/todolist'
 import { Route as AppSettingsRouteImport } from './routes/app/settings'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppUnassignedRoute = AppUnassignedRouteImport.update({
+  id: '/unassigned',
+  path: '/unassigned',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppTodolistRoute = AppTodolistRouteImport.update({
   id: '/todolist',
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/app/settings': typeof AppSettingsRoute
   '/app/todolist': typeof AppTodolistRoute
+  '/app/unassigned': typeof AppUnassignedRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppRouteWithChildren
   '/app/settings': typeof AppSettingsRoute
   '/app/todolist': typeof AppTodolistRoute
+  '/app/unassigned': typeof AppUnassignedRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRoutesById {
@@ -61,19 +69,33 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/app/settings': typeof AppSettingsRoute
   '/app/todolist': typeof AppTodolistRoute
+  '/app/unassigned': typeof AppUnassignedRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/app/settings' | '/app/todolist' | '/api/trpc/$'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/app/settings'
+    | '/app/todolist'
+    | '/app/unassigned'
+    | '/api/trpc/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/app/settings' | '/app/todolist' | '/api/trpc/$'
+  to:
+    | '/'
+    | '/app'
+    | '/app/settings'
+    | '/app/todolist'
+    | '/app/unassigned'
+    | '/api/trpc/$'
   id:
     | '__root__'
     | '/'
     | '/app'
     | '/app/settings'
     | '/app/todolist'
+    | '/app/unassigned'
     | '/api/trpc/$'
   fileRoutesById: FileRoutesById
 }
@@ -98,6 +120,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/app/unassigned': {
+      id: '/app/unassigned'
+      path: '/unassigned'
+      fullPath: '/app/unassigned'
+      preLoaderRoute: typeof AppUnassignedRouteImport
+      parentRoute: typeof AppRoute
     }
     '/app/todolist': {
       id: '/app/todolist'
@@ -126,11 +155,13 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppSettingsRoute: typeof AppSettingsRoute
   AppTodolistRoute: typeof AppTodolistRoute
+  AppUnassignedRoute: typeof AppUnassignedRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppSettingsRoute: AppSettingsRoute,
   AppTodolistRoute: AppTodolistRoute,
+  AppUnassignedRoute: AppUnassignedRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

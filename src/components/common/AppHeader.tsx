@@ -56,6 +56,11 @@ export default function AppHeader(): React.ReactNode {
                     <NewTaskModal key="new-task-button"/>
                 ]
                 break;
+            case 'Unassigned':
+                options = [
+                    <NewTaskModal key="new-task-button"/>
+                ]
+                break;
             case 'Calendar':
                 options = []
                 break;

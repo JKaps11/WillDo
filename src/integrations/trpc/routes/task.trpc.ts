@@ -25,6 +25,14 @@ export const taskRouter = {
             return task;
         }),
 
+    /** GET /task/unassigned - Get all tasks without a due date */
+    listUnassigned: protectedProcedure
+        .query(async ({ ctx }) => {
+            const userId = ctx.userId;
+            const tasks = await taskRepository.findUnassigned(userId);
+            return tasks;
+        }),
+
     /** POST /task */
     create: protectedProcedure
         .input(createTaskSchema)
