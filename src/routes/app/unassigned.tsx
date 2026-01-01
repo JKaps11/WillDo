@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { ArrowDownAZ, ArrowUpDown, Check, Plus, X } from 'lucide-react';
 import type { ReactNode } from 'react';
-import type { Task as TaskType, Priority } from '@/db/schemas/task.schema';
+import type { Priority, Task as TaskType } from '@/db/schemas/task.schema';
 import { ensureUser } from '@/utils/auth';
 import { useTRPC } from '@/integrations/trpc/react';
 import { uiStoreActions } from '@/lib/store';
@@ -11,8 +12,9 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowDownAZ, ArrowUpDown } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { UnassignedTask } from '@/components/task';
+import { startOfDay } from '@/utils/dates';
 
 export const Route = createFileRoute('/app/unassigned')({
     loader: () => ensureUser(),
@@ -29,7 +31,7 @@ const PRIORITY_RANK: Record<Priority, number> = {
     Very_Low: 1,
 };
 
-function sortTasks(tasks: TaskType[], sortBy: SortOption): TaskType[] {
+function sortTasks(tasks: Array<TaskType>, sortBy: SortOption): Array<TaskType> {
     const sorted = [...tasks];
 
     // Always push completed to bottom
@@ -55,15 +57,42 @@ function sortTasks(tasks: TaskType[], sortBy: SortOption): TaskType[] {
 
 function RouteComponent(): ReactNode {
     const trpc = useTRPC();
+    const queryClient = useQueryClient();
     const [sortBy, setSortBy] = useState<SortOption>('priority');
+    const [isCreating, setIsCreating] = useState<boolean>(false);
+    const [newTaskTitle, setNewTaskTitle] = useState<string>('');
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const { data: tasks, isLoading, isError } = useQuery(
         trpc.task.listUnassigned.queryOptions()
     );
 
+    const createTaskMutation = useMutation(
+        trpc.task.create.mutationOptions({
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: trpc.task.listUnassigned.queryKey() });
+                setNewTaskTitle('');
+                setIsCreating(false);
+            },
+        })
+    );
+
     useEffect(() => {
         uiStoreActions.setHeaderName('Unassigned');
     }, []);
+
+    useEffect(() => {
+        if (isCreating && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [isCreating]);
+
+    const sortedTasks = useMemo(
+        () => sortTasks(tasks ?? [], sortBy),
+        [tasks, sortBy]
+    );
+    const total = sortedTasks.length;
+    const done = sortedTasks.filter((t) => t.completed).length;
 
     if (isLoading) {
         return <LoadingSpinner />;
@@ -84,15 +113,29 @@ function RouteComponent(): ReactNode {
         );
     }
 
-    const sortedTasks = useMemo(
-        () => sortTasks(tasks ?? [], sortBy),
-        [tasks, sortBy]
-    );
-    const total = sortedTasks.length;
-    const done = sortedTasks.filter((t) => t.completed).length;
-
     function toggleSort(): void {
         setSortBy((current) => (current === 'priority' ? 'alphabetical' : 'priority'));
+    }
+
+    function handleCreateTask(): void {
+        if (!newTaskTitle.trim()) return;
+        createTaskMutation.mutate({
+            name: newTaskTitle.trim(),
+            todoListDate: startOfDay(new Date()),
+        });
+    }
+
+    function handleCancel(): void {
+        setIsCreating(false);
+        setNewTaskTitle('');
+    }
+
+    function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>): void {
+        if (e.key === 'Enter') {
+            handleCreateTask();
+        } else if (e.key === 'Escape') {
+            handleCancel();
+        }
     }
 
     return (
@@ -124,20 +167,20 @@ function RouteComponent(): ReactNode {
                     <CardHeader className="space-y-1 pb-3">
                         <div className="flex items-center justify-between gap-3">
                             <CardTitle className="text-base font-medium">
-                                All Unassigned
+                                Tasks
                             </CardTitle>
                             <Badge variant="secondary" className="shrink-0">
                                 {done}/{total}
                             </Badge>
                         </div>
                     </CardHeader>
-                    <CardContent className="pt-0">
+                    <CardContent className="pt-0 space-y-3">
                         {sortedTasks.length === 0 ? (
                             <div className="py-8 text-center text-sm text-muted-foreground">
                                 No unassigned tasks. Create a task without a due date to see it here.
                             </div>
                         ) : (
-                            <div className="rounded-md border overflow-hidden">
+                            <div className="rounded-md overflow-hidden">
                                 <div className="flex flex-col gap-1 p-1 max-h-[600px] overflow-y-auto overflow-x-hidden">
                                     {sortedTasks.map((task) => (
                                         <div key={task.id} className="relative overflow-hidden">
@@ -146,6 +189,47 @@ function RouteComponent(): ReactNode {
                                     ))}
                                 </div>
                             </div>
+                        )}
+
+                        {/* Inline Task Creation */}
+                        {isCreating ? (
+                            <div className="flex items-center gap-2 p-3 border rounded-lg bg-muted/30">
+                                <Input
+                                    ref={inputRef}
+                                    placeholder="Task title"
+                                    value={newTaskTitle}
+                                    onChange={(e) => setNewTaskTitle(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    className="flex-1"
+                                    disabled={createTaskMutation.isPending}
+                                />
+                                <Button
+                                    size="icon"
+                                    onClick={handleCreateTask}
+                                    disabled={!newTaskTitle.trim() || createTaskMutation.isPending}
+                                    className="h-9 w-9 shrink-0"
+                                >
+                                    <Check className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={handleCancel}
+                                    disabled={createTaskMutation.isPending}
+                                    className="h-9 w-9 shrink-0"
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        ) : (
+                            <Button
+                                variant="ghost"
+                                onClick={() => setIsCreating(true)}
+                                className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+                            >
+                                <Plus className="h-4 w-4" />
+                                Add task
+                            </Button>
                         )}
                     </CardContent>
                 </Card>

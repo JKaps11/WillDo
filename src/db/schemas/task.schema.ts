@@ -2,6 +2,7 @@ import {
     boolean,
     date,
     foreignKey,
+    json,
     pgEnum,
     pgTable,
     text,
@@ -46,6 +47,8 @@ export const tasks = pgTable(
         priority: priorityEnum().default('Medium').notNull(),
         dueDate: timestamp('due_date'),
         completed: boolean('completed').default(false).notNull(),
+
+        tagIds: json('tag_ids').$type<string[]>().default([]).notNull(),
 
         ...resourceTimestamps,
     },

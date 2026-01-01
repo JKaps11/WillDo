@@ -14,6 +14,7 @@ export const createTaskSchema = z.object({
     priority: prioritySchema.optional(),
     dueDate: z.date().optional(),
     completed: z.boolean().optional(),
+    tagIds: z.array(z.string().uuid()).optional(),
 });
 
 export const updateTaskSchema = z.object({
@@ -24,6 +25,7 @@ export const updateTaskSchema = z.object({
     priority: prioritySchema.optional(),
     dueDate: z.date().nullable().optional(),
     completed: z.boolean().optional(),
+    tagIds: z.array(z.string().uuid()).optional(),
 });
 
 export const getTaskSchema = z.object({

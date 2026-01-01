@@ -18,8 +18,8 @@ import {
 } from '@/components/ui/sidebar';
 
 const navItems: Array<{ title: UIStoreHeaderName, to: string, icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>> }> = [
-    { title: 'Todo List', to: '/app/todolist', icon: CheckSquare },
     { title: 'Unassigned', to: '/app/unassigned', icon: Inbox },
+    { title: 'Todo List', to: '/app/todolist', icon: CheckSquare },
     { title: 'Calendar', to: '/app/calendar', icon: CalendarDays },
     { title: 'Settings', to: '/app/settings', icon: Settings },
 ];

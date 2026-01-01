@@ -75,6 +75,7 @@ export function EditTaskModal({ task }: EditTaskModalProps): ReactNode {
             priority: task.priority,
             todoListDate: utcDateToLocal(task.todoListDate),
             dueDate: task.dueDate ? new Date(task.dueDate) : null,
+            tagIds: task.tagIds ?? [],
             completed: task.completed,
         },
         onSubmit: ({ value }) => {
@@ -84,6 +85,7 @@ export function EditTaskModal({ task }: EditTaskModalProps): ReactNode {
                 description: value.description || null,
                 priority: value.priority,
                 dueDate: value.dueDate ?? undefined,
+                tagIds: value.tagIds.length > 0 ? value.tagIds : undefined,
                 completed: value.completed,
                 todoListDate: startOfDay(value.todoListDate),
             });

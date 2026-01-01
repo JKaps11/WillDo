@@ -20,6 +20,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { TagPicker } from './TaskTag';
 
 interface TaskFormValues {
     name: string;
@@ -27,6 +28,7 @@ interface TaskFormValues {
     priority: Priority;
     todoListDate: Date;
     dueDate: Date | null;
+    tagIds: string[];
     completed?: boolean;
 }
 
@@ -100,7 +102,21 @@ export function TaskForm({ form, showCompleted = false }: TaskFormProps): ReactN
                 )}
             />
 
-            {/* Row 3: Task Date, Due Date */}
+            {/* Row 3: Tags */}
+            <form.Field
+                name="tagIds"
+                children={(field) => (
+                    <Field className="col-span-2">
+                        <FieldLabel>Tags</FieldLabel>
+                        <TagPicker
+                            value={field.state.value}
+                            onChange={(tagIds) => field.handleChange(tagIds)}
+                        />
+                    </Field>
+                )}
+            />
+
+            {/* Row 4: Task Date, Due Date */}
             <form.Field
                 name="todoListDate"
                 children={(field) => (
@@ -175,7 +191,7 @@ export function TaskForm({ form, showCompleted = false }: TaskFormProps): ReactN
                 )}
             />
 
-            {/* Row 4: Completed (optional) */}
+            {/* Row 5: Completed (optional) */}
             {showCompleted && (
                 <form.Field
                     name="completed"

@@ -40,6 +40,7 @@ export default function NewTaskModal(): ReactNode {
             priority: 'medium' as const,
             todoListDate: startOfDay(new Date()),
             dueDate: null as Date | null,
+            tagIds: [] as string[],
         },
         onSubmit: ({ value }) => {
             createTaskMutation.mutate({
@@ -48,6 +49,7 @@ export default function NewTaskModal(): ReactNode {
                 description: value.description || undefined,
                 priority: value.priority,
                 dueDate: value.dueDate ?? undefined,
+                tagIds: value.tagIds.length > 0 ? value.tagIds : undefined,
             });
         },
     });
