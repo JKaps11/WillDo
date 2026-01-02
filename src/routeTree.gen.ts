@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppUnassignedRouteImport } from './routes/app/unassigned'
 import { Route as AppTodolistRouteImport } from './routes/app/todolist'
 import { Route as AppSettingsRouteImport } from './routes/app/settings'
+import { Route as AppCalendarRouteImport } from './routes/app/calendar'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
 
 const AppRoute = AppRouteImport.update({
@@ -41,6 +42,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCalendarRoute = AppCalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => AppRoute,
+} as any)
 const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
   id: '/api/trpc/$',
   path: '/api/trpc/$',
@@ -50,6 +56,7 @@ const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/calendar': typeof AppCalendarRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/todolist': typeof AppTodolistRoute
   '/app/unassigned': typeof AppUnassignedRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/calendar': typeof AppCalendarRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/todolist': typeof AppTodolistRoute
   '/app/unassigned': typeof AppUnassignedRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/calendar': typeof AppCalendarRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/todolist': typeof AppTodolistRoute
   '/app/unassigned': typeof AppUnassignedRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/app/calendar'
     | '/app/settings'
     | '/app/todolist'
     | '/app/unassigned'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/app'
+    | '/app/calendar'
     | '/app/settings'
     | '/app/todolist'
     | '/app/unassigned'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
+    | '/app/calendar'
     | '/app/settings'
     | '/app/todolist'
     | '/app/unassigned'
@@ -142,6 +154,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/calendar': {
+      id: '/app/calendar'
+      path: '/calendar'
+      fullPath: '/app/calendar'
+      preLoaderRoute: typeof AppCalendarRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/api/trpc/$': {
       id: '/api/trpc/$'
       path: '/api/trpc/$'
@@ -153,12 +172,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppCalendarRoute: typeof AppCalendarRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppTodolistRoute: typeof AppTodolistRoute
   AppUnassignedRoute: typeof AppUnassignedRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppCalendarRoute: AppCalendarRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppTodolistRoute: AppTodolistRoute,
   AppUnassignedRoute: AppUnassignedRoute,

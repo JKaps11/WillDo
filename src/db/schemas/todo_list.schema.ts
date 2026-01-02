@@ -1,9 +1,4 @@
-import {
-  date,
-  pgTable,
-  primaryKey,
-  text,
-} from 'drizzle-orm/pg-core';
+import { date, pgTable, primaryKey, text } from 'drizzle-orm/pg-core';
 
 import { resourceTimestamps } from './utils.schema';
 import { users } from './user.schema';
@@ -25,7 +20,7 @@ export const todoLists = pgTable(
     pk: primaryKey({
       columns: [table.userId, table.date],
     }),
-  })
+  }),
 );
 
 /* ---------- Inferred Types ---------- */

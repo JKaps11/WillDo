@@ -1,4 +1,4 @@
-import { Outlet, createFileRoute, } from '@tanstack/react-router'
+import { Outlet, createFileRoute } from '@tanstack/react-router';
 import { SignedIn } from '@clerk/tanstack-react-start';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/common/AppSidebar';
@@ -6,7 +6,7 @@ import AppHeader from '@/components/common/AppHeader';
 
 export const Route = createFileRoute('/app')({
   component: AppLayout,
-})
+});
 
 export function AppLayout() {
   return (
@@ -14,7 +14,7 @@ export function AppLayout() {
       <SidebarProvider defaultOpen={false}>
         <AppSidebar />
         <SidebarInset>
-          <AppHeader/>
+          <AppHeader />
           <main className="p-4 h-full">
             <Outlet />
           </main>

@@ -36,11 +36,13 @@ bun run db:studio        # Open Drizzle Studio GUI
 **Routing**: TanStack Router with file-based routes in `src/routes/`. Route tree is auto-generated in `src/routeTree.gen.ts`.
 
 **API Layer**: tRPC with SuperJSON transformer. Routers in `src/integrations/trpc/routes/`:
+
 - `protectedProcedure` - requires auth (most endpoints)
 - `publicProcedure` - no auth required
 - Client usage via `src/integrations/trpc/react.ts`
 
 **Database**: Drizzle ORM with Neon serverless PostgreSQL.
+
 - Schemas: `src/db/schemas/*.ts`
 - Repositories: `src/db/repositories/*.ts` (data access layer)
 - Validation: Zod schemas in `src/lib/zod-schemas/`

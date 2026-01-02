@@ -1,124 +1,196 @@
-import { useEffect } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import type {
+  CalendarView,
+  DefaultHomePage,
+  TodoListSortBy,
+  TodoListTimeSpan,
+  User,
+} from '@/db/schemas/user.schema';
 import type { UIStoreSettingsTab } from '@/lib/store';
-import type { TodoListSortBy, TodoListTimeSpan, User } from '@/db/schemas/user.schema';
-import { uiStore, uiStoreActions } from '@/lib/store';
-import { useTheme } from '@/lib/theme';
-import { useTRPC } from '@/integrations/trpc/react';
 import {
-    SettingsAppearanceTab,
-    SettingsCalendarTab,
-    SettingsTasksTab,
-    SettingsTodoListTab,
+  SettingsAppearanceTab,
+  SettingsCalendarTab,
+  SettingsGeneralTab,
+  SettingsIntegrationsTab,
+  SettingsTasksTab,
+  SettingsTodoListTab,
 } from '@/components/settings';
+import { useTRPC } from '@/integrations/trpc/react';
+import { useTheme } from '@/lib/theme';
+import { uiStore } from '@/lib/store';
 
 export const Route = createFileRoute('/app/settings')({
-    component: RouteComponent,
+  component: RouteComponent,
 });
 
 function RouteComponent(): React.ReactNode {
-    const currentTab: UIStoreSettingsTab = useStore(uiStore, (s) => s.settingsTab);
-    const { theme, setTheme } = useTheme();
+  const currentTab: UIStoreSettingsTab = useStore(
+    uiStore,
+    (s) => s.settingsTab,
+  );
+  const { theme, setTheme } = useTheme();
 
-    useEffect(() => {
-        uiStoreActions.setHeaderName('Settings');
-    }, []);
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
 
-    const trpc = useTRPC();
-    const queryClient = useQueryClient();
+  // Fetch user settings
+  const { data: user, isError } = useQuery(trpc.user.get.queryOptions());
 
-    // Fetch user settings
-    const { data: user, isError } = useQuery(trpc.user.get.queryOptions());
-
-    if (isError || !user) {
-        return (
-            <div className="flex items-center justify-center p-8">
-                <p className="text-muted-foreground">Unable to load settings</p>
-            </div>
-        );
-    }
-
-    const todoListSettings = user.settings.todoList;
-
-    // Mutation with optimistic updates
-    const patchMutation = useMutation(
-        trpc.user.patchSettings.mutationOptions({
-            onMutate: async (patch) => {
-                await queryClient.cancelQueries({ queryKey: trpc.user.get.queryKey() });
-                const previousUser = queryClient.getQueryData<User>(trpc.user.get.queryKey());
-
-                if (previousUser) {
-                    queryClient.setQueryData(trpc.user.get.queryKey(), {
-                        ...previousUser,
-                        settings: {
-                            appearance: {
-                                ...previousUser.settings.appearance,
-                                ...patch.appearance,
-                            },
-                            todoList: {
-                                ...previousUser.settings.todoList,
-                                ...patch.todoList,
-                            },
-                        },
-                    });
-                }
-
-                return { previousUser };
-            },
-            onError: (_err, _patch, context) => {
-                if (context?.previousUser) {
-                    queryClient.setQueryData(trpc.user.get.queryKey(), context.previousUser);
-                }
-            },
-            onSettled: () => {
-                queryClient.invalidateQueries({ queryKey: trpc.user.get.queryKey() });
-            },
-        })
+  if (isError || !user) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-muted-foreground">Unable to load settings</p>
+      </div>
     );
+  }
 
-    const handleSortByChange = (sortBy: TodoListSortBy): void => {
-        patchMutation.mutate({
-            todoList: { ...todoListSettings, sortBy },
-        });
-    };
+  const generalSettings = user.settings.general;
+  const todoListSettings = user.settings.todoList;
+  const calendarSettings = user.settings.calendar;
 
-    const handleTimeSpanChange = (timeSpan: TodoListTimeSpan): void => {
-        patchMutation.mutate({
-            todoList: { ...todoListSettings, timeSpan },
-        });
-    };
+  // Mutation with optimistic updates
+  const patchMutation = useMutation(
+    trpc.user.patchSettings.mutationOptions({
+      onMutate: async (patch) => {
+        await queryClient.cancelQueries({ queryKey: trpc.user.get.queryKey() });
+        const previousUser = queryClient.getQueryData<User>(
+          trpc.user.get.queryKey(),
+        );
 
-    const handleShowCompletedChange = (showCompleted: boolean): void => {
-        patchMutation.mutate({
-            todoList: { ...todoListSettings, showCompleted },
-        });
-    };
+        if (previousUser) {
+          queryClient.setQueryData(trpc.user.get.queryKey(), {
+            ...previousUser,
+            settings: {
+              general: {
+                ...previousUser.settings.general,
+                ...patch.general,
+              },
+              appearance: {
+                ...previousUser.settings.appearance,
+                ...patch.appearance,
+              },
+              todoList: {
+                ...previousUser.settings.todoList,
+                ...patch.todoList,
+              },
+              calendar: {
+                ...previousUser.settings.calendar,
+                ...patch.calendar,
+              },
+            },
+          });
+        }
 
-    switch (currentTab) {
-        case 'appearance':
-            return (
-                <SettingsAppearanceTab
-                    theme={theme}
-                    onThemeChange={setTheme}
-                />
-            );
-        case 'todo-list':
-            return (
-                <SettingsTodoListTab
-                    sortBy={todoListSettings.sortBy}
-                    timeSpan={todoListSettings.timeSpan}
-                    showCompleted={todoListSettings.showCompleted}
-                    onSortByChange={handleSortByChange}
-                    onTimeSpanChange={handleTimeSpanChange}
-                    onShowCompletedChange={handleShowCompletedChange}
-                />
-            );
-        case 'tasks':
-            return <SettingsTasksTab />;
-        case 'calendar':
-            return <SettingsCalendarTab />;
-    }
+        return { previousUser };
+      },
+      onError: (_err, _patch, context) => {
+        if (context?.previousUser) {
+          queryClient.setQueryData(
+            trpc.user.get.queryKey(),
+            context.previousUser,
+          );
+        }
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: trpc.user.get.queryKey() });
+      },
+    }),
+  );
+
+  const handleDefaultHomePageChange = (
+    defaultHomePage: DefaultHomePage,
+  ): void => {
+    patchMutation.mutate({
+      general: { ...generalSettings, defaultHomePage },
+    });
+  };
+
+  const handleSortByChange = (sortBy: TodoListSortBy): void => {
+    patchMutation.mutate({
+      todoList: { ...todoListSettings, sortBy },
+    });
+  };
+
+  const handleTimeSpanChange = (timeSpan: TodoListTimeSpan): void => {
+    patchMutation.mutate({
+      todoList: { ...todoListSettings, timeSpan },
+    });
+  };
+
+  const handleShowCompletedChange = (showCompleted: boolean): void => {
+    patchMutation.mutate({
+      todoList: { ...todoListSettings, showCompleted },
+    });
+  };
+
+  const handleStartOfWeekChange = (startOfWeek: 0 | 1 | 6): void => {
+    patchMutation.mutate({
+      calendar: { ...calendarSettings, startOfWeek },
+    });
+  };
+
+  const handleDefaultEventDurationChange = (
+    defaultEventDuration: 30 | 60 | 90 | 120,
+  ): void => {
+    patchMutation.mutate({
+      calendar: { ...calendarSettings, defaultEventDuration },
+    });
+  };
+
+  const handleDefaultViewChange = (defaultView: CalendarView): void => {
+    patchMutation.mutate({
+      calendar: { ...calendarSettings, defaultView },
+    });
+  };
+
+  const handleGoogleCalendarSyncChange = (
+    googleCalendarSync: boolean,
+  ): void => {
+    patchMutation.mutate({
+      calendar: { ...calendarSettings, googleCalendarSync },
+    });
+  };
+
+  switch (currentTab) {
+    case 'general':
+      return (
+        <SettingsGeneralTab
+          defaultHomePage={generalSettings.defaultHomePage}
+          onDefaultHomePageChange={handleDefaultHomePageChange}
+        />
+      );
+    case 'appearance':
+      return <SettingsAppearanceTab theme={theme} onThemeChange={setTheme} />;
+    case 'todo-list':
+      return (
+        <SettingsTodoListTab
+          sortBy={todoListSettings.sortBy}
+          timeSpan={todoListSettings.timeSpan}
+          showCompleted={todoListSettings.showCompleted}
+          onSortByChange={handleSortByChange}
+          onTimeSpanChange={handleTimeSpanChange}
+          onShowCompletedChange={handleShowCompletedChange}
+        />
+      );
+    case 'tasks':
+      return <SettingsTasksTab />;
+    case 'calendar':
+      return (
+        <SettingsCalendarTab
+          startOfWeek={calendarSettings.startOfWeek}
+          defaultEventDuration={calendarSettings.defaultEventDuration}
+          defaultView={calendarSettings.defaultView}
+          googleCalendarSync={calendarSettings.googleCalendarSync}
+          onStartOfWeekChange={handleStartOfWeekChange}
+          onDefaultEventDurationChange={handleDefaultEventDurationChange}
+          onDefaultViewChange={handleDefaultViewChange}
+          onGoogleCalendarSyncChange={handleGoogleCalendarSyncChange}
+        />
+      );
+    case 'integrations':
+      return <SettingsIntegrationsTab />;
+  }
 }

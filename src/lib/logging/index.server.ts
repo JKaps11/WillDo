@@ -5,31 +5,28 @@
 
 // Re-export types from the shared types file (safe for client import)
 export type {
-    WideEvent,
-    WideEventUser,
-    WideEventRpc,
-    WideEventError,
-    WideEventFields,
-} from './types'
+  WideEvent,
+  WideEventUser,
+  WideEventRpc,
+  WideEventError,
+  WideEventFields,
+} from './types';
 
 export {
-    runWithWideEvent,
-    getWideEvent,
-    addWide,
-    addWideUser,
-    addWideRpc,
-    addWideError,
-    getRequestId,
-} from './wideEventStore.server'
+  runWithWideEvent,
+  getWideEvent,
+  addWide,
+  addWideUser,
+  addWideRpc,
+  addWideError,
+  getRequestId,
+} from './wideEventStore.server';
 
 export {
-    type TailSamplingContext,
-    shouldLog,
-    emitWideEvent,
-    finalizeAndEmit,
-} from './logger.server'
+  type TailSamplingContext,
+  shouldLog,
+  emitWideEvent,
+  finalizeAndEmit,
+} from './logger.server';
 
-export {
-    withLogging,
-    withLoggingInput,
-} from './serverFn.server'
+export { withLogging, withLoggingInput } from './serverFn.server';

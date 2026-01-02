@@ -121,7 +121,8 @@ Responsibilities:
 - Emit structured JSON logs using:
   ```ts
   console.log(JSON.stringify(event))
-No transports
+  No transports
+  ```
 
 No external services
 
@@ -144,10 +145,9 @@ D) tRPC Integration Example
 Show how to enrich the wide event with:
 
 rpc: {
-  system: 'trpc',
-  procedure: string
+system: 'trpc',
+procedure: string
 }
-
 
 Must be server-only.
 
@@ -156,10 +156,9 @@ E) Server Function Integration Example
 Show how to enrich the wide event with:
 
 rpc: {
-  system: 'server_fn',
-  procedure: string
+system: 'server_fn',
+procedure: string
 }
-
 
 Must be safe for client-callable server functions.
 
@@ -182,21 +181,20 @@ Expected Result
 A single request should produce one structured JSON log like:
 
 {
-  "event": "http_request",
-  "request_id": "…",
-  "method": "POST",
-  "path": "/api/trpc/todo.create",
-  "status_code": 200,
-  "duration_ms": 84,
-  "user": {
-    "id": "user_123",
-    "plan": "free"
-  },
-  "rpc": {
-    "system": "trpc",
-    "procedure": "todo.create"
-  }
+"event": "http_request",
+"request_id": "…",
+"method": "POST",
+"path": "/api/trpc/todo.create",
+"status_code": 200,
+"duration_ms": 84,
+"user": {
+"id": "user_123",
+"plan": "free"
+},
+"rpc": {
+"system": "trpc",
+"procedure": "todo.create"
 }
-
+}
 
 If there is any ambiguity about TanStack Start execution boundaries, default to server-only isolation over convenience.

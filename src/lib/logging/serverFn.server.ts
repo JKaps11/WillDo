@@ -1,10 +1,10 @@
-import { addWideRpc, addWideError } from './wideEventStore.server'
+import { addWideError, addWideRpc } from './wideEventStore.server';
 
 /**
  * Context object passed to server function handlers with input.
  */
 export interface ServerFnContext<TInput> {
-    data: TInput
+  data: TInput;
 }
 
 /**
@@ -23,24 +23,24 @@ export interface ServerFnContext<TInput> {
  * ```
  */
 export function withLogging<TOutput>(
-    procedureName: string,
-    handler: () => TOutput | Promise<TOutput>
+  procedureName: string,
+  handler: () => TOutput | Promise<TOutput>,
 ): () => Promise<TOutput> {
-    return async (): Promise<TOutput> => {
-        addWideRpc({
-            system: 'server_fn',
-            procedure: procedureName,
-        })
+  return async (): Promise<TOutput> => {
+    addWideRpc({
+      system: 'server_fn',
+      procedure: procedureName,
+    });
 
-        try {
-            return await handler()
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                addWideError(err)
-            }
-            throw err
-        }
+    try {
+      return await handler();
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        addWideError(err);
+      }
+      throw err;
     }
+  };
 }
 
 /**
@@ -59,22 +59,22 @@ export function withLogging<TOutput>(
  * ```
  */
 export function withLoggingInput<TInput, TOutput>(
-    procedureName: string,
-    handler: (ctx: ServerFnContext<TInput>) => TOutput | Promise<TOutput>
+  procedureName: string,
+  handler: (ctx: ServerFnContext<TInput>) => TOutput | Promise<TOutput>,
 ): (ctx: ServerFnContext<TInput>) => Promise<TOutput> {
-    return async (ctx: ServerFnContext<TInput>): Promise<TOutput> => {
-        addWideRpc({
-            system: 'server_fn',
-            procedure: procedureName,
-        })
+  return async (ctx: ServerFnContext<TInput>): Promise<TOutput> => {
+    addWideRpc({
+      system: 'server_fn',
+      procedure: procedureName,
+    });
 
-        try {
-            return await handler(ctx)
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                addWideError(err)
-            }
-            throw err
-        }
+    try {
+      return await handler(ctx);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        addWideError(err);
+      }
+      throw err;
     }
+  };
 }

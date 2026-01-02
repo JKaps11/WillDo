@@ -1,15 +1,15 @@
-import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
-import { createFileRoute } from '@tanstack/react-router'
-import { trpcRouter } from '@/integrations/trpc/routes/router'
-import { createTRPCContext } from '@/integrations/trpc/context'
+import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
+import { createFileRoute } from '@tanstack/react-router';
+import { createTRPCContext } from '@/integrations/trpc/context';
+import { trpcRouter } from '@/integrations/trpc/routes/router';
 
 function handler({ request }: { request: Request }) {
   return fetchRequestHandler({
     req: request,
     router: trpcRouter,
     endpoint: '/api/trpc',
-    createContext: createTRPCContext
-  })
+    createContext: createTRPCContext,
+  });
 }
 
 export const Route = createFileRoute('/api/trpc/$')({
@@ -19,4 +19,4 @@ export const Route = createFileRoute('/api/trpc/$')({
       POST: handler,
     },
   },
-})
+});

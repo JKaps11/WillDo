@@ -4,38 +4,40 @@
  */
 
 export interface WideEventUser {
-    id: string
-    plan?: string
+  id: string;
+  plan?: string;
 }
 
 export interface WideEventRpc {
-    system: 'trpc' | 'server_fn'
-    procedure: string
+  system: 'trpc' | 'server_fn';
+  procedure: string;
 }
 
 export interface WideEventError {
-    message: string
-    code?: string
-    stack?: string
+  message: string;
+  code?: string;
+  stack?: string;
 }
 
 export interface WideEvent {
-    event: 'http_request'
-    request_id: string
-    timestamp: string
-    method: string
-    path: string
-    status_code: number | null
-    duration_ms: number | null
+  event: 'http_request';
+  request_id: string;
+  timestamp: string;
+  method: string;
+  path: string;
+  status_code: number | null;
+  duration_ms: number | null;
 
-    user?: WideEventUser
-    rpc?: WideEventRpc
-    error?: WideEventError
+  user?: WideEventUser;
+  rpc?: WideEventRpc;
+  error?: WideEventError;
 
-    [key: string]: unknown
+  [key: string]: unknown;
 }
 
 /**
  * Fields that can be added to a wide event after initialization.
  */
-export type WideEventFields = Partial<Omit<WideEvent, 'event' | 'request_id' | 'timestamp'>>
+export type WideEventFields = Partial<
+  Omit<WideEvent, 'event' | 'request_id' | 'timestamp'>
+>;

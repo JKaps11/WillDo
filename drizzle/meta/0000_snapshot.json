@@ -80,12 +80,8 @@
           "name": "task_user_id_user_id_fk",
           "tableFrom": "task",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -93,14 +89,8 @@
           "name": "task_todo_list_date_user_id_todo_list_date_user_id_fk",
           "tableFrom": "task",
           "tableTo": "todo_list",
-          "columnsFrom": [
-            "todo_list_date",
-            "user_id"
-          ],
-          "columnsTo": [
-            "date",
-            "user_id"
-          ],
+          "columnsFrom": ["todo_list_date", "user_id"],
+          "columnsTo": ["date", "user_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -147,12 +137,8 @@
           "name": "todo_list_user_id_user_id_fk",
           "tableFrom": "todo_list",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -160,10 +146,7 @@
       "compositePrimaryKeys": {
         "todo_list_user_id_date_pk": {
           "name": "todo_list_user_id_date_pk",
-          "columns": [
-            "user_id",
-            "date"
-          ]
+          "columns": ["user_id", "date"]
         }
       },
       "uniqueConstraints": {},
@@ -208,9 +191,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -222,30 +203,17 @@
     "public.priority": {
       "name": "priority",
       "schema": "public",
-      "values": [
-        "Very_Low",
-        "Low",
-        "Medium",
-        "High",
-        "Very_High"
-      ]
+      "values": ["Very_Low", "Low", "Medium", "High", "Very_High"]
     },
     "public.todo_list_sort_by": {
       "name": "todo_list_sort_by",
       "schema": "public",
-      "values": [
-        "date",
-        "priority",
-        "alphabetical"
-      ]
+      "values": ["date", "priority", "alphabetical"]
     },
     "public.todo_list_time_span": {
       "name": "todo_list_time_span",
       "schema": "public",
-      "values": [
-        "day",
-        "week"
-      ]
+      "values": ["day", "week"]
     }
   },
   "schemas": {},

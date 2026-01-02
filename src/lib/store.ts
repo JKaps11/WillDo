@@ -1,71 +1,110 @@
 import { Store } from '@tanstack/store';
-import type { TodoListTimeSpan } from '@/db/schemas/user.schema';
+import type { CalendarView, TodoListTimeSpan } from '@/db/schemas/user.schema';
 import { addDays, startOfDay } from '@/utils/dates';
 
-export const UI_STORE_HEADER_NAMES = [
-  'Todo List',
-  'Unassigned',
-  'Calendar',
-  'Settings',
-] as const;
-
-export type UIStoreHeaderName = typeof UI_STORE_HEADER_NAMES[number];
-
 export const UI_STORE_SETTINGS_TABS = [
+  'general',
   'appearance',
   'todo-list',
   'tasks',
   'calendar',
+  'integrations',
 ] as const;
 
-export type UIStoreSettingsTab = typeof UI_STORE_SETTINGS_TABS[number];
+export type UIStoreSettingsTab = (typeof UI_STORE_SETTINGS_TABS)[number];
+
+export type UnassignedSortOption = 'priority' | 'alphabetical';
 
 export interface UIStoreState {
-    headerName: UIStoreHeaderName;
-    settingsTab: UIStoreSettingsTab;
-    todoListBaseDate: Date;
+  settingsTab: UIStoreSettingsTab;
+  todoListBaseDate: Date;
+  calendarBaseDate: Date;
+  unassignedSortBy: UnassignedSortOption;
 }
 
 export type UIStoreActions = {
-    setHeaderName: (name: UIStoreHeaderName) => void;
-    setSettingsTab: (tab: UIStoreSettingsTab) => void;
-    setTodoListBaseDate: (date: Date) => void;
-    navigateTodoList: (direction: 'prev' | 'next', timeSpan: TodoListTimeSpan) => void;
+  setSettingsTab: (tab: UIStoreSettingsTab) => void;
+  setTodoListBaseDate: (date: Date) => void;
+  navigateTodoList: (
+    direction: 'prev' | 'next',
+    timeSpan: TodoListTimeSpan,
+  ) => void;
+  setCalendarBaseDate: (date: Date) => void;
+  navigateCalendar: (direction: 'prev' | 'next', view: CalendarView) => void;
+  toggleUnassignedSort: () => void;
 };
 
 const initialState: UIStoreState = {
-    headerName: 'Todo List',
-    settingsTab: 'appearance',
-    todoListBaseDate: startOfDay(new Date()),
+  settingsTab: 'general',
+  todoListBaseDate: startOfDay(new Date()),
+  calendarBaseDate: startOfDay(new Date()),
+  unassignedSortBy: 'priority',
 };
 
 export const uiStore = new Store<UIStoreState>(initialState);
 
 export const uiStoreActions: UIStoreActions = {
-    setHeaderName: (name: UIStoreHeaderName) => {
-        uiStore.setState((state) => ({
-            ...state,
-            headerName: name,
-        }));
-    },
-    setSettingsTab: (tab: UIStoreSettingsTab) => {
-        uiStore.setState((state) => ({
-            ...state,
-            settingsTab: tab
-        }))
-    },
-    setTodoListBaseDate: (date: Date) => {
-        uiStore.setState((state) => ({
-            ...state,
-            todoListBaseDate: startOfDay(date),
-        }));
-    },
-    navigateTodoList: (direction: 'prev' | 'next', timeSpan: TodoListTimeSpan) => {
-        const amount = timeSpan === 'week' ? 7 : 1;
-        const delta = direction === 'prev' ? -amount : amount;
-        uiStore.setState((state) => ({
-            ...state,
-            todoListBaseDate: addDays(state.todoListBaseDate, delta),
-        }));
-    },
+  setSettingsTab: (tab: UIStoreSettingsTab) => {
+    uiStore.setState((state) => ({
+      ...state,
+      settingsTab: tab,
+    }));
+  },
+  setTodoListBaseDate: (date: Date) => {
+    uiStore.setState((state) => ({
+      ...state,
+      todoListBaseDate: startOfDay(date),
+    }));
+  },
+  navigateTodoList: (
+    direction: 'prev' | 'next',
+    timeSpan: TodoListTimeSpan,
+  ) => {
+    const amount = timeSpan === 'week' ? 7 : 1;
+    const delta = direction === 'prev' ? -amount : amount;
+    uiStore.setState((state) => ({
+      ...state,
+      todoListBaseDate: addDays(state.todoListBaseDate, delta),
+    }));
+  },
+  setCalendarBaseDate: (date: Date) => {
+    uiStore.setState((state) => ({
+      ...state,
+      calendarBaseDate: startOfDay(date),
+    }));
+  },
+  navigateCalendar: (direction: 'prev' | 'next', view: CalendarView) => {
+    uiStore.setState((state) => {
+      const current = state.calendarBaseDate;
+      let newDate: Date;
+
+      switch (view) {
+        case 'month':
+          newDate = new Date(
+            current.getFullYear(),
+            current.getMonth() + (direction === 'prev' ? -1 : 1),
+            1,
+          );
+          break;
+        case 'week':
+          newDate = addDays(current, direction === 'prev' ? -7 : 7);
+          break;
+        case 'day':
+          newDate = addDays(current, direction === 'prev' ? -1 : 1);
+          break;
+      }
+
+      return {
+        ...state,
+        calendarBaseDate: newDate,
+      };
+    });
+  },
+  toggleUnassignedSort: () => {
+    uiStore.setState((state) => ({
+      ...state,
+      unassignedSortBy:
+        state.unassignedSortBy === 'priority' ? 'alphabetical' : 'priority',
+    }));
+  },
 };

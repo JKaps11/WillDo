@@ -14,7 +14,8 @@ const t = initTRPC.context<TRPCContext>().create({
  */
 const wideEventMiddleware = t.middleware(async ({ path, type, next }) => {
   // Dynamic import to prevent bundling into client
-  const { addWideRpc, addWideError } = await import('@/lib/logging/wideEventStore.server');
+  const { addWideRpc, addWideError } =
+    await import('@/lib/logging/wideEventStore.server');
 
   // Add RPC context to the wide event
   addWideRpc({
@@ -41,7 +42,7 @@ const isAuthed = t.middleware(({ ctx, next }) => {
     ctx: {
       ...ctx,
       userId: ctx.userId,
-    }
+    },
   });
 });
 
@@ -49,4 +50,6 @@ export const createTRPCRouter = t.router;
 
 // Base procedure with wide event logging
 export const publicProcedure = t.procedure.use(wideEventMiddleware);
-export const protectedProcedure = t.procedure.use(wideEventMiddleware).use(isAuthed);
+export const protectedProcedure = t.procedure
+  .use(wideEventMiddleware)
+  .use(isAuthed);

@@ -1,4 +1,4 @@
-import postgresPlugin from 'vite-plugin-db'
+import postgresPlugin from 'vite-plugin-db';
 
 export default postgresPlugin({
   seed: {
@@ -7,4 +7,4 @@ export default postgresPlugin({
   },
   referrer: 'create-tanstack',
   dotEnvKey: 'DATABASE_URL',
-})
+});

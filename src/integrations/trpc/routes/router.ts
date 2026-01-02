@@ -1,13 +1,16 @@
-import { createTRPCRouter } from "../init"
-import { taskRouter } from "./task.trpc"
-import { tagRouter } from "./tag.trpc"
-import { todoListRouter } from "./todo_list.trpc"
-import { userRouter } from "./user.trpc"
+import { createTRPCRouter } from '../init';
+import { todoListRouter } from './todo_list.trpc';
+import { eventRouter } from './event.trpc';
+import { userRouter } from './user.trpc';
+import { taskRouter } from './task.trpc';
+import { tagRouter } from './tag.trpc';
 
 export const trpcRouter = createTRPCRouter({
-  todoList: todoListRouter,
-  task: taskRouter,
+  event: eventRouter,
   tag: tagRouter,
+  task: taskRouter,
+  todoList: todoListRouter,
   user: userRouter,
-})
-export type TRPCRouter = typeof trpcRouter
+});
+
+export type TRPCRouter = typeof trpcRouter;

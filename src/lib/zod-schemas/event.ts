@@ -1,0 +1,54 @@
+import { z } from 'zod';
+import { syncStatusEnum } from '@/db/schemas/event.schema';
+
+/* ---------- Sync Status Schema ---------- */
+
+export const syncStatusSchema = z.enum(syncStatusEnum.enumValues);
+
+/* ---------- Event Schemas ---------- */
+
+export const createEventSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  description: z.string().optional(),
+  location: z.string().optional(),
+  startTime: z.date(),
+  endTime: z.date(),
+  color: z
+    .string()
+    .regex(/^#[0-9A-F]{6}$/i, 'Color must be a valid hex code')
+    .optional(),
+  recurrenceRule: z.string().optional(),
+});
+
+export const updateEventSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string().min(1, 'Title is required').optional(),
+  description: z.string().nullable().optional(),
+  location: z.string().nullable().optional(),
+  startTime: z.date().optional(),
+  endTime: z.date().optional(),
+  color: z
+    .string()
+    .regex(/^#[0-9A-F]{6}$/i, 'Color must be a valid hex code')
+    .optional(),
+  recurrenceRule: z.string().nullable().optional(),
+});
+
+export const getEventSchema = z.object({
+  id: z.string().uuid(),
+});
+
+export const deleteEventSchema = z.object({
+  id: z.string().uuid(),
+});
+
+export const listEventsSchema = z.object({
+  startTime: z.date(),
+  endTime: z.date(),
+});
+
+export const createEventFromTaskSchema = z.object({
+  taskId: z.string().uuid(),
+  startTime: z.date(),
+  endTime: z.date().optional(),
+});
