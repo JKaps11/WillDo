@@ -2,6 +2,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 
+import {
+  SettingsAppearanceTab,
+  // SettingsCalendarTab, // DISABLED: Calendar feature
+  // SettingsGeneralTab, // DISABLED: General settings
+  // SettingsIntegrationsTab, // DISABLED: Not implemented
+  SettingsTasksTab,
+  SettingsTodoListTab,
+} from '@/components/settings';
 import type {
   CalendarView,
   DefaultHomePage,
@@ -10,14 +18,6 @@ import type {
   User,
 } from '@/db/schemas/user.schema';
 import type { UIStoreSettingsTab } from '@/lib/store';
-import {
-  SettingsAppearanceTab,
-  SettingsCalendarTab,
-  SettingsGeneralTab,
-  SettingsIntegrationsTab,
-  SettingsTasksTab,
-  SettingsTodoListTab,
-} from '@/components/settings';
 import { useTRPC } from '@/integrations/trpc/react';
 import { useTheme } from '@/lib/theme';
 import { uiStore } from '@/lib/store';
@@ -155,13 +155,14 @@ function RouteComponent(): React.ReactNode {
   };
 
   switch (currentTab) {
-    case 'general':
-      return (
-        <SettingsGeneralTab
-          defaultHomePage={generalSettings.defaultHomePage}
-          onDefaultHomePageChange={handleDefaultHomePageChange}
-        />
-      );
+    // DISABLED: General settings
+    // case 'general':
+    //   return (
+    //     <SettingsGeneralTab
+    //       defaultHomePage={generalSettings.defaultHomePage}
+    //       onDefaultHomePageChange={handleDefaultHomePageChange}
+    //     />
+    //   );
     case 'appearance':
       return <SettingsAppearanceTab theme={theme} onThemeChange={setTheme} />;
     case 'todo-list':
@@ -177,20 +178,22 @@ function RouteComponent(): React.ReactNode {
       );
     case 'tasks':
       return <SettingsTasksTab />;
-    case 'calendar':
-      return (
-        <SettingsCalendarTab
-          startOfWeek={calendarSettings.startOfWeek}
-          defaultEventDuration={calendarSettings.defaultEventDuration}
-          defaultView={calendarSettings.defaultView}
-          googleCalendarSync={calendarSettings.googleCalendarSync}
-          onStartOfWeekChange={handleStartOfWeekChange}
-          onDefaultEventDurationChange={handleDefaultEventDurationChange}
-          onDefaultViewChange={handleDefaultViewChange}
-          onGoogleCalendarSyncChange={handleGoogleCalendarSyncChange}
-        />
-      );
-    case 'integrations':
-      return <SettingsIntegrationsTab />;
+    // DISABLED: Calendar feature
+    // case 'calendar':
+    //   return (
+    //     <SettingsCalendarTab
+    //       startOfWeek={calendarSettings.startOfWeek}
+    //       defaultEventDuration={calendarSettings.defaultEventDuration}
+    //       defaultView={calendarSettings.defaultView}
+    //       googleCalendarSync={calendarSettings.googleCalendarSync}
+    //       onStartOfWeekChange={handleStartOfWeekChange}
+    //       onDefaultEventDurationChange={handleDefaultEventDurationChange}
+    //       onDefaultViewChange={handleDefaultViewChange}
+    //       onGoogleCalendarSyncChange={handleGoogleCalendarSyncChange}
+    //     />
+    //   );
+    // DISABLED: Not implemented
+    // case 'integrations':
+    //   return <SettingsIntegrationsTab />;
   }
 }

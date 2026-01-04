@@ -1,6 +1,6 @@
+import type { ErrorComponentProps } from '@tanstack/react-router';
 import { Link } from '@tanstack/react-router';
 import { TriangleAlert } from 'lucide-react';
-import type { ErrorComponentProps } from '@tanstack/react-router';
 
 import {
   Empty,

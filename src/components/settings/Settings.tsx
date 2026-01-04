@@ -1,5 +1,3 @@
-import { useState } from 'react';
-import type { ReactNode } from 'react';
 import {
   Card,
   CardContent,
@@ -13,7 +11,9 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
+import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 /* ---------- Root ---------- */
 

@@ -1,7 +1,7 @@
-import { eq } from 'drizzle-orm';
 import type { NewUser, User, UserSettings } from '@/db/schemas/user.schema';
-import type { PatchUserSettings } from '@/lib/zod-schemas';
 import { DEFAULT_USER_SETTINGS, users } from '@/db/schemas/user.schema';
+import type { PatchUserSettings } from '@/lib/zod-schemas';
+import { eq } from 'drizzle-orm';
 import { db } from '@/db/index';
 
 export const userRepository = {

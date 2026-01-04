@@ -2,8 +2,8 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { useQuery } from '@tanstack/react-query';
 
-import type { TodoListWithTasks } from '@/components/todo-list';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import type { TodoListWithTasks } from '@/components/todo-list';
 import { useTRPC } from '@/integrations/trpc/react';
 import { TodoList } from '@/components/todo-list';
 import { DndProvider } from '@/components/dnd';

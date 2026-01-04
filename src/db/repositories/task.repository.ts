@@ -1,6 +1,6 @@
-import { and, eq, isNull } from 'drizzle-orm';
 import type { NewTask, Task } from '@/db/schemas/task.schema';
 import { tasks } from '@/db/schemas/task.schema';
+import { and, eq, isNull } from 'drizzle-orm';
 import { db } from '@/db/index';
 
 export const taskRepository = {

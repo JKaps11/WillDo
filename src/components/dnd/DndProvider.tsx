@@ -7,13 +7,13 @@ import { DndStateContext } from './context';
 
 import type { TodoListWithTasks } from '@/components/todo-list/types';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
-import type { Task } from '@/db/schemas/task.schema';
-import type { DndContextValue } from './context';
-import type { ReactNode } from 'react';
 import { formatPriority } from '@/components/todo-list/utils';
 import { startOfDay, utcDateToLocal } from '@/utils/dates';
+import type { Task } from '@/db/schemas/task.schema';
 import { useTRPC } from '@/integrations/trpc/react';
+import type { DndContextValue } from './context';
 import { Badge } from '@/components/ui/badge';
+import type { ReactNode } from 'react';
 import { uiStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
 

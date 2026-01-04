@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { Trash2 } from 'lucide-react';
-import { EditTaskModal } from './EditTaskModal';
-import PriorityBadge from './PriorityBadge';
 import type { Task as TaskType } from '@/db/schemas/task.schema';
-import type { ReactNode } from 'react';
 import { useTRPC } from '@/integrations/trpc/react';
 import { TAG_MAX_WIDTH } from '@/lib/constants';
+import { EditTaskModal } from './EditTaskModal';
+import PriorityBadge from './PriorityBadge';
+import type { ReactNode } from 'react';
+import { Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 import { Checkbox } from '@/components/ui/checkbox';

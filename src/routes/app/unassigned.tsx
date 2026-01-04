@@ -3,19 +3,19 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 
-import { Check, Plus, X } from 'lucide-react';
-import type { Priority, Task as TaskType } from '@/db/schemas/task.schema';
-import type { UnassignedSortOption } from '@/lib/store';
-import type { ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { Priority, Task as TaskType } from '@/db/schemas/task.schema';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import type { UnassignedSortOption } from '@/lib/store';
 import { useTRPC } from '@/integrations/trpc/react';
 import { UnassignedTask } from '@/components/task';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Check, Plus, X } from 'lucide-react';
 import { startOfDay } from '@/utils/dates';
 import { ensureUser } from '@/utils/auth';
+import type { ReactNode } from 'react';
 import { uiStore } from '@/lib/store';
 
 export const Route = createFileRoute('/app/unassigned')({

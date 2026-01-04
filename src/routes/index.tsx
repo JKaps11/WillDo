@@ -1,19 +1,19 @@
 import {
+  Target,
+  Repeat,
+  MessageSquare,
+  RotateCcw,
   Calendar,
-  CheckCircle2,
-  GripVertical,
-  Inbox,
-  LayoutGrid,
-  Settings,
-  Tag,
+  Cog,
+  Trophy,
   Zap,
 } from 'lucide-react';
 import { SignInButton } from '@clerk/tanstack-react-start';
 import { createFileRoute } from '@tanstack/react-router';
-import type { ReactNode } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { authStateFn } from '@/utils/auth';
+import type { ReactNode } from 'react';
 
 export const Route = createFileRoute('/')({
   beforeLoad: async () => authStateFn(),
@@ -25,141 +25,98 @@ export default function App(): ReactNode {
     <main className="min-h-screen bg-background text-foreground">
       {/* Hero */}
       <section className="mx-auto max-w-6xl px-6 pt-24 pb-20">
-        <div className="grid gap-12 md:grid-cols-2 items-center">
-          <div className="space-y-6">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-              Will Do
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-xl">
-              A developer-first task manager with calendar integration. Fast,
-              minimal, and designed for people who live in their editor.
-            </p>
-            <div className="flex gap-4">
-              <SignInButton forceRedirectUrl={'/app/todolist'}>
-                <Button size="lg">Get Started</Button>
-              </SignInButton>
-              <SignInButton forceRedirectUrl={'/app/todolist'}>
-                <Button size="lg" variant="outline">
-                  Sign In
-                </Button>
-              </SignInButton>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Free to use • No credit card required
-            </p>
+        <div className="text-center space-y-6">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+            It&apos;s time to make a change
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Get on the path to success
+          </p>
+          <div className="flex gap-4 justify-center">
+            <SignInButton forceRedirectUrl={'/app/todolist'}>
+              <Button size="lg">Get Started</Button>
+            </SignInButton>
+            <SignInButton forceRedirectUrl={'/app/todolist'}>
+              <Button size="lg" variant="outline">
+                Sign In
+              </Button>
+            </SignInButton>
           </div>
-
-          {/* Mock preview */}
-          <Card className="rounded-2xl shadow-sm border-2">
-            <CardContent className="p-0">
-              <div className="border-b px-4 py-3 flex items-center gap-2 bg-muted/30">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-400" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-400" />
-                  <div className="w-3 h-3 rounded-full bg-green-400" />
-                </div>
-                <span className="text-xs text-muted-foreground ml-2">
-                  Todo List — Week View
-                </span>
-              </div>
-              <div className="p-4 space-y-3 font-mono text-sm">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
-                    Today
-                  </span>
-                  <span className="text-xs">3/5 done</span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-muted-foreground line-through">
-                    <CheckCircle2 className="h-4 w-4 text-primary" />
-                    <span>Fix Vite config</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground line-through">
-                    <CheckCircle2 className="h-4 w-4 text-primary" />
-                    <span>Push migration</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground line-through">
-                    <CheckCircle2 className="h-4 w-4 text-primary" />
-                    <span>Write tests</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="h-4 w-4 rounded border-2" />
-                    <span>Review PR #214</span>
-                    <span className="text-xs bg-orange-500/20 text-orange-600 px-1.5 py-0.5 rounded">
-                      High
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="h-4 w-4 rounded border-2" />
-                    <span>Deploy to prod</span>
-                    <span className="text-xs bg-blue-500/20 text-blue-600 px-1.5 py-0.5 rounded">
-                      backend
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <p className="text-sm text-muted-foreground">
+            Free to use • No credit card required
+          </p>
         </div>
       </section>
 
-      {/* Features */}
+      {/* What We Do */}
+      <section className="mx-auto max-w-6xl px-6 pb-20">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold mb-4">What is Will Do?</h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Your all-in-one platform for planning and building skills
+          </p>
+        </div>
+      </section>
+
+      {/* Section 1: What is required to build a skill */}
       <section className="mx-auto max-w-6xl px-6 pb-24">
-        <h2 className="text-2xl font-semibold mb-8 text-center">
-          Everything you need, nothing you don&apos;t
+        <h2 className="text-2xl font-semibold mb-12 text-center">
+          What is required to build a skill?
         </h2>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Feature
-            icon={<LayoutGrid className="h-5 w-5" />}
-            title="Day & Week Views"
-            description="Toggle between focused daily view or see your entire week at a glance with the 7-day grid."
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+          <SkillStep
+            number="1"
+            icon={<Target className="h-6 w-6" />}
+            title="Plan"
+            items={[
+              'Where are you now',
+              'What is your skill goal and metric for it',
+              'What are things that are missing',
+            ]}
           />
-          <Feature
-            icon={<Calendar className="h-5 w-5" />}
-            title="Calendar Integration"
-            description="Built-in calendar with month, week, and day views. Sync with Google Calendar."
+          <SkillStep
+            number="2"
+            icon={<Repeat className="h-6 w-6" />}
+            title="Volume of Repetition"
+            items={['Repeat and practice and learn']}
           />
-          <Feature
-            icon={<GripVertical className="h-5 w-5" />}
-            title="Drag & Drop"
-            description="Effortlessly move tasks between days or reschedule by dragging to the calendar."
+          <SkillStep
+            number="3"
+            icon={<MessageSquare className="h-6 w-6" />}
+            title="Feedback Loop"
+            items={[
+              'Analysis and evaluation of your repetitions in relation to your goal metric',
+            ]}
           />
-          <Feature
-            icon={<Tag className="h-5 w-5" />}
-            title="Tags & Priorities"
-            description="Color-coded tags and priority levels keep your tasks organized and visible."
-          />
-          <Feature
-            icon={<Inbox className="h-5 w-5" />}
-            title="Unassigned Inbox"
-            description="Capture tasks without dates. Sort by priority or alphabetically, assign when ready."
-          />
-          <Feature
-            icon={<Settings className="h-5 w-5" />}
-            title="Customizable"
-            description="Choose your default view, theme, week start day, and how tasks are sorted."
+          <SkillStep
+            number="4"
+            icon={<RotateCcw className="h-6 w-6" />}
+            title="Re-apply"
+            items={['Take your feedback and do more repetitions']}
           />
         </div>
       </section>
 
-      {/* How it works */}
+      {/* Section 2: How do we facilitate */}
       <section className="mx-auto max-w-6xl px-6 pb-24">
-        <h2 className="text-2xl font-semibold mb-8">How it works</h2>
+        <h2 className="text-2xl font-semibold mb-12 text-center">
+          How do we facilitate this?
+        </h2>
         <div className="grid gap-8 md:grid-cols-3">
-          <Step
-            number="01"
-            title="Sign in"
-            description="Quick authentication with Clerk. No lengthy onboarding."
+          <FacilitateCard
+            icon={<Calendar className="h-8 w-8" />}
+            title="Plan with Organization"
+            description="Powerful organization tools to help you map out your journey and track your progress."
           />
-          <Step
-            number="02"
-            title="Add tasks"
-            description="Create tasks with priorities and tags. Assign to dates or leave unassigned."
+          <FacilitateCard
+            icon={<Cog className="h-8 w-8" />}
+            title="Maintain with Automation"
+            description="Automation features that keep you on track without the mental overhead."
           />
-          <Step
-            number="03"
-            title="Get it done"
-            description="Drag tasks around, check them off, and watch your progress grow."
+          <FacilitateCard
+            icon={<Trophy className="h-8 w-8" />}
+            title="Celebrate Success"
+            description="Recognition and tracking of your wins to keep you motivated on your journey."
           />
         </div>
       </section>
@@ -168,11 +125,10 @@ export default function App(): ReactNode {
       <section className="border-t">
         <div className="mx-auto max-w-6xl px-6 py-20 text-center">
           <h2 className="text-3xl font-bold mb-4">
-            Stop tracking. Start doing.
+            Ready to build your skills?
           </h2>
           <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-            Will Do stays out of your way so you can focus on what matters.
-            Simple, fast, and built for developers.
+            Start your journey today with Will Do.
           </p>
           <SignInButton forceRedirectUrl={'/app/todolist'}>
             <Button size="lg">Get Started for Free</Button>
@@ -194,43 +150,54 @@ export default function App(): ReactNode {
   );
 }
 
-interface FeatureProps {
+interface SkillStepProps {
+  number: string;
   icon: ReactNode;
   title: string;
-  description: string;
+  items: string[];
 }
 
-function Feature({ icon, title, description }: FeatureProps): ReactNode {
+function SkillStep({ number, icon, title, items }: SkillStepProps): ReactNode {
   return (
     <Card className="rounded-2xl">
-      <CardContent className="p-6 space-y-3">
-        <div className="flex items-center gap-2 text-primary">
-          {icon}
-          <span className="font-medium">{title}</span>
+      <CardContent className="p-6 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
+            {number}
+          </div>
+          <div className="text-primary">{icon}</div>
         </div>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <h3 className="font-semibold text-lg">{title}</h3>
+        <ul className="space-y-2">
+          {items.map((item, index) => (
+            <li key={index} className="text-sm text-muted-foreground">
+              • {item}
+            </li>
+          ))}
+        </ul>
       </CardContent>
     </Card>
   );
 }
 
-interface StepProps {
-  number: string;
+interface FacilitateCardProps {
+  icon: ReactNode;
   title: string;
   description: string;
 }
 
-function Step({ number, title, description }: StepProps): ReactNode {
+function FacilitateCard({
+  icon,
+  title,
+  description,
+}: FacilitateCardProps): ReactNode {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-3">
-        <div className="text-sm font-mono text-primary font-bold">{number}</div>
-        <div className="flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4 text-primary" />
-          <span className="font-medium">{title}</span>
-        </div>
-      </div>
-      <p className="text-sm text-muted-foreground pl-10">{description}</p>
-    </div>
+    <Card className="rounded-2xl">
+      <CardContent className="p-8 text-center space-y-4">
+        <div className="flex justify-center text-primary">{icon}</div>
+        <h3 className="font-semibold text-lg">{title}</h3>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </CardContent>
+    </Card>
   );
 }

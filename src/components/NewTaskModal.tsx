@@ -14,9 +14,9 @@ import {
 import { TaskForm } from './task/TaskForm';
 import { Button } from './ui/button';
 
-import type { ReactNode } from 'react';
 import { useTRPC } from '@/integrations/trpc/react';
 import { startOfDay } from '@/utils/dates';
+import type { ReactNode } from 'react';
 
 export default function NewTaskModal(): ReactNode {
   const [open, setOpen] = useState(false);

@@ -1,18 +1,18 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, Pencil, Plus, Trash2, X } from 'lucide-react';
-import { useState } from 'react';
-import { Settings } from './Settings';
-import type { ReactNode } from 'react';
 import {
   TAG_DEFAULT_COLOR,
   TAG_MAX_LENGTH,
   TAG_MAX_WIDTH,
 } from '@/lib/constants';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Check, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { useTRPC } from '@/integrations/trpc/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import type { ReactNode } from 'react';
+import { Settings } from './Settings';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 export function SettingsTasksTab(): ReactNode {
   const trpc = useTRPC();

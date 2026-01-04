@@ -1,8 +1,3 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, Plus, X } from 'lucide-react';
-import { useState } from 'react';
-import type { Tag } from '@/db/schemas/tag.schema';
-import type { ReactNode } from 'react';
 import {
   Command,
   CommandEmpty,
@@ -16,10 +11,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TAG_DEFAULT_COLOR, TAG_MAX_WIDTH } from '@/lib/constants';
 import { useTRPC } from '@/integrations/trpc/react';
+import type { Tag } from '@/db/schemas/tag.schema';
 import { Badge } from '@/components/ui/badge';
+import { Check, Plus, X } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 interface TagPickerProps {
   value: Array<string>;

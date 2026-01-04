@@ -1,6 +1,3 @@
-import { TRPCError } from '@trpc/server';
-import { protectedProcedure } from '../init';
-import type { TodoList } from '@/db/schemas/todo_list.schema';
 import {
   createTaskSchema,
   deleteTaskSchema,
@@ -9,6 +6,9 @@ import {
 } from '@/lib/zod-schemas';
 import { todoListRepository } from '@/db/repositories/todo_list.repository';
 import { taskRepository } from '@/db/repositories/task.repository';
+import type { TodoList } from '@/db/schemas/todo_list.schema';
+import { protectedProcedure } from '../init';
+import { TRPCError } from '@trpc/server';
 
 export const taskRouter = {
   /** GET /task */

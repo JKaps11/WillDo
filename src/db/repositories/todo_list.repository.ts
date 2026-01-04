@@ -1,8 +1,8 @@
-import { and, eq, gte, lte } from 'drizzle-orm';
 import type { NewTodoList, TodoList } from '@/db/schemas/todo_list.schema';
-import type { Task } from '@/db/schemas/task.schema';
 import { todoLists } from '@/db/schemas/todo_list.schema';
+import type { Task } from '@/db/schemas/task.schema';
 import { tasks } from '@/db/schemas/task.schema';
+import { and, eq, gte, lte } from 'drizzle-orm';
 import { db } from '@/db/index';
 
 export type TodoListWithTasks = TodoList & {

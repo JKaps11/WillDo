@@ -1,5 +1,5 @@
-import { Settings } from './Settings';
 import type { ReactNode } from 'react';
+import { Settings } from './Settings';
 
 export function SettingsIntegrationsTab(): ReactNode {
   return (

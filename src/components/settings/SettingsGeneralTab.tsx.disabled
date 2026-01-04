@@ -1,7 +1,6 @@
-import { Settings } from './Settings';
 import type { ReactNode } from 'react';
+import { Settings } from './Settings';
 
-import type { DefaultHomePage } from '@/db/schemas/user.schema';
 import {
   Select,
   SelectContent,
@@ -9,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import type { DefaultHomePage } from '@/db/schemas/user.schema';
 
 interface SettingsGeneralTabProps {
   defaultHomePage: DefaultHomePage;

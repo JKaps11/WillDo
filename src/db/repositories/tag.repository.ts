@@ -1,6 +1,6 @@
-import { and, eq } from 'drizzle-orm';
 import type { NewTag, Tag } from '@/db/schemas/tag.schema';
 import { tags } from '@/db/schemas/tag.schema';
+import { and, eq } from 'drizzle-orm';
 import { db } from '@/db/index';
 
 export const tagRepository = {

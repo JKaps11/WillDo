@@ -1,5 +1,5 @@
 import {
-  CalendarDays,
+  // CalendarDays, // DISABLED: Calendar feature
   CheckSquare,
   Inbox,
   LogOut,
@@ -7,13 +7,6 @@ import {
 } from 'lucide-react';
 import { Link, useRouterState } from '@tanstack/react-router';
 
-import {
-  SignOutButton,
-  UserButton,
-  useUser,
-} from '@clerk/tanstack-react-start';
-import type { ForwardRefExoticComponent, RefAttributes } from 'react';
-import type { LucideProps } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -26,6 +19,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import {
+  SignOutButton,
+  UserButton,
+  useUser,
+} from '@clerk/tanstack-react-start';
+import type { ForwardRefExoticComponent, RefAttributes } from 'react';
+import type { LucideProps } from 'lucide-react';
 
 const navItems: Array<{
   title: string;
@@ -36,7 +36,7 @@ const navItems: Array<{
 }> = [
   { title: 'Unassigned Tasks', to: '/app/unassigned', icon: Inbox },
   { title: 'Todo List', to: '/app/todolist', icon: CheckSquare },
-  { title: 'Calendar', to: '/app/calendar', icon: CalendarDays },
+  // { title: 'Calendar', to: '/app/calendar', icon: CalendarDays }, // DISABLED: Calendar feature
 ];
 
 export function AppSidebar(): React.ReactElement {

@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import { priorityEnum } from '@/db/schemas/task.schema';
+import { z } from 'zod';
 
 /* ---------- Priority Schema ---------- */
 

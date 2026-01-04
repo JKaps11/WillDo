@@ -16,17 +16,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
+import { UI_STORE_SETTINGS_TABS, uiStore, uiStoreActions } from '@/lib/store';
+import type { UIStoreSettingsTab, UnassignedSortOption } from '@/lib/store';
+import { withVerticalSeparators } from './utils';
 import { SidebarTrigger } from '../ui/sidebar';
 import { Separator } from '../ui/separator';
 import NewTaskModal from '../NewTaskModal';
-import { Button } from '../ui/button';
-import { withVerticalSeparators } from './utils';
 import type { ReactNode } from 'react';
-import type { UIStoreSettingsTab, UnassignedSortOption } from '@/lib/store';
-import { UI_STORE_SETTINGS_TABS, uiStore, uiStoreActions } from '@/lib/store';
+import { Button } from '../ui/button';
 
 import TodoListConfig from '@/components/todo-list/TodoListConfig';
-import CalendarConfig from '@/components/calendar/CalendarConfig';
+// import CalendarConfig from '@/components/calendar/CalendarConfig'; // DISABLED: Calendar feature
 import { useTRPC } from '@/integrations/trpc/react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -134,34 +134,35 @@ export default function AppHeader(): React.ReactNode {
           <NewTaskModal key="new-task-button" />,
         ];
         break;
-      case 'Calendar':
-        options = [
-          <div key="calendar-nav-buttons" className="flex gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handleCalendarNavigate('prev')}
-            >
-              <ArrowBigLeft />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handleCalendarNavigate('next')}
-            >
-              <ArrowBigRight />
-            </Button>
-          </div>,
-          <Button
-            key="calendar-today-button"
-            variant="outline"
-            onClick={() => uiStoreActions.setCalendarBaseDate(new Date())}
-          >
-            Today
-          </Button>,
-          <CalendarConfig key="calendar-config-popover" />,
-        ];
-        break;
+      // DISABLED: Calendar feature
+      // case 'Calendar':
+      //   options = [
+      //     <div key="calendar-nav-buttons" className="flex gap-2">
+      //       <Button
+      //         variant="outline"
+      //         size="icon"
+      //         onClick={() => handleCalendarNavigate('prev')}
+      //       >
+      //         <ArrowBigLeft />
+      //       </Button>
+      //       <Button
+      //         variant="outline"
+      //         size="icon"
+      //         onClick={() => handleCalendarNavigate('next')}
+      //       >
+      //         <ArrowBigRight />
+      //       </Button>
+      //     </div>,
+      //     <Button
+      //       key="calendar-today-button"
+      //       variant="outline"
+      //       onClick={() => uiStoreActions.setCalendarBaseDate(new Date())}
+      //     >
+      //       Today
+      //     </Button>,
+      //     <CalendarConfig key="calendar-config-popover" />,
+      //   ];
+      //   break;
       case 'Settings':
         options = isMobile
           ? [
@@ -176,12 +177,12 @@ export default function AppHeader(): React.ReactNode {
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="general">General</SelectItem>
+                  {/* <SelectItem value="general">General</SelectItem> */}
                   <SelectItem value="appearance">Appearance</SelectItem>
                   <SelectItem value="todo-list">Todo List</SelectItem>
                   <SelectItem value="tasks">Tasks</SelectItem>
-                  <SelectItem value="calendar">Calendar</SelectItem>
-                  <SelectItem value="integrations">Integrations</SelectItem>
+                  {/* <SelectItem value="calendar">Calendar</SelectItem> */}
+                  {/* <SelectItem value="integrations">Integrations</SelectItem> */}
                 </SelectContent>
               </Select>,
             ]

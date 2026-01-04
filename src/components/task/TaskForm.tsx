@@ -1,12 +1,12 @@
 import { CalendarIcon, Clock } from 'lucide-react';
 import { format, startOfDay } from 'date-fns';
 
-import { TagPicker } from './TaskTag';
 import type { ReactFormExtendedApi } from '@tanstack/react-form';
-import type { Priority } from '@/db/schemas/task.schema';
-import type { ReactNode } from 'react';
 import { formatPriority } from '@/components/todo-list/utils';
+import type { Priority } from '@/db/schemas/task.schema';
 import { priorityEnum } from '@/db/schemas/task.schema';
+import type { ReactNode } from 'react';
+import { TagPicker } from './TaskTag';
 
 import {
   Select,

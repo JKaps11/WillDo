@@ -1,14 +1,14 @@
-import { Store } from '@tanstack/store';
 import type { CalendarView, TodoListTimeSpan } from '@/db/schemas/user.schema';
 import { addDays, startOfDay } from '@/utils/dates';
+import { Store } from '@tanstack/store';
 
 export const UI_STORE_SETTINGS_TABS = [
-  'general',
   'appearance',
   'todo-list',
   'tasks',
-  'calendar',
-  'integrations',
+  // 'general', // DISABLED: General settings
+  // 'calendar', // DISABLED: Calendar feature
+  // 'integrations', // DISABLED: Not implemented
 ] as const;
 
 export type UIStoreSettingsTab = (typeof UI_STORE_SETTINGS_TABS)[number];
@@ -35,7 +35,7 @@ export type UIStoreActions = {
 };
 
 const initialState: UIStoreState = {
-  settingsTab: 'general',
+  settingsTab: 'appearance',
   todoListBaseDate: startOfDay(new Date()),
   calendarBaseDate: startOfDay(new Date()),
   unassignedSortBy: 'priority',

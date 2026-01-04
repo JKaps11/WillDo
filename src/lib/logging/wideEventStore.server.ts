@@ -1,10 +1,10 @@
-import { AsyncLocalStorage } from 'node:async_hooks';
 import type {
   WideEvent,
   WideEventFields,
   WideEventRpc,
   WideEventUser,
 } from './types';
+import { AsyncLocalStorage } from 'node:async_hooks';
 
 // Re-export the types for convenience
 export type {
