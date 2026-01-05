@@ -2,8 +2,8 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { useQuery } from '@tanstack/react-query';
 
-import LoadingSpinner from '@/components/common/LoadingSpinner';
 import type { TodoListWithTasks } from '@/components/todo-list';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { useTRPC } from '@/integrations/trpc/react';
 import { TodoList } from '@/components/todo-list';
 import { DndProvider } from '@/components/dnd';
@@ -45,7 +45,7 @@ function RouteComponent(): React.ReactNode {
   }
 
   const todoOptions = user.settings.todoList;
-  const lists = (data ?? []) as Array<TodoListWithTasks>;
+  const lists = data ?? [];
 
   if (isError) {
     return (

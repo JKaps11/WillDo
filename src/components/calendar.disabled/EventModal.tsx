@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
-import type { ReactNode } from 'react';
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 
+import type { Event } from '@/db/schemas/event.schema';
 import {
   Dialog,
   DialogContent,
@@ -11,7 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import type { Event } from '@/db/schemas/event.schema';
 import { useTRPC } from '@/integrations/trpc/react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';

@@ -1,10 +1,13 @@
 import {
+  Archive,
   ArrowBigLeft,
   ArrowBigRight,
   ArrowDownAZ,
   ArrowUpDown,
+  ChevronRight,
+  Plus,
 } from 'lucide-react';
-import { useRouterState } from '@tanstack/react-router';
+import { Link, useRouterState } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
@@ -16,35 +19,82 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
-import { UI_STORE_SETTINGS_TABS, uiStore, uiStoreActions } from '@/lib/store';
-import type { UIStoreSettingsTab, UnassignedSortOption } from '@/lib/store';
-import { withVerticalSeparators } from './utils';
 import { SidebarTrigger } from '../ui/sidebar';
 import { Separator } from '../ui/separator';
-import NewTaskModal from '../NewTaskModal';
-import type { ReactNode } from 'react';
+// import NewTaskModal from '../NewTaskModal';
 import { Button } from '../ui/button';
+import { withVerticalSeparators } from './utils';
+import type { ReactNode } from 'react';
+import type { UIStoreSettingsTab, UnassignedSortOption } from '@/lib/store';
+import { UI_STORE_SETTINGS_TABS, uiStore, uiStoreActions } from '@/lib/store';
 
 import TodoListConfig from '@/components/todo-list/TodoListConfig';
 // import CalendarConfig from '@/components/calendar/CalendarConfig'; // DISABLED: Calendar feature
 import { useTRPC } from '@/integrations/trpc/react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-type PageTitle = 'Todo List' | 'Unassigned Tasks' | 'Calendar' | 'Settings';
+type PageTitle =
+  | 'Dashboard'
+  | 'Todo List'
+  | 'Unassigned Tasks'
+  | 'Skills'
+  | 'New Skill'
+  | 'Skill Planner'
+  | 'Docs'
+  | 'Calendar'
+  | 'Settings';
+
+interface Breadcrumb {
+  label: string;
+  href?: string;
+}
+
+function getBreadcrumbs(pathname: string): Array<Breadcrumb> {
+  const segment = pathname.split('/')[2] ?? '';
+
+  if (segment === 'skills') {
+    const breadcrumbs: Array<Breadcrumb> = [
+      { label: 'Skills', href: '/app/skills' },
+    ];
+
+    if (pathname.endsWith('/new')) {
+      breadcrumbs.push({ label: 'New Skill' });
+    } else if (pathname.includes('/planner')) {
+      breadcrumbs.push({ label: 'Planner' });
+    } else {
+      // On the main skills page, no href needed for last item
+      breadcrumbs[0] = { label: 'Skills' };
+    }
+
+    return breadcrumbs;
+  }
+
+  // For non-skills pages, return single breadcrumb
+  return [{ label: getPageTitle(pathname) }];
+}
 
 function getPageTitle(pathname: string): PageTitle {
   const segment = pathname.split('/')[2] ?? '';
   switch (segment) {
+    case '':
+    case 'dashboard':
+      return 'Dashboard';
     case 'todolist':
       return 'Todo List';
     case 'unassigned':
       return 'Unassigned Tasks';
+    case 'skills':
+      if (pathname.endsWith('/new')) return 'New Skill';
+      if (pathname.includes('/planner')) return 'Skill Planner';
+      return 'Skills';
+    case 'docs':
+      return 'Docs';
     case 'calendar':
       return 'Calendar';
     case 'settings':
       return 'Settings';
     default:
-      return 'Todo List';
+      return 'Dashboard';
   }
 }
 
@@ -54,6 +104,7 @@ export default function AppHeader(): React.ReactNode {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const title: PageTitle = getPageTitle(pathname);
+  const breadcrumbs: Array<Breadcrumb> = getBreadcrumbs(pathname);
 
   // Fetch user settings to get the timeSpan/view for navigation
   const { data: user } = useQuery(trpc.user.get.queryOptions());
@@ -64,9 +115,9 @@ export default function AppHeader(): React.ReactNode {
     uiStoreActions.navigateTodoList(direction, timeSpan);
   }
 
-  function handleCalendarNavigate(direction: 'prev' | 'next'): void {
-    uiStoreActions.navigateCalendar(direction, calendarView);
-  }
+  // function handleCalendarNavigate(direction: 'prev' | 'next'): void {
+  //   uiStoreActions.navigateCalendar(direction, calendarView);
+  // }
 
   const settingsTab: UIStoreSettingsTab = useStore(
     uiStore,
@@ -75,6 +126,10 @@ export default function AppHeader(): React.ReactNode {
   const unassignedSortBy: UnassignedSortOption = useStore(
     uiStore,
     (s) => s.unassignedSortBy,
+  );
+  const showArchivedSkills: boolean = useStore(
+    uiStore,
+    (s) => s.showArchivedSkills,
   );
   function onSettingsSelected(value: string): void {
     uiStoreActions.setSettingsTab(value as UIStoreSettingsTab);
@@ -108,7 +163,7 @@ export default function AppHeader(): React.ReactNode {
             </Button>
           </div>,
           <TodoListConfig key="todo-list-config-popover" />,
-          <NewTaskModal key="new-task-button" />,
+          // <NewTaskModal key="new-task-button" />,
         ];
         break;
       case 'Unassigned Tasks':
@@ -131,7 +186,26 @@ export default function AppHeader(): React.ReactNode {
               </>
             )}
           </Button>,
-          <NewTaskModal key="new-task-button" />,
+          // <NewTaskModal key="new-task-button" />,
+        ];
+        break;
+      case 'Skills':
+        options = [
+          <Button
+            key="toggle-archived-button"
+            variant={showArchivedSkills ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => uiStoreActions.toggleShowArchivedSkills()}
+          >
+            <Archive className="mr-2 size-4" />
+            {showArchivedSkills ? 'Showing Archived' : 'Show Archived'}
+          </Button>,
+          <Button key="new-skill-button" asChild>
+            <Link to="/app/skills/new">
+              <Plus className="mr-2 size-4" />
+              New Skill
+            </Link>
+          </Button>,
         ];
         break;
       // DISABLED: Calendar feature
@@ -199,7 +273,7 @@ export default function AppHeader(): React.ReactNode {
         break;
     }
     return withVerticalSeparators(options);
-  }, [title, timeSpan, calendarView, isMobile, settingsTab, unassignedSortBy]);
+  }, [title, timeSpan, isMobile, settingsTab, unassignedSortBy, showArchivedSkills]);
 
   return (
     <header className="w-full flex items-center justify-between py-2 px-4">
@@ -210,11 +284,29 @@ export default function AppHeader(): React.ReactNode {
           orientation="vertical"
           className="border-1"
         />
-        <div className="font-large">{title}</div>
+        <div className="flex items-center gap-1 font-medium">
+          {breadcrumbs.map((crumb, index) => (
+            <span key={crumb.label} className="flex items-center gap-1">
+              {index > 0 && (
+                <ChevronRight className="size-4 text-muted-foreground" />
+              )}
+              {crumb.href ? (
+                <Link
+                  to={crumb.href}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {crumb.label}
+                </Link>
+              ) : (
+                <span>{crumb.label}</span>
+              )}
+            </span>
+          ))}
+        </div>
       </div>
-      <div className="flex h-full items-center gap-4 p-2 border-1">
+      {headerMenuOptions.length > 0 && <div className="flex h-full items-center gap-4 p-2 border-1">
         {headerMenuOptions}
-      </div>
+      </div>}
     </header>
   );
 }

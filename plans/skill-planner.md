@@ -48,6 +48,7 @@ Every sub-skill goes through the same repeating cycle:
 ```
 
 **Stages:**
+
 1. **Practice** - Actively working on the sub-skill
 2. **Feedback** - Receiving feedback (self-assessment, mentor, AI, etc.)
 3. **Evaluate** - Determining if goal is met or if another cycle is needed
@@ -82,6 +83,7 @@ Sub-skill complete → Next sub-skill(s) unlocked
 ```
 
 **Key Points:**
+
 - Tasks are derived from sub-skills, not created independently
 - Completing a task on TodoList increments the sub-skill's metric
 - When metric is filled, task becomes disabled (greyed out) but sub-skill is NOT auto-completed
@@ -89,13 +91,13 @@ Sub-skill complete → Next sub-skill(s) unlocked
 
 ## Stage Colors
 
-| Stage | Color | Meaning |
-|-------|-------|---------|
-| Not Started | Gray | Sub-skill not yet begun |
-| Practice | Blue | Actively practicing |
-| Feedback | Yellow/Orange | Receiving/reviewing feedback |
-| Evaluate | Purple | Assessing progress |
-| Complete | Green | Goal met, sub-skill mastered |
+| Stage       | Color         | Meaning                      |
+| ----------- | ------------- | ---------------------------- |
+| Not Started | Gray          | Sub-skill not yet begun      |
+| Practice    | Blue          | Actively practicing          |
+| Feedback    | Yellow/Orange | Receiving/reviewing feedback |
+| Evaluate    | Purple        | Assessing progress           |
+| Complete    | Green         | Goal met, sub-skill mastered |
 
 ## Layout Concept
 
@@ -133,12 +135,14 @@ Sub-skill complete → Next sub-skill(s) unlocked
 ## Node Types
 
 ### 1. Root Node (Skill)
+
 - Skill name and icon
 - Master goal description
 - Overall metrics progress
 - Skill theme color
 
 ### 2. Sub-skill Nodes
+
 - Sub-skill name
 - **Stage color** (gray/blue/yellow/purple/green)
 - Current stage label
@@ -153,6 +157,7 @@ Sub-skill complete → Next sub-skill(s) unlocked
 ## Interactions
 
 ### Canvas Navigation
+
 - Pan: Click and drag on empty space
 - Zoom: Mouse wheel or pinch gesture
 - Fit to view: Button to reset view
@@ -161,12 +166,14 @@ Sub-skill complete → Next sub-skill(s) unlocked
 ### Node Interactions
 
 **Click on Sub-skill Node:**
+
 - Open sub-skill detail panel
 - View/edit goal and metrics
 - Advance stage (Practice → Feedback → Evaluate)
 - Mark as complete
 
 **Right-click Context Menu:**
+
 - Edit sub-skill
 - Delete sub-skill
 - Add dependency
@@ -209,11 +216,13 @@ Sub-skill complete → Next sub-skill(s) unlocked
 ### Stage Advancement
 
 Users can advance stages via:
+
 1. **Stage buttons** in the edit panel
 2. **Quick action** on node hover
 3. **Keyboard shortcut** when node selected
 
 When advancing from Evaluate:
+
 - Cycle back to Practice (for another round)
 - OR click "Mark Sub-skill Complete" to finish
 
@@ -222,11 +231,13 @@ When advancing from Evaluate:
 **Important:** Sub-skills are NEVER auto-completed.
 
 Even when the metric is filled (e.g., 100/100):
+
 - The task becomes disabled/greyed out in Unassigned
 - The sub-skill remains in its current stage
 - User must explicitly click "Mark Sub-skill Complete"
 
 **Completion Flow:**
+
 1. User opens sub-skill edit panel (click on node)
 2. Reviews progress and notes
 3. Clicks "Mark Sub-skill Complete" button
@@ -236,6 +247,7 @@ Even when the metric is filled (e.g., 100/100):
 7. Associated task removed from Unassigned
 
 **Why Manual?**
+
 - User maintains full control over progression
 - Allows continuing practice beyond the goal
 - Explicit acknowledgment of mastery
@@ -246,11 +258,13 @@ Even when the metric is filled (e.g., 100/100):
 ### Node Styling
 
 **Root Node:**
+
 - Larger size, prominent position
 - Skill color as background
 - Icon display
 
 **Sub-skill Nodes:**
+
 - Rounded rectangles
 - **Border/background color = current stage**
 - Progress indicator (mini bar or fraction)
@@ -259,11 +273,11 @@ Even when the metric is filled (e.g., 100/100):
 ### Stage Color Scheme
 
 ```css
---stage-not-started: #9CA3AF;  /* Gray */
---stage-practice: #3B82F6;      /* Blue */
---stage-feedback: #F59E0B;      /* Amber/Orange */
---stage-evaluate: #8B5CF6;      /* Purple */
---stage-complete: #10B981;      /* Green */
+--stage-not-started: #9ca3af; /* Gray */
+--stage-practice: #3b82f6; /* Blue */
+--stage-feedback: #f59e0b; /* Amber/Orange */
+--stage-evaluate: #8b5cf6; /* Purple */
+--stage-complete: #10b981; /* Green */
 ```
 
 ### Connections
@@ -276,6 +290,7 @@ Even when the metric is filled (e.g., 100/100):
 ## Technical Implementation
 
 ### Route
+
 - `/app/skills/:id/planner`
 
 ### Components
@@ -298,13 +313,19 @@ src/components/skill-planner/
 ```
 
 ### Library
+
 - **React Flow / Xyflow** for node-based UI
 
 ### Data Structures
 
 ```typescript
 // Stage cycle
-type SubSkillStage = 'not_started' | 'practice' | 'feedback' | 'evaluate' | 'complete';
+type SubSkillStage =
+  | 'not_started'
+  | 'practice'
+  | 'feedback'
+  | 'evaluate'
+  | 'complete';
 
 // Task status relative to sub-skill
 type TaskStatus = 'active' | 'disabled' | 'none';
@@ -316,16 +337,16 @@ interface SubSkill {
   name: string;
   description?: string;
   stage: SubSkillStage;
-  goal: string;                    // What defines mastery
+  goal: string; // What defines mastery
   metricType: MetricValueType;
   metricTarget: number | boolean;
   metricCurrent: number | boolean;
   metricUnit?: string;
-  dependencies: string[];          // IDs of prerequisite sub-skills
+  dependencies: string[]; // IDs of prerequisite sub-skills
   order: number;
   notes?: string;
   completedAt?: Date;
-  taskId?: string;                 // Reference to auto-generated task
+  taskId?: string; // Reference to auto-generated task
 }
 
 // For React Flow
@@ -339,11 +360,11 @@ interface PlannerNode {
 interface SubSkillNodeData {
   subSkill: SubSkill;
   stageColor: string;
-  isLocked: boolean;              // Dependencies not met
-  progress: number;               // 0-100 based on metric
-  isMetricFilled: boolean;        // metricCurrent >= metricTarget
-  taskStatus: TaskStatus;         // 'active' | 'disabled' | 'none'
-  canComplete: boolean;           // Show complete button?
+  isLocked: boolean; // Dependencies not met
+  progress: number; // 0-100 based on metric
+  isMetricFilled: boolean; // metricCurrent >= metricTarget
+  taskStatus: TaskStatus; // 'active' | 'disabled' | 'none'
+  canComplete: boolean; // Show complete button?
 }
 ```
 
@@ -352,15 +373,15 @@ interface SubSkillNodeData {
 ```typescript
 function getTaskStatus(subSkill: SubSkill): TaskStatus {
   if (subSkill.stage === 'complete') {
-    return 'none';  // No task for completed sub-skills
+    return 'none'; // No task for completed sub-skills
   }
   if (subSkill.stage === 'not_started') {
-    return 'none';  // No task until started
+    return 'none'; // No task until started
   }
   if (subSkill.metricCurrent >= subSkill.metricTarget) {
-    return 'disabled';  // Metric filled, waiting for manual completion
+    return 'disabled'; // Metric filled, waiting for manual completion
   }
-  return 'active';  // Task available for scheduling
+  return 'active'; // Task available for scheduling
 }
 
 function canShowCompleteButton(subSkill: SubSkill): boolean {

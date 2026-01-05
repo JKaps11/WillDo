@@ -14,6 +14,7 @@ The main landing page after login, providing a daily overview of skill-based tas
 ## Key Concept
 
 **All tasks on the dashboard come from sub-skills.** There is no manual task creation on this page. Tasks are:
+
 1. Auto-generated from sub-skills in the Skill Planner
 2. Scheduled to the TodoList via drag-and-drop from Unassigned
 3. Optionally recurring based on user preference
@@ -53,6 +54,7 @@ The main landing page after login, providing a daily overview of skill-based tas
 ### Today's Tasks
 
 **Display:**
+
 - Tasks scheduled for today (from TodoList)
 - Each task shows:
   - Skill color dot
@@ -62,18 +64,21 @@ The main landing page after login, providing a daily overview of skill-based tas
 - Completed tasks shown with strikethrough
 
 **Functionality:**
+
 - Checkbox to mark complete → updates sub-skill metric
 - Click task to view sub-skill details (optional: navigate to Skill Planner)
 - No drag reordering (order determined by when added)
 - No inline task creation
 
 **On Task Complete:**
+
 1. Task marked as done
 2. Sub-skill's `metricCurrent` incremented
 3. If recurring: next instance scheduled
 4. Visual feedback showing metric update
 
 **Empty State:**
+
 - "No tasks for today"
 - "Drag tasks from Unassigned to schedule them"
 - Link to Unassigned Tasks page
@@ -81,6 +86,7 @@ The main landing page after login, providing a daily overview of skill-based tas
 ### Skills Overview
 
 **Display:**
+
 - All active (non-archived) skills
 - For each skill:
   - Name and icon
@@ -89,10 +95,12 @@ The main landing page after login, providing a daily overview of skill-based tas
   - Link to Skill Planner
 
 **Stage Dots:**
+
 ```
 ●●●○○○○○
 [green][blue][orange][gray][gray][gray][gray][gray]
 ```
+
 - Green = complete
 - Blue = practice
 - Orange = feedback
@@ -100,11 +108,13 @@ The main landing page after login, providing a daily overview of skill-based tas
 - Gray = not started
 
 **Click Action:**
+
 - Navigate to Skill Planner for that skill
 
 ## Technical Implementation
 
 ### Route
+
 - `/app/dashboard` (or `/app` as default landing page)
 
 ### Components
@@ -178,6 +188,7 @@ task.completeWithMetricUpdate({ taskId }): {
 ### Database Queries
 
 **Today's Tasks with Skill Info:**
+
 ```sql
 SELECT
   t.*,
@@ -201,6 +212,7 @@ ORDER BY t.created_at
 ```
 
 **Skills Summary with Stage Counts:**
+
 ```sql
 SELECT
   s.*,
@@ -254,13 +266,13 @@ Client:
 
 ## Differences from Current TodoList Page
 
-| Aspect | Dashboard | TodoList Page |
-|--------|-----------|---------------|
-| Purpose | Quick overview | Full task management |
-| Scope | Today only | Week/Day view |
-| Task info | Shows skill context | Focuses on task details |
-| Drag & drop | No | Yes (reorder, move dates) |
-| Add tasks | No | Via Unassigned sheet |
+| Aspect      | Dashboard           | TodoList Page             |
+| ----------- | ------------------- | ------------------------- |
+| Purpose     | Quick overview      | Full task management      |
+| Scope       | Today only          | Week/Day view             |
+| Task info   | Shows skill context | Focuses on task details   |
+| Drag & drop | No                  | Yes (reorder, move dates) |
+| Add tasks   | No                  | Via Unassigned sheet      |
 
 ## Future Enhancements
 

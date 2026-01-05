@@ -76,6 +76,13 @@ code {
 }
 
 :root {
+  /* Stage colors for skill progression */
+  --stage-not-started: #9ca3af;
+  --stage-practice: #3b82f6;
+  --stage-feedback: #f59e0b;
+  --stage-evaluate: #8b5cf6;
+  --stage-complete: #10b981;
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.13 0.028 261.692);
   --card: oklch(1 0 0);
@@ -153,4 +160,64 @@ code {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Prose typography for docs */
+.prose {
+  --tw-prose-body: var(--foreground);
+  --tw-prose-headings: var(--foreground);
+  --tw-prose-links: var(--primary);
+  --tw-prose-bold: var(--foreground);
+  --tw-prose-counters: var(--muted-foreground);
+  --tw-prose-bullets: var(--muted-foreground);
+  --tw-prose-hr: var(--border);
+  --tw-prose-quotes: var(--foreground);
+  --tw-prose-quote-borders: var(--border);
+  --tw-prose-captions: var(--muted-foreground);
+  --tw-prose-code: var(--foreground);
+  --tw-prose-pre-code: var(--foreground);
+  --tw-prose-pre-bg: var(--muted);
+  --tw-prose-th-borders: var(--border);
+  --tw-prose-td-borders: var(--border);
+}
+
+.prose h1 {
+  @apply mb-4 text-3xl font-bold;
+}
+
+.prose h2 {
+  @apply mb-3 mt-8 text-xl font-semibold;
+}
+
+.prose h3 {
+  @apply mb-2 mt-6 text-lg font-medium;
+}
+
+.prose p {
+  @apply mb-4 leading-relaxed;
+}
+
+.prose .lead {
+  @apply mb-6 text-lg text-muted-foreground;
+}
+
+.prose ul,
+.prose ol {
+  @apply mb-4 ml-6 space-y-1;
+}
+
+.prose ul {
+  @apply list-disc;
+}
+
+.prose ol {
+  @apply list-decimal;
+}
+
+.prose li {
+  @apply leading-relaxed;
+}
+
+.prose strong {
+  @apply font-semibold;
 }

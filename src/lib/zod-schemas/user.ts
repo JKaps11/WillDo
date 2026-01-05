@@ -1,3 +1,5 @@
+import { z } from 'zod';
+import type { UserSettings } from '@/db/schemas/user.schema';
 import {
   appearanceThemeEnum,
   calendarViewEnum,
@@ -5,8 +7,6 @@ import {
   todoListSortByEnum,
   todoListTimeSpanEnum,
 } from '@/db/schemas/user.schema';
-import type { UserSettings } from '@/db/schemas/user.schema';
-import { z } from 'zod';
 
 /* ---------- Enum Schemas ---------- */
 

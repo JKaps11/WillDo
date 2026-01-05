@@ -1,5 +1,5 @@
-import type { TodoListContextValue } from './types';
 import { createContext, useContext } from 'react';
+import type { TodoListContextValue } from './types';
 
 const TodoListContext = createContext<TodoListContextValue | null>(null);
 

@@ -1,6 +1,6 @@
-import { Separator } from '@/components/ui/separator';
 import { Fragment, isValidElement } from 'react';
 import type { ReactNode } from 'react';
+import { Separator } from '@/components/ui/separator';
 
 export function withVerticalSeparators(
   nodes: Array<ReactNode>,

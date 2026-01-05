@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Calendar } from 'lucide-react';
-import type { ReactNode } from 'react';
 import { Task } from './Task';
+import type { ReactNode } from 'react';
 
 import {
   Sheet,

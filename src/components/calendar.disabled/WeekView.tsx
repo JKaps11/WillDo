@@ -1,5 +1,5 @@
-import type { Event } from '@/db/schemas/event.schema';
 import { CalendarDropZone } from './CalendarDropZone';
+import type { Event } from '@/db/schemas/event.schema';
 
 interface WeekViewProps {
   currentDate: Date;

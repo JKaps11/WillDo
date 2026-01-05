@@ -1,12 +1,22 @@
 import {
+  BookOpen,
   // CalendarDays, // DISABLED: Calendar feature
   CheckSquare,
   Inbox,
+  LayoutDashboard,
   LogOut,
   Settings,
+  Target,
 } from 'lucide-react';
 import { Link, useRouterState } from '@tanstack/react-router';
 
+import {
+  SignOutButton,
+  UserButton,
+  useUser,
+} from '@clerk/tanstack-react-start';
+import type { ForwardRefExoticComponent, RefAttributes } from 'react';
+import type { LucideProps } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -19,13 +29,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import {
-  SignOutButton,
-  UserButton,
-  useUser,
-} from '@clerk/tanstack-react-start';
-import type { ForwardRefExoticComponent, RefAttributes } from 'react';
-import type { LucideProps } from 'lucide-react';
 
 const navItems: Array<{
   title: string;
@@ -34,8 +37,12 @@ const navItems: Array<{
     Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
   >;
 }> = [
+  { title: 'Dashboard', to: '/app/dashboard', icon: LayoutDashboard },
+  { title: 'Skills Hub', to: '/app/skills', icon: Target },
   { title: 'Unassigned Tasks', to: '/app/unassigned', icon: Inbox },
   { title: 'Todo List', to: '/app/todolist', icon: CheckSquare },
+  { title: 'Settings', to: '/app/settings', icon: Settings },
+  { title: 'Docs', to: '/app/docs', icon: BookOpen },
   // { title: 'Calendar', to: '/app/calendar', icon: CalendarDays }, // DISABLED: Calendar feature
 ];
 
@@ -91,7 +98,7 @@ export function AppSidebar(): React.ReactElement {
 
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem>
+          {/* <SidebarMenuItem>
             <SidebarMenuButton
               asChild
               isActive={isSettingsActive}
@@ -102,15 +109,15 @@ export function AppSidebar(): React.ReactElement {
                 <span>Settings</span>
               </Link>
             </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
+          </SidebarMenuItem> */}
+          {/* <SidebarMenuItem>
             <SignOutButton>
               <SidebarMenuButton tooltip="Sign out">
                 <LogOut />
                 <span>Sign out</span>
               </SidebarMenuButton>
             </SignOutButton>
-          </SidebarMenuItem>
+          </SidebarMenuItem> */}
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"

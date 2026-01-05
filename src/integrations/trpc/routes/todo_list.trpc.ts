@@ -1,6 +1,6 @@
-import type { TRPCRouterRecord } from '@trpc/server';
-import { protectedProcedure } from '../init';
 import { TRPCError } from '@trpc/server';
+import { protectedProcedure } from '../init';
+import type { TRPCRouterRecord } from '@trpc/server';
 
 import { todoListRepository } from '@/db/repositories/todo_list.repository';
 import { endOfWeek, startOfWeek } from '@/utils/dates';

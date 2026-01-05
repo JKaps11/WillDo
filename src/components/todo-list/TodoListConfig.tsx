@@ -8,18 +8,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
+import { Separator } from '../ui/separator';
+import { Switch } from '../ui/switch';
+import { Button } from '../ui/button';
+import type { ReactNode } from 'react';
 import type {
   TodoListSortBy,
   TodoListTimeSpan,
   User,
 } from '@/db/schemas/user.schema';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import { useTRPC } from '@/integrations/trpc/react';
-import { Separator } from '../ui/separator';
-import type { ReactNode } from 'react';
-import { Switch } from '../ui/switch';
-import { Button } from '../ui/button';
 
 export default function TodoListConfig(): ReactNode {
   const trpc = useTRPC();

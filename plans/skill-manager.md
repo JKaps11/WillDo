@@ -18,6 +18,7 @@ Skill (Top-Level Goal)
 ### Sub-skill Stage Cycle
 
 Every sub-skill goes through the same repeating stages:
+
 1. **Practice** (Blue) - Actively working on it
 2. **Feedback** (Orange) - Receiving/reviewing feedback
 3. **Evaluate** (Purple) - Assessing if goal is met
@@ -35,6 +36,7 @@ Every sub-skill goes through the same repeating stages:
 ### Skills List View
 
 **Layout:**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  Skills Hub                                    [+ New Skill] │
@@ -67,40 +69,44 @@ Every sub-skill goes through the same repeating stages:
 ### Skill Card Components
 
 **Header:**
+
 - Skill name and icon
 - Sub-skills completed count (e.g., "3/8 sub-skills ✓")
 
 **Stage Distribution:**
+
 - Colored dots representing each sub-skill's current stage
 - Legend: Gray (Not Started), Blue (Practice), Orange (Feedback), Purple (Evaluate), Green (Complete)
 
 **Metrics Summary:**
+
 - Compact display of key metrics with current/target
 
 **Actions:**
+
 - **Edit Button** → Navigates to Skill Planner (`/app/skills/:id/planner`)
 - **Delete Button** → Confirmation modal, then removes skill
 
 ### Stage Color Reference
 
-| Stage | Color | Hex Code |
-|-------|-------|----------|
-| Not Started | Gray | `#9CA3AF` |
-| Practice | Blue | `#3B82F6` |
-| Feedback | Orange | `#F59E0B` |
-| Evaluate | Purple | `#8B5CF6` |
-| Complete | Green | `#10B981` |
+| Stage       | Color  | Hex Code  |
+| ----------- | ------ | --------- |
+| Not Started | Gray   | `#9CA3AF` |
+| Practice    | Blue   | `#3B82F6` |
+| Feedback    | Orange | `#F59E0B` |
+| Evaluate    | Purple | `#8B5CF6` |
+| Complete    | Green  | `#10B981` |
 
 ## Skill Creation Form
 
 ### Step 1: Basic Information
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| Name | Text | Yes | Skill name (e.g., "Piano", "Spanish") |
-| Color | Color Picker | Yes | Theme color for the skill |
-| Icon | Icon Selector | No | Visual identifier |
-| Goal | Textarea | Yes | Description of end goal |
+| Field | Type          | Required | Description                           |
+| ----- | ------------- | -------- | ------------------------------------- |
+| Name  | Text          | Yes      | Skill name (e.g., "Piano", "Spanish") |
+| Color | Color Picker  | Yes      | Theme color for the skill             |
+| Icon  | Icon Selector | No       | Visual identifier                     |
+| Goal  | Textarea      | Yes      | Description of end goal               |
 
 ### Step 2: AI-Powered Planning
 
@@ -123,31 +129,36 @@ Every sub-skill goes through the same repeating stages:
 
 ```typescript
 // Supported metric value types
-type MetricValueType = 'number' | 'boolean' | 'percentage' | 'duration' | 'level';
+type MetricValueType =
+  | 'number'
+  | 'boolean'
+  | 'percentage'
+  | 'duration'
+  | 'level';
 
 interface SkillMetric {
-  name: string;               // e.g., "Songs Mastered", "Can Read Sheet Music"
-  type: MetricValueType;      // How to interpret/display the value
-  target: number | boolean;   // Target value
-  unit?: string;              // Optional unit label (e.g., "songs", "hours")
-  description?: string;       // What this metric measures
+  name: string; // e.g., "Songs Mastered", "Can Read Sheet Music"
+  type: MetricValueType; // How to interpret/display the value
+  target: number | boolean; // Target value
+  unit?: string; // Optional unit label (e.g., "songs", "hours")
+  description?: string; // What this metric measures
 }
 
 interface SubSkillPlan {
-  name: string;               // e.g., "Basic Chords"
-  description: string;        // What this sub-skill covers
-  goal: string;               // Specific goal for mastery
+  name: string; // e.g., "Basic Chords"
+  description: string; // What this sub-skill covers
+  goal: string; // Specific goal for mastery
   metricType: MetricValueType;
   metricTarget: number | boolean;
   metricUnit?: string;
-  dependencies?: number[];    // Indices of prerequisite sub-skills
-  resources?: string[];       // Helpful resources
+  dependencies?: number[]; // Indices of prerequisite sub-skills
+  resources?: string[]; // Helpful resources
 }
 
 interface AISkillPlanResponse {
-  metrics: SkillMetric[];     // Overall skill metrics
+  metrics: SkillMetric[]; // Overall skill metrics
 
-  subSkills: SubSkillPlan[];  // Building blocks to master
+  subSkills: SubSkillPlan[]; // Building blocks to master
 
   recommendations: {
     resources: string[];
@@ -181,6 +192,7 @@ interface AISkillPlanResponse {
 ### What Happens on Create
 
 When the skill is created:
+
 1. Skill and all sub-skills are saved to database
 2. **Tasks are auto-generated** for each sub-skill (see integration.md)
 3. Tasks appear in Unassigned Tasks (filtered by stage)
@@ -234,7 +246,12 @@ interface Skill {
 }
 
 // skill_metrics table
-type MetricValueType = 'number' | 'boolean' | 'percentage' | 'duration' | 'level';
+type MetricValueType =
+  | 'number'
+  | 'boolean'
+  | 'percentage'
+  | 'duration'
+  | 'level';
 
 interface SkillMetric {
   id: string;
@@ -249,15 +266,20 @@ interface SkillMetric {
 }
 
 // sub_skills table
-type SubSkillStage = 'not_started' | 'practice' | 'feedback' | 'evaluate' | 'complete';
+type SubSkillStage =
+  | 'not_started'
+  | 'practice'
+  | 'feedback'
+  | 'evaluate'
+  | 'complete';
 
 interface SubSkill {
   id: string;
   skillId: string;
   name: string;
   description?: string;
-  stage: SubSkillStage;          // Current stage in the cycle
-  goal: string;                   // What defines mastery
+  stage: SubSkillStage; // Current stage in the cycle
+  goal: string; // What defines mastery
   metricType: MetricValueType;
   metricTarget: number | boolean;
   metricCurrent: number | boolean;
@@ -265,7 +287,7 @@ interface SubSkill {
   order: number;
   notes?: string;
   completedAt?: Date;
-  taskId?: string;               // Auto-generated task linked to this sub-skill
+  taskId?: string; // Auto-generated task linked to this sub-skill
 }
 
 // sub_skill_dependencies table
@@ -343,6 +365,7 @@ Create a learning plan with:
 ```
 
 **AI Provider Options:**
+
 - Anthropic Claude
 - Local LLM option
 
@@ -351,11 +374,13 @@ Create a learning plan with:
 ### Stage Indicator Design
 
 Option 1: Colored dots in a row
+
 ```
 ●●● ●● ● ○○
 ```
 
 Option 2: Segmented bar
+
 ```
 [███|██|█|░░]
 ```
@@ -363,16 +388,19 @@ Option 2: Segmented bar
 Option 3: Mini pie/donut chart
 
 ### Color Picker
+
 - Preset color palette (8-12 colors)
 - Custom hex input option
 - Preview of color in context
 
 ### Progress Visualization
+
 - Sub-skill stage distribution (colored indicators)
 - Metric progress bars
 - Overall completion percentage
 
 ### Form Validation
+
 - Required field validation
 - At least 1 sub-skill required
 - Goal must be defined for each sub-skill

@@ -1,6 +1,10 @@
-import type { ReactNode } from 'react';
 import { Settings } from './Settings';
+import type { ReactNode } from 'react';
 
+import type {
+  TodoListSortBy,
+  TodoListTimeSpan,
+} from '@/db/schemas/user.schema';
 import {
   Select,
   SelectContent,
@@ -8,10 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type {
-  TodoListSortBy,
-  TodoListTimeSpan,
-} from '@/db/schemas/user.schema';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Switch } from '@/components/ui/switch';
 

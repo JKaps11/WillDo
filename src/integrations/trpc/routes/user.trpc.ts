@@ -1,7 +1,7 @@
+import { TRPCError } from '@trpc/server';
+import { protectedProcedure } from '../init';
 import { patchUserSettingsSchema, updateUserSchema } from '@/lib/zod-schemas';
 import { userRepository } from '@/db/repositories/user.repository';
-import { protectedProcedure } from '../init';
-import { TRPCError } from '@trpc/server';
 
 export const userRouter = {
   /** GET /user */

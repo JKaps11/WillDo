@@ -1,8 +1,10 @@
-import type { TodoList } from '@/db/schemas/todo_list.schema';
 import type { UserSettings } from '@/db/schemas/user.schema';
-import type { Task } from '@/db/schemas/task.schema';
 
-export type TodoListWithTasks = TodoList & { tasks: Array<Task> };
+// Re-export from repository for consistency
+export type {
+  TodoListWithTasks,
+  TaskWithSkillContext,
+} from '@/db/repositories/todo_list.repository';
 
 export type TodoListOptions = UserSettings['todoList'];
 

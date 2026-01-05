@@ -1,21 +1,25 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Priority, Task as TaskType } from '@/db/schemas/task.schema';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { Check, Plus, X } from 'lucide-react';
+import type { StageFilter } from '@/components/unassigned/UnassignedFilters';
+import type { TaskWithSkillInfo } from '@/db/repositories/task.repository';
+import type { Priority } from '@/db/schemas/task.schema';
 import type { UnassignedSortOption } from '@/lib/store';
+import type { ReactNode } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { UnassignedFilters } from '@/components/unassigned/UnassignedFilters';
+import { SkillGroupHeader } from '@/components/unassigned/SkillGroupHeader';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { useTRPC } from '@/integrations/trpc/react';
 import { UnassignedTask } from '@/components/task';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Check, Plus, X } from 'lucide-react';
 import { startOfDay } from '@/utils/dates';
 import { ensureUser } from '@/utils/auth';
-import type { ReactNode } from 'react';
 import { uiStore } from '@/lib/store';
 
 export const Route = createFileRoute('/app/unassigned')({
@@ -31,10 +35,18 @@ const PRIORITY_RANK: Record<Priority, number> = {
   Very_Low: 1,
 };
 
+interface SkillGroup {
+  skillId: string;
+  skillName: string;
+  skillColor: string;
+  skillIcon: string | null;
+  tasks: Array<TaskWithSkillInfo>;
+}
+
 function sortTasks(
-  tasks: Array<TaskType>,
+  tasks: Array<TaskWithSkillInfo>,
   sortBy: UnassignedSortOption,
-): Array<TaskType> {
+): Array<TaskWithSkillInfo> {
   const sorted = [...tasks];
 
   // Always push completed to bottom
@@ -58,25 +70,81 @@ function sortTasks(
   return sorted;
 }
 
+function filterByStage(
+  tasks: Array<TaskWithSkillInfo>,
+  stageFilter: StageFilter,
+): Array<TaskWithSkillInfo> {
+  if (stageFilter === 'all') return tasks;
+
+  return tasks.filter((task) => {
+    if (!task.subSkill) return stageFilter === 'not_started';
+    if (stageFilter === 'in_progress') {
+      return ['practice', 'feedback', 'evaluate'].includes(task.subSkill.stage);
+    }
+    return task.subSkill.stage === 'not_started';
+  });
+}
+
+function groupBySkill(
+  tasks: Array<TaskWithSkillInfo>,
+): Array<SkillGroup | TaskWithSkillInfo> {
+  const skillGroups = new Map<string, SkillGroup>();
+  const ungroupedTasks: Array<TaskWithSkillInfo> = [];
+
+  for (const task of tasks) {
+    if (task.skill) {
+      const existing = skillGroups.get(task.skill.id);
+      if (existing) {
+        existing.tasks.push(task);
+      } else {
+        skillGroups.set(task.skill.id, {
+          skillId: task.skill.id,
+          skillName: task.skill.name,
+          skillColor: task.skill.color,
+          skillIcon: task.skill.icon,
+          tasks: [task],
+        });
+      }
+    } else {
+      ungroupedTasks.push(task);
+    }
+  }
+
+  // Return skill groups followed by ungrouped tasks
+  const result: Array<SkillGroup | TaskWithSkillInfo> = [];
+  result.push(...skillGroups.values());
+  result.push(...ungroupedTasks);
+  return result;
+}
+
+function isSkillGroup(
+  item: SkillGroup | TaskWithSkillInfo,
+): item is SkillGroup {
+  return 'skillId' in item && 'tasks' in item;
+}
+
 function RouteComponent(): ReactNode {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const sortBy = useStore(uiStore, (s) => s.unassignedSortBy);
   const [isCreating, setIsCreating] = useState<boolean>(false);
   const [newTaskTitle, setNewTaskTitle] = useState<string>('');
+  const [stageFilter, setStageFilter] = useState<StageFilter>('all');
+  const [showGroupBySkill, setShowGroupBySkill] = useState<boolean>(true);
+  const [expandedSkills, setExpandedSkills] = useState<Set<string>>(new Set());
   const inputRef = useRef<HTMLInputElement>(null);
 
   const {
     data: tasks,
     isLoading,
     isError,
-  } = useQuery(trpc.task.listUnassigned.queryOptions());
+  } = useQuery(trpc.task.listUnassignedWithSkillInfo.queryOptions());
 
   const createTaskMutation = useMutation(
     trpc.task.create.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.task.listUnassigned.queryKey(),
+          queryKey: trpc.task.listUnassignedWithSkillInfo.queryKey(),
         });
         setNewTaskTitle('');
         setIsCreating(false);
@@ -90,12 +158,44 @@ function RouteComponent(): ReactNode {
     }
   }, [isCreating]);
 
-  const sortedTasks = useMemo(
-    () => sortTasks(tasks ?? [], sortBy),
-    [tasks, sortBy],
-  );
-  const total = sortedTasks.length;
-  const done = sortedTasks.filter((t) => t.completed).length;
+  // Initialize expanded skills when data loads
+  useEffect(() => {
+    if (tasks && expandedSkills.size === 0) {
+      const skillIds = new Set<string>();
+      for (const task of tasks) {
+        if (task.skill) {
+          skillIds.add(task.skill.id);
+        }
+      }
+      setExpandedSkills(skillIds);
+    }
+  }, [tasks, expandedSkills.size]);
+
+  const processedData = useMemo(() => {
+    if (!tasks) return { items: [], total: 0, done: 0 };
+
+    const filtered = filterByStage(tasks, stageFilter);
+    const sorted = sortTasks(filtered, sortBy);
+    const items = showGroupBySkill ? groupBySkill(sorted) : sorted;
+
+    return {
+      items,
+      total: filtered.length,
+      done: filtered.filter((t) => t.completed).length,
+    };
+  }, [tasks, stageFilter, sortBy, showGroupBySkill]);
+
+  const toggleSkillExpanded = useCallback((skillId: string) => {
+    setExpandedSkills((prev) => {
+      const next = new Set(prev);
+      if (next.has(skillId)) {
+        next.delete(skillId);
+      } else {
+        next.add(skillId);
+      }
+      return next;
+    });
+  }, []);
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -148,32 +248,79 @@ function RouteComponent(): ReactNode {
               <CardTitle className="text-base font-medium">
                 Tasks Without Date
               </CardTitle>
-              <Badge variant="secondary" className="shrink-0">
-                {done}/{total}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <UnassignedFilters
+                  stageFilter={stageFilter}
+                  onStageFilterChange={setStageFilter}
+                  showGroupBySkill={showGroupBySkill}
+                  onGroupBySkillChange={setShowGroupBySkill}
+                />
+                <Badge variant="secondary" className="shrink-0">
+                  {processedData.done}/{processedData.total}
+                </Badge>
+              </div>
             </div>
           </CardHeader>
-          <CardContent className="pt-0 space-y-3">
-            {sortedTasks.length === 0 ? (
+          <CardContent className="space-y-3 pt-0">
+            {processedData.items.length === 0 ? (
               <div className="py-8 text-center text-sm text-muted-foreground">
-                No unassigned tasks. Create a task without a due date to see it
-                here.
+                {stageFilter !== 'all'
+                  ? 'No tasks match the current filter.'
+                  : 'No unassigned tasks'}
               </div>
             ) : (
-              <div className="rounded-md overflow-hidden">
-                <div className="flex flex-col gap-1 p-1 max-h-[600px] overflow-y-auto overflow-x-hidden">
-                  {sortedTasks.map((task) => (
-                    <div key={task.id} className="relative overflow-hidden">
-                      <UnassignedTask task={task} />
-                    </div>
-                  ))}
+              <div className="max-h-[600px] overflow-y-auto overflow-x-hidden rounded-md">
+                <div className="flex flex-col gap-1 p-1">
+                  {processedData.items.map((item) => {
+                    if (isSkillGroup(item)) {
+                      const isExpanded = expandedSkills.has(item.skillId);
+                      const completedCount = item.tasks.filter(
+                        (t) => t.completed,
+                      ).length;
+
+                      return (
+                        <div key={item.skillId} className="mb-2">
+                          <SkillGroupHeader
+                            skillName={item.skillName}
+                            skillColor={item.skillColor}
+                            skillIcon={item.skillIcon}
+                            taskCount={item.tasks.length}
+                            completedCount={completedCount}
+                            isExpanded={isExpanded}
+                            onToggle={() => toggleSkillExpanded(item.skillId)}
+                          />
+                          {isExpanded && (
+                            <div className="ml-6 mt-1 flex flex-col gap-1 border-l-2 pl-2">
+                              {item.tasks.map((task) => (
+                                <div
+                                  key={task.id}
+                                  className="relative overflow-hidden"
+                                >
+                                  <UnassignedTask
+                                    task={task}
+                                    showSkillInfo={false}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div key={item.id} className="relative overflow-hidden">
+                        <UnassignedTask task={item} showSkillInfo />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
 
             {/* Inline Task Creation */}
             {isCreating ? (
-              <div className="flex items-center gap-2 p-3 border rounded-lg bg-muted/30">
+              <div className="flex items-center gap-2 rounded-lg border bg-muted/30 p-3">
                 <Input
                   ref={inputRef}
                   placeholder="Task title"
@@ -203,16 +350,15 @@ function RouteComponent(): ReactNode {
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-            ) : (
-              <Button
-                variant="ghost"
-                onClick={() => setIsCreating(true)}
-                className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
-              >
-                <Plus className="h-4 w-4" />
-                Add task
-              </Button>
-            )}
+            ) : // <Button
+            //   variant="ghost"
+            //   onClick={() => setIsCreating(true)}
+            //   className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+            // >
+            // <Plus className="h-4 w-4" />
+            // Add task
+            // </Button>
+            null}
           </CardContent>
         </Card>
       </div>

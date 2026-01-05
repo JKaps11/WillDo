@@ -1,9 +1,9 @@
 import { Monitor, Moon, Sun } from 'lucide-react';
 
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Settings } from './Settings';
 import type { AppearanceTheme } from '@/db/schemas/user.schema';
 import type { ReactNode } from 'react';
-import { Settings } from './Settings';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 interface SettingsAppearanceTabProps {
   theme: AppearanceTheme;

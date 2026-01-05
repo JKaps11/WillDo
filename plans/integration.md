@@ -7,6 +7,7 @@ This document outlines the migration from the current standalone task system to 
 ## Current State → Target State
 
 ### Current Flow
+
 ```
 User creates task manually → Task in TodoList or Unassigned
                           → Drag between dates
@@ -14,6 +15,7 @@ User creates task manually → Task in TodoList or Unassigned
 ```
 
 ### Target Flow
+
 ```
 Sub-skill in Skill Planner
     ↓ (auto-creates)
@@ -45,10 +47,12 @@ Sub-skill marked complete → Next sub-skill unlocked
 **After:** Auto-generated tasks from in-progress sub-skills
 
 **Filter Toggle:**
+
 - Default: Show only tasks from sub-skills in "practice" stage (in-progress)
 - Toggle: Show all tasks (including not-started, completed)
 
 **Display:**
+
 - Tasks grouped by skill
 - Color-coded by sub-skill stage
 - Metric progress shown (e.g., "15/100 typing tests")
@@ -57,6 +61,7 @@ Sub-skill marked complete → Next sub-skill unlocked
 ### 3. Drag to TodoList with Recurring Modal
 
 **On Drop → Show Recurring Modal:**
+
 ```
 ┌─────────────────────────────────────────────┐
 │  Add to Todo List                       [×] │
@@ -81,12 +86,14 @@ Sub-skill marked complete → Next sub-skill unlocked
 ```
 
 **Recurrence Options (like calendar):**
+
 - Once (no recurrence)
 - Daily
 - Weekly (select days)
 - Custom interval
 
 **Until Options:**
+
 - Until metric is complete
 - Until specific date
 - For X occurrences
@@ -102,6 +109,7 @@ When user completes a task on the TodoList:
 5. If `metricCurrent >= metricTarget`: task becomes disabled (greyed out)
 
 **Example:**
+
 ```
 Sub-skill: "Typing Speed"
 Goal: Complete 100 typing tests
@@ -200,11 +208,11 @@ ALTER TABLE tasks ADD COLUMN parent_task_id UUID REFERENCES tasks(id); -- for re
 ```typescript
 interface RecurrenceRule {
   frequency: 'daily' | 'weekly' | 'monthly';
-  interval: number;                    // every N days/weeks/months
-  daysOfWeek?: number[];               // 0-6 for weekly (0 = Sunday)
+  interval: number; // every N days/weeks/months
+  daysOfWeek?: number[]; // 0-6 for weekly (0 = Sunday)
   endType: 'metric' | 'date' | 'count';
-  endDate?: string;                    // ISO date
-  endCount?: number;                   // number of occurrences
+  endDate?: string; // ISO date
+  endCount?: number; // number of occurrences
 }
 ```
 
@@ -214,12 +222,12 @@ interface RecurrenceRule {
 
 ### Remove/Modify
 
-| Component | Change |
-|-----------|--------|
-| `NewTaskModal.tsx` | **Remove** - No standalone task creation |
-| `AppHeader.tsx` | Remove "New Task" button from todolist/unassigned pages |
+| Component            | Change                                                      |
+| -------------------- | ----------------------------------------------------------- |
+| `NewTaskModal.tsx`   | **Remove** - No standalone task creation                    |
+| `AppHeader.tsx`      | Remove "New Task" button from todolist/unassigned pages     |
 | `UnassignedTask.tsx` | Update to show sub-skill info, stage color, metric progress |
-| `Task.tsx` | Update to show skill color, link to sub-skill |
+| `Task.tsx`           | Update to show skill color, link to sub-skill               |
 
 ### New Components
 
@@ -297,19 +305,19 @@ App
 
 ### Filter Options
 
-| Filter | Shows |
-|--------|-------|
+| Filter                | Shows                                                              |
+| --------------------- | ------------------------------------------------------------------ |
 | In Progress (default) | Tasks from sub-skills in `practice`, `feedback`, `evaluate` stages |
-| All | All tasks including `not_started` and `complete` |
-| By Stage | Filter by specific stage |
+| All                   | All tasks including `not_started` and `complete`                   |
+| By Stage              | Filter by specific stage                                           |
 
 ### Task Card States
 
-| State | Appearance |
-|-------|------------|
-| Active | Normal, draggable, stage color border |
+| State         | Appearance                                   |
+| ------------- | -------------------------------------------- |
+| Active        | Normal, draggable, stage color border        |
 | Metric Filled | Greyed out, not draggable, "Completed" badge |
-| Not Started | Lighter opacity, not draggable |
+| Not Started   | Lighter opacity, not draggable               |
 
 ---
 
@@ -324,6 +332,7 @@ App
 ### Recurring Task Handling
 
 When a recurring task is completed:
+
 1. Mark current instance as complete
 2. Update sub-skill metric
 3. Generate next instance based on recurrence rule
@@ -430,29 +439,34 @@ task.listUnassigned({ filter?: 'in_progress' | 'all' }): TaskWithSubSkill[]
 ## Migration Steps
 
 ### Phase 1: Database Setup
+
 1. Create new tables (skills, skill_metrics, sub_skills, sub_skill_dependencies)
 2. Add new columns to tasks table
 3. Run migrations
 
 ### Phase 2: New Features
+
 1. Implement Skills Hub (list, create, delete)
 2. Implement Skill Planner (view, edit sub-skills)
 3. Implement AI planning integration
 4. Add sub-skill completion flow
 
 ### Phase 3: Task Integration
+
 1. Modify task creation to require sub-skill
 2. Update unassigned tasks page with new design
 3. Implement recurring modal
 4. Implement metric updates on completion
 
 ### Phase 4: Cleanup
+
 1. Remove NewTaskModal from header (for todolist/unassigned)
 2. Update navigation (add Skills Hub)
 3. Migrate any existing tasks (optional: archive or convert)
 4. Update dashboard
 
 ### Phase 5: Polish
+
 1. Add stage color indicators everywhere
 2. Implement filtering and sorting
 3. Test recurring task flows
@@ -512,12 +526,12 @@ interface UserSettings {
 
 ## Summary of Key Behavioral Changes
 
-| Aspect | Before | After |
-|--------|--------|-------|
-| Task Creation | Manual via modal | Auto from sub-skills |
-| Unassigned Tasks | User-created backlog | Sub-skill task pool |
-| Task → TodoList | Direct drag | Drag + recurring modal |
-| Task Completion | Just marks done | Updates sub-skill metric |
-| Metric Tracking | N/A | Automatic on task complete |
-| Sub-skill Completion | N/A | Manual button press |
-| Recurring Tasks | Not supported | Full calendar-style recurrence |
+| Aspect               | Before               | After                          |
+| -------------------- | -------------------- | ------------------------------ |
+| Task Creation        | Manual via modal     | Auto from sub-skills           |
+| Unassigned Tasks     | User-created backlog | Sub-skill task pool            |
+| Task → TodoList      | Direct drag          | Drag + recurring modal         |
+| Task Completion      | Just marks done      | Updates sub-skill metric       |
+| Metric Tracking      | N/A                  | Automatic on task complete     |
+| Sub-skill Completion | N/A                  | Manual button press            |
+| Recurring Tasks      | Not supported        | Full calendar-style recurrence |

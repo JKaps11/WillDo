@@ -3,9 +3,9 @@ import netlify from '@netlify/vite-plugin-tanstack-start';
 import viteTsConfigPaths from 'vite-tsconfig-paths';
 import { devtools } from '@tanstack/devtools-vite';
 import tailwindcss from '@tailwindcss/vite';
-import neon from './neon-vite-plugin.ts';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import neon from './neon-vite-plugin.ts';
 import type { Plugin } from 'vite';
 
 /**

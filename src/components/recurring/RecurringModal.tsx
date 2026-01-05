@@ -1,0 +1,145 @@
+import { CalendarClock, Repeat } from 'lucide-react';
+import { useState } from 'react';
+
+import { RecurrenceEndSelector } from './RecurrenceEndSelector';
+import { RecurrenceSelector } from './RecurrenceSelector';
+import type {
+  RecurrenceEndType,
+  RecurrenceRule,
+  Task,
+} from '@/db/schemas/task.schema';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+
+interface RecurringModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  task: Task;
+  targetDate: Date;
+  onConfirm: (options: RecurringOptions) => void;
+}
+
+export interface RecurringOptions {
+  isRecurring: boolean;
+  recurrenceRule?: RecurrenceRule;
+  recurrenceEndType?: RecurrenceEndType;
+  recurrenceEndValue?: number;
+}
+
+const DEFAULT_RECURRENCE_RULE: RecurrenceRule = {
+  frequency: 'daily',
+  interval: 1,
+};
+
+export function RecurringModal({
+  open,
+  onOpenChange,
+  task,
+  targetDate,
+  onConfirm,
+}: RecurringModalProps): React.ReactElement {
+  const [isRecurring, setIsRecurring] = useState<boolean>(false);
+  const [recurrenceRule, setRecurrenceRule] = useState<RecurrenceRule>(
+    DEFAULT_RECURRENCE_RULE,
+  );
+  const [endType, setEndType] = useState<RecurrenceEndType>('never');
+  const [endValue, setEndValue] = useState<number | undefined>(undefined);
+
+  const handleConfirm = (): void => {
+    if (isRecurring) {
+      onConfirm({
+        isRecurring: true,
+        recurrenceRule,
+        recurrenceEndType: endType,
+        recurrenceEndValue: endValue,
+      });
+    } else {
+      onConfirm({ isRecurring: false });
+    }
+    onOpenChange(false);
+  };
+
+  const handleCancel = (): void => {
+    // Reset state
+    setIsRecurring(false);
+    setRecurrenceRule(DEFAULT_RECURRENCE_RULE);
+    setEndType('never');
+    setEndValue(undefined);
+    onOpenChange(false);
+  };
+
+  const formattedDate = targetDate.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <CalendarClock className="size-5" />
+            Schedule Task
+          </DialogTitle>
+          <DialogDescription>
+            Moving &quot;{task.name}&quot; to {formattedDate}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-4">
+          <div className="flex items-center justify-between">
+            <Label
+              htmlFor="recurring-toggle"
+              className="flex items-center gap-2 text-sm font-medium"
+            >
+              <Repeat className="size-4" />
+              Make this a recurring task
+            </Label>
+            <Switch
+              id="recurring-toggle"
+              checked={isRecurring}
+              onCheckedChange={setIsRecurring}
+            />
+          </div>
+
+          {isRecurring && (
+            <>
+              <Separator />
+              <RecurrenceSelector
+                value={recurrenceRule}
+                onChange={setRecurrenceRule}
+              />
+              <Separator />
+              <RecurrenceEndSelector
+                endType={endType}
+                endValue={endValue}
+                onEndTypeChange={setEndType}
+                onEndValueChange={setEndValue}
+              />
+            </>
+          )}
+        </div>
+
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="outline" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirm}>
+            {isRecurring ? 'Schedule Recurring' : 'Move Task'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

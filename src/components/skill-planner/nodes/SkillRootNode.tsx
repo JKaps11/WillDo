@@ -1,0 +1,39 @@
+import { Handle, Position } from '@xyflow/react';
+import type { Skill } from '@/db/schemas/skill.schema';
+import type { Node, NodeProps } from '@xyflow/react';
+
+export interface SkillRootNodeData {
+  skill: Skill;
+}
+
+export type SkillRootNodeType = Node<SkillRootNodeData, 'skillRoot'>;
+
+export function SkillRootNode({
+  data,
+}: NodeProps<SkillRootNodeType>): React.ReactElement {
+  const { skill } = data;
+
+  return (
+    <div
+      className="rounded-lg border-2 bg-card px-4 py-3 shadow-lg"
+      style={{ borderColor: skill.color }}
+    >
+      <div className="flex items-center gap-2">
+        {skill.icon && <span className="text-2xl">{skill.icon}</span>}
+        <div>
+          <h3 className="font-semibold">{skill.name}</h3>
+          {skill.goal && (
+            <p className="max-w-48 truncate text-xs text-muted-foreground">
+              {skill.goal}
+            </p>
+          )}
+        </div>
+      </div>
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        className="!size-3 !border-2 !border-background !bg-primary"
+      />
+    </div>
+  );
+}

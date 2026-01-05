@@ -1,6 +1,6 @@
+import { Store } from '@tanstack/store';
 import type { CalendarView, TodoListTimeSpan } from '@/db/schemas/user.schema';
 import { addDays, startOfDay } from '@/utils/dates';
-import { Store } from '@tanstack/store';
 
 export const UI_STORE_SETTINGS_TABS = [
   'appearance',
@@ -20,6 +20,7 @@ export interface UIStoreState {
   todoListBaseDate: Date;
   calendarBaseDate: Date;
   unassignedSortBy: UnassignedSortOption;
+  showArchivedSkills: boolean;
 }
 
 export type UIStoreActions = {
@@ -32,6 +33,7 @@ export type UIStoreActions = {
   setCalendarBaseDate: (date: Date) => void;
   navigateCalendar: (direction: 'prev' | 'next', view: CalendarView) => void;
   toggleUnassignedSort: () => void;
+  toggleShowArchivedSkills: () => void;
 };
 
 const initialState: UIStoreState = {
@@ -39,6 +41,7 @@ const initialState: UIStoreState = {
   todoListBaseDate: startOfDay(new Date()),
   calendarBaseDate: startOfDay(new Date()),
   unassignedSortBy: 'priority',
+  showArchivedSkills: false,
 };
 
 export const uiStore = new Store<UIStoreState>(initialState);
@@ -105,6 +108,12 @@ export const uiStoreActions: UIStoreActions = {
       ...state,
       unassignedSortBy:
         state.unassignedSortBy === 'priority' ? 'alphabetical' : 'priority',
+    }));
+  },
+  toggleShowArchivedSkills: () => {
+    uiStore.setState((state) => ({
+      ...state,
+      showArchivedSkills: !state.showArchivedSkills,
     }));
   },
 };

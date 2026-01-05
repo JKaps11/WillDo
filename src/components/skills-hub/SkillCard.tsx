@@ -1,0 +1,129 @@
+import { Archive, GitBranch, MoreHorizontal, Pencil } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
+
+import { SubSkillStageIndicator } from './SubSkillStageIndicator';
+import { DeleteSkillModal } from './DeleteSkillModal';
+import type { SubSkill } from '@/db/schemas/sub_skill.schema';
+import type { Skill } from '@/db/schemas/skill.schema';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { useTRPC } from '@/integrations/trpc/react';
+import { Button } from '@/components/ui/button';
+
+interface SkillCardProps {
+  skill: Skill & { subSkills: Array<SubSkill> };
+}
+
+export function SkillCard({ skill }: SkillCardProps): React.ReactElement {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const archiveMutation = useMutation(
+    trpc.skill.archive.mutationOptions({
+      onSuccess: () => {
+        void queryClient.invalidateQueries({ queryKey: [['skill', 'list']] });
+      },
+    }),
+  );
+
+  const stages = skill.subSkills.map((s) => s.stage);
+  const completedCount = stages.filter((s) => s === 'complete').length;
+  const totalCount = stages.length;
+
+  return (
+    <Card className="group relative transition-shadow hover:shadow-md">
+      <div
+        className="absolute left-0 top-0 h-full w-1 rounded-l-lg"
+        style={{ backgroundColor: skill.color }}
+      />
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            {skill.icon && <span className="text-2xl">{skill.icon}</span>}
+            <div>
+              <Link
+                to="/app/skills/$id/planner"
+                params={{ id: skill.id }}
+                className="font-semibold hover:underline"
+              >
+                {skill.name}
+              </Link>
+              {skill.goal && (
+                <p className="text-sm text-muted-foreground line-clamp-1">
+                  {skill.goal}
+                </p>
+              )}
+            </div>
+          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8 opacity-0 transition-opacity group-hover:opacity-100"
+              >
+                <MoreHorizontal className="size-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-40 p-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start"
+                asChild
+              >
+                <Link to="/app/skills/$id/planner" params={{ id: skill.id }}>
+                  <GitBranch className="mr-2 size-4" />
+                  View Planner
+                </Link>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start"
+                onClick={() => archiveMutation.mutate({ id: skill.id })}
+                disabled={archiveMutation.isPending}
+              >
+                <Archive className="mr-2 size-4" />
+                Archive
+              </Button>
+              <DeleteSkillModal
+                skill={skill}
+                trigger={
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-destructive hover:text-destructive"
+                  >
+                    <Pencil className="mr-2 size-4" />
+                    Delete
+                  </Button>
+                }
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <SubSkillStageIndicator stages={stages} />
+            <span className="text-xs text-muted-foreground">
+              {completedCount}/{totalCount} complete
+            </span>
+          </div>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/app/skills/$id/planner" params={{ id: skill.id }}>
+              Open Planner
+            </Link>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

@@ -1,19 +1,19 @@
 import {
-  Target,
-  Repeat,
-  MessageSquare,
-  RotateCcw,
   Calendar,
   Cog,
+  MessageSquare,
+  Repeat,
+  RotateCcw,
+  Target,
   Trophy,
   Zap,
 } from 'lucide-react';
 import { SignInButton } from '@clerk/tanstack-react-start';
 import { createFileRoute } from '@tanstack/react-router';
+import type { ReactNode } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { authStateFn } from '@/utils/auth';
-import type { ReactNode } from 'react';
 
 export const Route = createFileRoute('/')({
   beforeLoad: async () => authStateFn(),
@@ -33,10 +33,10 @@ export default function App(): ReactNode {
             Get on the path to success
           </p>
           <div className="flex gap-4 justify-center">
-            <SignInButton forceRedirectUrl={'/app/todolist'}>
+            <SignInButton forceRedirectUrl={'/app/dashboard'}>
               <Button size="lg">Get Started</Button>
             </SignInButton>
-            <SignInButton forceRedirectUrl={'/app/todolist'}>
+            <SignInButton forceRedirectUrl={'/app/dashboard'}>
               <Button size="lg" variant="outline">
                 Sign In
               </Button>
@@ -130,7 +130,7 @@ export default function App(): ReactNode {
           <p className="text-muted-foreground mb-8 max-w-md mx-auto">
             Start your journey today with Will Do.
           </p>
-          <SignInButton forceRedirectUrl={'/app/todolist'}>
+          <SignInButton forceRedirectUrl={'/app/dashboard'}>
             <Button size="lg">Get Started for Free</Button>
           </SignInButton>
         </div>
@@ -154,7 +154,7 @@ interface SkillStepProps {
   number: string;
   icon: ReactNode;
   title: string;
-  items: string[];
+  items: Array<string>;
 }
 
 function SkillStep({ number, icon, title, items }: SkillStepProps): ReactNode {

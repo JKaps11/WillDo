@@ -1,3 +1,5 @@
+import { TRPCError } from '@trpc/server';
+import { protectedProcedure } from '../init';
 import {
   createTagSchema,
   deleteTagSchema,
@@ -5,8 +7,6 @@ import {
   updateTagSchema,
 } from '@/lib/zod-schemas';
 import { tagRepository } from '@/db/repositories/tag.repository';
-import { protectedProcedure } from '../init';
-import { TRPCError } from '@trpc/server';
 
 export const tagRouter = {
   /** GET /tag - Get a specific tag */

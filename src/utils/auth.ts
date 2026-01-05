@@ -1,16 +1,16 @@
+import { auth, clerkClient } from '@clerk/tanstack-react-start/server';
+import { createServerFn } from '@tanstack/react-start';
+import { redirect } from '@tanstack/react-router';
 import type { User as ClerkUser } from '@clerk/tanstack-react-start/server';
 import type { User as DBUser, NewUser } from '@/db/schemas/user.schema';
-import { auth, clerkClient } from '@clerk/tanstack-react-start/server';
 import { userRepository } from '@/db/repositories/user.repository';
 import { withLogging } from '@/lib/logging/index.server';
-import { createServerFn } from '@tanstack/react-start';
 import { clerkUserSchema } from '@/lib/zod-schemas';
-import { redirect } from '@tanstack/react-router';
 
 export const authStateFn = createServerFn({ method: 'GET' }).handler(
   async () => {
     const { isAuthenticated } = await auth();
-    if (isAuthenticated) throw redirect({ to: '/app/todolist' });
+    if (isAuthenticated) throw redirect({ to: '/app/dashboard' });
   },
 );
 

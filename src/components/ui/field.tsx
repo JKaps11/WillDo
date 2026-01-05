@@ -1,6 +1,6 @@
-import type { VariantProps } from 'class-variance-authority';
 import { cva } from 'class-variance-authority';
 import { useMemo } from 'react';
+import type { VariantProps } from 'class-variance-authority';
 
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
@@ -203,7 +203,7 @@ function FieldError({
       ...new Map(errors.map((error) => [error?.message, error])).values(),
     ];
 
-    if (uniqueErrors?.length == 1) {
+    if (uniqueErrors.length == 1) {
       return uniqueErrors[0]?.message;
     }
 

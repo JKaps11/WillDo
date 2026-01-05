@@ -2,14 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 
-import {
-  SettingsAppearanceTab,
-  // SettingsCalendarTab, // DISABLED: Calendar feature
-  // SettingsGeneralTab, // DISABLED: General settings
-  // SettingsIntegrationsTab, // DISABLED: Not implemented
-  SettingsTasksTab,
-  SettingsTodoListTab,
-} from '@/components/settings';
 import type {
   CalendarView,
   DefaultHomePage,
@@ -18,6 +10,14 @@ import type {
   User,
 } from '@/db/schemas/user.schema';
 import type { UIStoreSettingsTab } from '@/lib/store';
+import {
+  SettingsAppearanceTab,
+  // SettingsCalendarTab, // DISABLED: Calendar feature
+  // SettingsGeneralTab, // DISABLED: General settings
+  // SettingsIntegrationsTab, // DISABLED: Not implemented
+  SettingsTasksTab,
+  SettingsTodoListTab,
+} from '@/components/settings';
 import { useTRPC } from '@/integrations/trpc/react';
 import { useTheme } from '@/lib/theme';
 import { uiStore } from '@/lib/store';

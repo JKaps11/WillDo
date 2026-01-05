@@ -11,10 +11,16 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AppUnassignedRouteImport } from './routes/app/unassigned'
 import { Route as AppTodolistRouteImport } from './routes/app/todolist'
+import { Route as AppSkillsRouteImport } from './routes/app/skills'
 import { Route as AppSettingsRouteImport } from './routes/app/settings'
+import { Route as AppDocsRouteImport } from './routes/app/docs'
+import { Route as AppDashboardRouteImport } from './routes/app/dashboard'
+import { Route as AppSkillsNewRouteImport } from './routes/app/skills_.new'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
+import { Route as AppSkillsIdPlannerRouteImport } from './routes/app/skills_.$id.planner'
 
 const AppRoute = AppRouteImport.update({
   id: '/app',
@@ -26,6 +32,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppUnassignedRoute = AppUnassignedRouteImport.update({
   id: '/unassigned',
   path: '/unassigned',
@@ -36,9 +47,29 @@ const AppTodolistRoute = AppTodolistRouteImport.update({
   path: '/todolist',
   getParentRoute: () => AppRoute,
 } as any)
+const AppSkillsRoute = AppSkillsRouteImport.update({
+  id: '/skills',
+  path: '/skills',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDocsRoute = AppDocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSkillsNewRoute = AppSkillsNewRouteImport.update({
+  id: '/skills_/new',
+  path: '/skills/new',
   getParentRoute: () => AppRoute,
 } as any)
 const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
@@ -46,57 +77,96 @@ const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
   path: '/api/trpc/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppSkillsIdPlannerRoute = AppSkillsIdPlannerRouteImport.update({
+  id: '/skills_/$id/planner',
+  path: '/skills/$id/planner',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/dashboard': typeof AppDashboardRoute
+  '/app/docs': typeof AppDocsRoute
   '/app/settings': typeof AppSettingsRoute
+  '/app/skills': typeof AppSkillsRoute
   '/app/todolist': typeof AppTodolistRoute
   '/app/unassigned': typeof AppUnassignedRoute
+  '/app/': typeof AppIndexRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/app/skills/new': typeof AppSkillsNewRoute
+  '/app/skills/$id/planner': typeof AppSkillsIdPlannerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/app': typeof AppRouteWithChildren
+  '/app/dashboard': typeof AppDashboardRoute
+  '/app/docs': typeof AppDocsRoute
   '/app/settings': typeof AppSettingsRoute
+  '/app/skills': typeof AppSkillsRoute
   '/app/todolist': typeof AppTodolistRoute
   '/app/unassigned': typeof AppUnassignedRoute
+  '/app': typeof AppIndexRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/app/skills/new': typeof AppSkillsNewRoute
+  '/app/skills/$id/planner': typeof AppSkillsIdPlannerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/dashboard': typeof AppDashboardRoute
+  '/app/docs': typeof AppDocsRoute
   '/app/settings': typeof AppSettingsRoute
+  '/app/skills': typeof AppSkillsRoute
   '/app/todolist': typeof AppTodolistRoute
   '/app/unassigned': typeof AppUnassignedRoute
+  '/app/': typeof AppIndexRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/app/skills_/new': typeof AppSkillsNewRoute
+  '/app/skills_/$id/planner': typeof AppSkillsIdPlannerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/app'
+    | '/app/dashboard'
+    | '/app/docs'
     | '/app/settings'
+    | '/app/skills'
     | '/app/todolist'
     | '/app/unassigned'
+    | '/app/'
     | '/api/trpc/$'
+    | '/app/skills/new'
+    | '/app/skills/$id/planner'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/app'
+    | '/app/dashboard'
+    | '/app/docs'
     | '/app/settings'
+    | '/app/skills'
     | '/app/todolist'
     | '/app/unassigned'
+    | '/app'
     | '/api/trpc/$'
+    | '/app/skills/new'
+    | '/app/skills/$id/planner'
   id:
     | '__root__'
     | '/'
     | '/app'
+    | '/app/dashboard'
+    | '/app/docs'
     | '/app/settings'
+    | '/app/skills'
     | '/app/todolist'
     | '/app/unassigned'
+    | '/app/'
     | '/api/trpc/$'
+    | '/app/skills_/new'
+    | '/app/skills_/$id/planner'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -121,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/unassigned': {
       id: '/app/unassigned'
       path: '/unassigned'
@@ -135,11 +212,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTodolistRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/skills': {
+      id: '/app/skills'
+      path: '/skills'
+      fullPath: '/app/skills'
+      preLoaderRoute: typeof AppSkillsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/settings': {
       id: '/app/settings'
       path: '/settings'
       fullPath: '/app/settings'
       preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/docs': {
+      id: '/app/docs'
+      path: '/docs'
+      fullPath: '/app/docs'
+      preLoaderRoute: typeof AppDocsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/dashboard': {
+      id: '/app/dashboard'
+      path: '/dashboard'
+      fullPath: '/app/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/skills_/new': {
+      id: '/app/skills_/new'
+      path: '/skills/new'
+      fullPath: '/app/skills/new'
+      preLoaderRoute: typeof AppSkillsNewRouteImport
       parentRoute: typeof AppRoute
     }
     '/api/trpc/$': {
@@ -149,19 +254,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTrpcSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/skills_/$id/planner': {
+      id: '/app/skills_/$id/planner'
+      path: '/skills/$id/planner'
+      fullPath: '/app/skills/$id/planner'
+      preLoaderRoute: typeof AppSkillsIdPlannerRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppDocsRoute: typeof AppDocsRoute
   AppSettingsRoute: typeof AppSettingsRoute
+  AppSkillsRoute: typeof AppSkillsRoute
   AppTodolistRoute: typeof AppTodolistRoute
   AppUnassignedRoute: typeof AppUnassignedRoute
+  AppIndexRoute: typeof AppIndexRoute
+  AppSkillsNewRoute: typeof AppSkillsNewRoute
+  AppSkillsIdPlannerRoute: typeof AppSkillsIdPlannerRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppDashboardRoute: AppDashboardRoute,
+  AppDocsRoute: AppDocsRoute,
   AppSettingsRoute: AppSettingsRoute,
+  AppSkillsRoute: AppSkillsRoute,
   AppTodolistRoute: AppTodolistRoute,
   AppUnassignedRoute: AppUnassignedRoute,
+  AppIndexRoute: AppIndexRoute,
+  AppSkillsNewRoute: AppSkillsNewRoute,
+  AppSkillsIdPlannerRoute: AppSkillsIdPlannerRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

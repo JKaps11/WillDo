@@ -3,4 +3,5 @@ export * from './todo-list';
 export * from './task';
 export * from './tag';
 export * from './clerk';
+export * from './skill';
 // export * from './event'; // DISABLED: Calendar feature

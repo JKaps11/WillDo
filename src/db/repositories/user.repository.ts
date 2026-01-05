@@ -1,7 +1,7 @@
-import type { NewUser, User, UserSettings } from '@/db/schemas/user.schema';
-import { DEFAULT_USER_SETTINGS, users } from '@/db/schemas/user.schema';
-import type { PatchUserSettings } from '@/lib/zod-schemas';
 import { eq } from 'drizzle-orm';
+import type { NewUser, User, UserSettings } from '@/db/schemas/user.schema';
+import type { PatchUserSettings } from '@/lib/zod-schemas';
+import { DEFAULT_USER_SETTINGS, users } from '@/db/schemas/user.schema';
 import { db } from '@/db/index';
 
 export const userRepository = {
@@ -11,34 +11,35 @@ export const userRepository = {
       .from(users)
       .where(eq(users.id, id))
       .limit(1);
-    const user = result[0] ?? null;
 
-    // Ensure existing users have all settings with defaults for missing keys
-    if (user) {
-      return {
-        ...user,
-        settings: {
-          general: {
-            ...DEFAULT_USER_SETTINGS.general,
-            ...user.settings.general,
-          },
-          appearance: {
-            ...DEFAULT_USER_SETTINGS.appearance,
-            ...user.settings.appearance,
-          },
-          todoList: {
-            ...DEFAULT_USER_SETTINGS.todoList,
-            ...user.settings.todoList,
-          },
-          calendar: {
-            ...DEFAULT_USER_SETTINGS.calendar,
-            ...user.settings.calendar,
-          },
-        },
-      };
+    if (result.length === 0) {
+      return null;
     }
 
-    return user;
+    const user = result[0];
+
+    // Ensure existing users have all settings with defaults for missing keys
+    return {
+      ...user,
+      settings: {
+        general: {
+          ...DEFAULT_USER_SETTINGS.general,
+          ...user.settings.general,
+        },
+        appearance: {
+          ...DEFAULT_USER_SETTINGS.appearance,
+          ...user.settings.appearance,
+        },
+        todoList: {
+          ...DEFAULT_USER_SETTINGS.todoList,
+          ...user.settings.todoList,
+        },
+        calendar: {
+          ...DEFAULT_USER_SETTINGS.calendar,
+          ...user.settings.calendar,
+        },
+      },
+    };
   },
 
   create: async (data: NewUser): Promise<User | null> => {

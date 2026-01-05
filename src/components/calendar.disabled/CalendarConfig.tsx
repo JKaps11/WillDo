@@ -2,11 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Settings2 } from 'lucide-react';
 
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import type { CalendarView, User } from '@/db/schemas/user.schema';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
-import { useTRPC } from '@/integrations/trpc/react';
-import type { ReactNode } from 'react';
 import { Button } from '../ui/button';
+import type { CalendarView, User } from '@/db/schemas/user.schema';
+import type { ReactNode } from 'react';
+import { useTRPC } from '@/integrations/trpc/react';
 
 export default function CalendarConfig(): ReactNode {
   const trpc = useTRPC();

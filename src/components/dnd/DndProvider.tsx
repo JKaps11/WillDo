@@ -1,25 +1,35 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DndContext, DragOverlay, pointerWithin } from '@dnd-kit/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useMemo, useRef, useState } from 'react';
 import { useStore } from '@tanstack/react-store';
 
 import { DndStateContext } from './context';
 
-import type { TodoListWithTasks } from '@/components/todo-list/types';
+import type {
+  TaskWithSkillContext,
+  TodoListWithTasks,
+} from '@/components/todo-list/types';
+import type { RecurringOptions } from '@/components/recurring/RecurringModal';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import type { Task } from '@/db/schemas/task.schema';
+import type { DndContextValue } from './context';
+import type { ReactNode } from 'react';
+import { RecurringModal } from '@/components/recurring/RecurringModal';
 import { formatPriority } from '@/components/todo-list/utils';
 import { startOfDay, utcDateToLocal } from '@/utils/dates';
-import type { Task } from '@/db/schemas/task.schema';
 import { useTRPC } from '@/integrations/trpc/react';
-import type { DndContextValue } from './context';
 import { Badge } from '@/components/ui/badge';
-import type { ReactNode } from 'react';
 import { uiStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
 
 interface DndProviderProps {
   children: ReactNode;
   onDragStart?: () => void;
+}
+
+interface PendingDrop {
+  task: Task | TaskWithSkillContext;
+  targetDate: Date;
 }
 
 export function DndProvider({
@@ -30,6 +40,8 @@ export function DndProvider({
   const queryClient = useQueryClient();
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [showRecurringModal, setShowRecurringModal] = useState(false);
+  const [pendingDrop, setPendingDrop] = useState<PendingDrop | null>(null);
   const baseDate = useStore(uiStore, (s) => s.todoListBaseDate);
 
   // Only render DndContext on client to avoid SSR issues with dnd-kit accessing DOM
@@ -60,6 +72,10 @@ export function DndProvider({
         // Invalidate all todoList.list queries regardless of date parameter
         queryClient.invalidateQueries({
           queryKey: trpc.todoList.list.pathKey(),
+        });
+        // Also invalidate unassigned queries
+        queryClient.invalidateQueries({
+          queryKey: trpc.task.listUnassignedWithSkillInfo.pathKey(),
         });
       },
     }),
@@ -149,6 +165,34 @@ export function DndProvider({
     }),
   );
 
+  /** Execute the actual task move */
+  const executeMoveTask = useCallback(
+    (task: Task, targetDate: Date, recurringOptions?: RecurringOptions) => {
+      const newDate = startOfDay(targetDate);
+
+      // Synchronously update cache BEFORE React re-renders
+      optimisticMoveTask(task.id, newDate);
+
+      // Build update payload
+      const updatePayload: Parameters<typeof updateTaskMutation.mutate>[0] = {
+        id: task.id,
+        todoListDate: newDate,
+      };
+
+      // Add recurrence fields if making recurring
+      if (recurringOptions?.isRecurring && recurringOptions.recurrenceRule) {
+        updatePayload.isRecurring = true;
+        updatePayload.recurrenceRule = recurringOptions.recurrenceRule;
+        updatePayload.recurrenceEndType = recurringOptions.recurrenceEndType;
+        updatePayload.recurrenceEndValue = recurringOptions.recurrenceEndValue;
+      }
+
+      // Trigger the server mutation
+      updateTaskMutation.mutate(updatePayload);
+    },
+    [updateTaskMutation],
+  );
+
   function handleDragEnd(event: DragEndEvent): void {
     const { active, over } = event;
 
@@ -184,20 +228,42 @@ export function DndProvider({
     })();
 
     if (shouldUpdate && task && targetDate) {
-      const newDate = startOfDay(targetDate);
-
-      // Synchronously update cache BEFORE React re-renders
-      optimisticMoveTask(task.id, newDate);
-
-      // Then trigger the server mutation
-      updateTaskMutation.mutate({
-        id: task.id,
-        todoListDate: newDate,
-      });
+      // If task is linked to a skill, show recurring modal
+      if (task.subSkillId) {
+        setPendingDrop({ task, targetDate });
+        setShowRecurringModal(true);
+      } else {
+        // For non-skill tasks, move immediately
+        executeMoveTask(task, targetDate);
+      }
     }
 
     setActiveTask(null);
   }
+
+  /** Handle recurring modal confirmation */
+  const handleRecurringConfirm = useCallback(
+    (options: RecurringOptions) => {
+      if (pendingDrop) {
+        executeMoveTask(
+          pendingDrop.task as Task,
+          pendingDrop.targetDate,
+          options,
+        );
+      }
+      setPendingDrop(null);
+      setShowRecurringModal(false);
+    },
+    [pendingDrop, executeMoveTask],
+  );
+
+  /** Handle recurring modal cancel */
+  const handleRecurringModalChange = useCallback((open: boolean) => {
+    if (!open) {
+      setPendingDrop(null);
+    }
+    setShowRecurringModal(open);
+  }, []);
 
   // During SSR, render children without DndContext to avoid DOM access errors
   if (!isMounted) {
@@ -218,11 +284,11 @@ export function DndProvider({
         {children}
         <DragOverlay dropAnimation={null}>
           {activeTask && (
-            <div className="bg-background border rounded-md shadow-lg px-4 py-3 w-64">
+            <div className="w-64 rounded-md border bg-background px-4 py-3 shadow-lg">
               <div className="flex items-start justify-between gap-3">
                 <div
                   className={cn(
-                    'min-w-0 font-medium leading-5 truncate',
+                    'min-w-0 truncate font-medium leading-5',
                     activeTask.completed &&
                       'text-muted-foreground line-through',
                   )}
@@ -234,7 +300,7 @@ export function DndProvider({
                 </Badge>
               </div>
               {activeTask.description && (
-                <div className="mt-1 text-sm text-muted-foreground line-clamp-1">
+                <div className="mt-1 line-clamp-1 text-sm text-muted-foreground">
                   {activeTask.description}
                 </div>
               )}
@@ -242,6 +308,17 @@ export function DndProvider({
           )}
         </DragOverlay>
       </DndContext>
+
+      {/* Recurring Modal for skill-linked tasks */}
+      {pendingDrop && (
+        <RecurringModal
+          open={showRecurringModal}
+          onOpenChange={handleRecurringModalChange}
+          task={pendingDrop.task as Task}
+          targetDate={pendingDrop.targetDate}
+          onConfirm={handleRecurringConfirm}
+        />
+      )}
     </DndStateContext.Provider>
   );
 }
