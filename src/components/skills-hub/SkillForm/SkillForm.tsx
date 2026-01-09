@@ -4,19 +4,17 @@ import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 
 import { BasicInfoStep } from './BasicInfoStep';
-import { PlanReview } from './PlanReview';
 import { AIPlanning } from './AIPlanning';
 import type { SkillBasicInfo } from './BasicInfoStep';
 import type { GeneratedSubSkill } from './AIPlanning';
 import { useTRPC } from '@/integrations/trpc/react';
 import { Button } from '@/components/ui/button';
 
-type Step = 'basic' | 'ai' | 'review';
+type Step = 'basic' | 'ai';
 
 const STEPS: Array<{ id: Step; title: string }> = [
   { id: 'basic', title: 'Basic Info' },
   { id: 'ai', title: 'AI Planning' },
-  { id: 'review', title: 'Review' },
 ];
 
 export function SkillForm(): React.ReactElement {
@@ -40,7 +38,10 @@ export function SkillForm(): React.ReactElement {
     trpc.skill.createWithPlan.mutationOptions({
       onSuccess: (skill) => {
         void queryClient.invalidateQueries({ queryKey: [['skill', 'list']] });
-        void navigate({ to: '/app/skills/$id/planner', params: { id: skill.id } });
+        void navigate({
+          to: '/app/skills/$id/planner',
+          params: { id: skill.id },
+        });
       },
     }),
   );
@@ -57,21 +58,29 @@ export function SkillForm(): React.ReactElement {
     }
   };
 
-  const handleSubmit = (): void => {
-    createSkillMutation.mutate({
+  const handleCreateSkill = (): void => {
+    const mutationInput = {
       name: basicInfo.name,
       description: basicInfo.description || undefined,
       color: basicInfo.color,
       icon: basicInfo.icon || undefined,
       goal: basicInfo.goal || undefined,
-      subSkills: subSkills.map((ss) => ({
+      subSkills: subSkills.map((ss, index) => ({
         name: ss.name,
         description: ss.description,
         metrics: ss.metrics,
-        dependencyIndices: ss.dependencies,
+        // Convert dependencies array to parentIndex (first dependency becomes parent)
+        parentIndex:
+          ss.dependencies.length > 0
+            ? ss.dependencies[0]
+            : index > 0
+              ? 0
+              : null,
       })),
-      createTasks: true,
-    });
+      createTasks: false, // Don't auto-create tasks, user can do that from planner
+    };
+
+    createSkillMutation.mutate(mutationInput);
   };
 
   const canProceed = (): boolean => {
@@ -79,9 +88,7 @@ export function SkillForm(): React.ReactElement {
       case 'basic':
         return basicInfo.name.trim().length > 0;
       case 'ai':
-        return true; // Can skip AI planning
-      case 'review':
-        return subSkills.length > 0;
+        return true; // Can skip AI planning or create with generated plan
       default:
         return false;
     }
@@ -118,7 +125,7 @@ export function SkillForm(): React.ReactElement {
               </span>
               {index < STEPS.length - 1 && (
                 <div
-                  className={`mx-4 h-0.5 w-12 ${
+                  className={`mx-4 h-0.5 w-16 ${
                     index < currentStepIndex ? 'bg-primary' : 'bg-muted'
                   }`}
                 />
@@ -140,9 +147,6 @@ export function SkillForm(): React.ReactElement {
             existingPlan={subSkills.length > 0 ? subSkills : null}
           />
         )}
-        {currentStep === 'review' && (
-          <PlanReview subSkills={subSkills} onChange={setSubSkills} />
-        )}
       </div>
 
       {/* Navigation */}
@@ -156,9 +160,9 @@ export function SkillForm(): React.ReactElement {
           Back
         </Button>
 
-        {currentStep === 'review' ? (
+        {currentStep === 'ai' ? (
           <Button
-            onClick={handleSubmit}
+            onClick={handleCreateSkill}
             disabled={!canProceed() || createSkillMutation.isPending}
           >
             {createSkillMutation.isPending ? (
@@ -169,15 +173,15 @@ export function SkillForm(): React.ReactElement {
             ) : (
               <>
                 <Check className="mr-2 size-4" />
-                Create Skill
+                {subSkills.length > 0
+                  ? `Create Skill with ${subSkills.length} Sub-skills`
+                  : 'Create Skill & Go to Planner'}
               </>
             )}
           </Button>
         ) : (
           <Button onClick={handleNext} disabled={!canProceed()}>
-            {currentStep === 'ai' && subSkills.length === 0
-              ? 'Skip AI Planning'
-              : 'Next'}
+            Next
             <ArrowRight className="ml-2 size-4" />
           </Button>
         )}

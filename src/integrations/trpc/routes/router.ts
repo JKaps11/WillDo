@@ -8,7 +8,7 @@ import { skillRouter } from './skill.trpc';
 // import { eventRouter } from './event.trpc'; // DISABLED: Calendar feature
 import { userRouter } from './user.trpc';
 import { taskRouter } from './task.trpc';
-import { tagRouter } from './tag.trpc';
+// import { tagRouter } from './tag.trpc';
 
 export const trpcRouter = createTRPCRouter({
   // event: eventRouter, // DISABLED: Calendar feature
@@ -17,7 +17,7 @@ export const trpcRouter = createTRPCRouter({
   skill: skillRouter,
   skillMetric: skillMetricRouter,
   subSkill: subSkillRouter,
-  tag: tagRouter,
+  // tag: tagRouter,
   task: taskRouter,
   todoList: todoListRouter,
   user: userRouter,

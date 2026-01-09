@@ -1,7 +1,7 @@
 export { TodoList } from './TodoList';
 export { sortAndFilterTasks, formatPriority } from './utils';
 export type {
-  TodoListWithTasks,
+  TodoListDay,
   TodoListOptions,
   TodoListContextValue,
 } from './types';

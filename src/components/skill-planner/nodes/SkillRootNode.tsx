@@ -2,7 +2,7 @@ import { Handle, Position } from '@xyflow/react';
 import type { Skill } from '@/db/schemas/skill.schema';
 import type { Node, NodeProps } from '@xyflow/react';
 
-export interface SkillRootNodeData {
+export interface SkillRootNodeData extends Record<string, unknown> {
   skill: Skill;
 }
 

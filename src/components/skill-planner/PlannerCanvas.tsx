@@ -20,14 +20,12 @@ import type { SubSkillNodeData } from './nodes/SubSkillNode';
 import type { Skill } from '@/db/schemas/skill.schema';
 
 type EnrichedSubSkill = SubSkill & {
-  dependencies: Array<string>;
   metrics: Array<SkillMetric>;
   isLocked: boolean;
 };
 
 interface PlannerCanvasProps {
   skill: Skill & { subSkills: Array<EnrichedSubSkill> };
-  selectedNodeId: string | null;
   onNodeSelect: (nodeId: string | null) => void;
 }
 
@@ -48,19 +46,18 @@ function calculateNodeDepths(
 
   function getDepth(id: string, visited: Set<string> = new Set()): number {
     if (depths.has(id)) return depths.get(id)!;
-    if (visited.has(id)) return 1; // Circular dependency fallback
+    if (visited.has(id)) return 1; // Circular reference fallback
 
     const subSkill = subSkillMap.get(id);
-    if (!subSkill || subSkill.dependencies.length === 0) {
+    if (!subSkill || !subSkill.parentSubSkillId) {
+      // Root-level sub-skills (no parent) are at depth 1
       depths.set(id, 1);
       return 1;
     }
 
     visited.add(id);
-    const maxDepDep = Math.max(
-      ...subSkill.dependencies.map((depId) => getDepth(depId, visited)),
-    );
-    const depth = maxDepDep + 1;
+    const parentDepth = getDepth(subSkill.parentSubSkillId, visited);
+    const depth = parentDepth + 1;
     depths.set(id, depth);
     return depth;
   }
@@ -121,17 +118,16 @@ function buildNodesAndEdges(
           subSkill,
           metrics: subSkill.metrics,
           isLocked: subSkill.isLocked,
-          isSelected: false,
         } satisfies SubSkillNodeData,
         draggable: true,
       });
     });
   });
 
-  // Create edges
+  // Create edges based on parentSubSkillId
   skill.subSkills.forEach((subSkill) => {
-    if (subSkill.dependencies.length === 0) {
-      // Connect to root if no dependencies
+    if (!subSkill.parentSubSkillId) {
+      // Connect to root if no parent
       edges.push({
         id: `edge-root-${subSkill.id}`,
         source: 'root',
@@ -140,16 +136,16 @@ function buildNodesAndEdges(
         data: { isActive: true },
       });
     } else {
-      // Connect to prerequisite sub-skills
-      subSkill.dependencies.forEach((depId) => {
-        const prerequisite = skill.subSkills.find((ss) => ss.id === depId);
-        edges.push({
-          id: `edge-${depId}-${subSkill.id}`,
-          source: `subskill-${depId}`,
-          target: `subskill-${subSkill.id}`,
-          type: 'dependency',
-          data: { isActive: prerequisite?.stage === 'complete' },
-        });
+      // Connect to parent sub-skill
+      const parent = skill.subSkills.find(
+        (ss) => ss.id === subSkill.parentSubSkillId,
+      );
+      edges.push({
+        id: `edge-${subSkill.parentSubSkillId}-${subSkill.id}`,
+        source: `subskill-${subSkill.parentSubSkillId}`,
+        target: `subskill-${subSkill.id}`,
+        type: 'dependency',
+        data: { isActive: parent?.stage === 'complete' },
       });
     }
   });
@@ -159,7 +155,6 @@ function buildNodesAndEdges(
 
 export function PlannerCanvas({
   skill,
-  selectedNodeId,
   onNodeSelect,
 }: PlannerCanvasProps): React.ReactElement {
   const initialLayout = useMemo(() => buildNodesAndEdges(skill), [skill]);

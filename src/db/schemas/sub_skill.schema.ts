@@ -1,4 +1,11 @@
-import { integer, pgEnum, pgTable, text, uuid } from 'drizzle-orm/pg-core';
+import {
+  foreignKey,
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  uuid,
+} from 'drizzle-orm/pg-core';
 
 import { resourceTimestamps } from './utils.schema';
 import { skills } from './skill.schema';
@@ -20,23 +27,36 @@ export type SubSkillStage = (typeof subSkillStageEnum.enumValues)[number];
 
 /* ---------- Table ---------- */
 
-export const subSkills = pgTable('sub_skill', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: text('user_id')
-    .notNull()
-    .references(() => users.id),
-  skillId: uuid('skill_id')
-    .notNull()
-    .references(() => skills.id, { onDelete: 'cascade' }),
+export const subSkills = pgTable(
+  'sub_skill',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id),
 
-  name: text('name').notNull(),
-  description: text('description'),
+    skillId: uuid('skill_id')
+      .notNull()
+      .references(() => skills.id, { onDelete: 'cascade' }),
+    // If null, this sub-skill connects directly to the Skill node in React Flow
+    parentSubSkillId: uuid('parent_sub_skill_id'),
 
-  stage: subSkillStageEnum().default('not_started').notNull(),
-  sortOrder: integer('sort_order').default(0).notNull(),
+    name: text('name').notNull(),
+    description: text('description'),
 
-  ...resourceTimestamps,
-});
+    stage: subSkillStageEnum().default('not_started').notNull(),
+    sortOrder: integer('sort_order').default(0).notNull(),
+
+    ...resourceTimestamps,
+  },
+  (table) => [
+    foreignKey({
+      name: 'sub_skill_parent_fkey',
+      columns: [table.parentSubSkillId],
+      foreignColumns: [table.id],
+    }).onDelete('set null'),
+  ],
+);
 
 /* ---------- Inferred Types ---------- */
 

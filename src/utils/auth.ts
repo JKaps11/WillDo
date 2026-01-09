@@ -20,7 +20,7 @@ export const ensureUser = createServerFn({ method: 'GET' }).handler(
     const { isAuthenticated, userId } = await auth();
     if (!isAuthenticated || !userId) throw redirect({ to: '/' });
 
-    // 2. Check if user exists in dv
+    // 2. Check if user exists in db
     let existing: DBUser | null;
     try {
       existing = await userRepository.findById(userId);

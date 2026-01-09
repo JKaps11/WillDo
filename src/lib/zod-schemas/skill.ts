@@ -1,31 +1,16 @@
 import { z } from 'zod';
 import { subSkillStageEnum } from '@/db/schemas/sub_skill.schema';
-import { recurrenceEndTypeEnum } from '@/db/schemas/task.schema';
 
 /* ---------- Stage Schema ---------- */
 
 export const subSkillStageSchema = z.enum(subSkillStageEnum.enumValues);
-
-/* ---------- Recurrence Schemas ---------- */
-
-export const recurrenceEndTypeSchema = z.enum(recurrenceEndTypeEnum.enumValues);
-
-export const recurrenceRuleSchema = z.object({
-  frequency: z.enum(['daily', 'weekly', 'monthly']),
-  interval: z.number().int().positive(),
-  daysOfWeek: z.array(z.number().int().min(0).max(6)).optional(),
-  dayOfMonth: z.number().int().min(1).max(31).optional(),
-});
 
 /* ---------- Skill Schemas ---------- */
 
 export const createSkillSchema = z.object({
   name: z.string().min(1).max(255),
   description: z.string().optional(),
-  color: z
-    .string()
-    .regex(/^#[0-9A-Fa-f]{6}$/)
-    .optional(),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
   icon: z.string().optional(),
   goal: z.string().optional(),
 });
@@ -63,6 +48,7 @@ export const createSubSkillSchema = z.object({
   description: z.string().optional(),
   stage: subSkillStageSchema.optional(),
   sortOrder: z.number().int().optional(),
+  parentSubSkillId: z.string().uuid().nullable().optional(),
 });
 
 export const updateSubSkillSchema = z.object({
@@ -71,6 +57,7 @@ export const updateSubSkillSchema = z.object({
   description: z.string().nullable().optional(),
   stage: subSkillStageSchema.optional(),
   sortOrder: z.number().int().optional(),
+  parentSubSkillId: z.string().uuid().nullable().optional(),
 });
 
 export const getSubSkillSchema = z.object({
@@ -91,18 +78,6 @@ export const advanceSubSkillStageSchema = z.object({
 
 export const completeSubSkillSchema = z.object({
   id: z.string().uuid(),
-});
-
-/* ---------- Sub-Skill Dependency Schemas ---------- */
-
-export const addDependencySchema = z.object({
-  dependentSubSkillId: z.string().uuid(),
-  prerequisiteSubSkillId: z.string().uuid(),
-});
-
-export const removeDependencySchema = z.object({
-  dependentSubSkillId: z.string().uuid(),
-  prerequisiteSubSkillId: z.string().uuid(),
 });
 
 /* ---------- Skill Metric Schemas ---------- */
@@ -157,7 +132,7 @@ export const skillPlanResultSchema = z.object({
           targetValue: z.number().int().positive(),
         }),
       ),
-      dependencies: z.array(z.number().int().min(0)), // indices of prerequisite sub-skills
+      parentIndex: z.number().int().min(-1).nullable().optional(), // -1 or null = root level
     }),
   ),
 });
@@ -174,21 +149,15 @@ export const subSkillPlanItemSchema = z.object({
       targetValue: z.number().int().positive(),
     }),
   ),
-  dependencyIndices: z.array(z.number().int().min(0)), // indices of prerequisite sub-skills
+  parentIndex: z.number().int().min(-1).nullable().optional(), // -1 or null = root level
 });
 
 export const createSkillWithPlanSchema = z.object({
-  // Skill info
   name: z.string().min(1).max(255),
   description: z.string().optional(),
-  color: z
-    .string()
-    .regex(/^#[0-9A-Fa-f]{6}$/)
-    .optional(),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
   icon: z.string().optional(),
   goal: z.string().optional(),
-  // Sub-skills with their metrics and dependencies
   subSkills: z.array(subSkillPlanItemSchema),
-  // Whether to create tasks for each sub-skill
   createTasks: z.boolean().default(true),
 });

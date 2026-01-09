@@ -2,9 +2,9 @@ import { TRPCError } from '@trpc/server';
 import { protectedProcedure } from '../init';
 import { patchUserSettingsSchema, updateUserSchema } from '@/lib/zod-schemas';
 import { userRepository } from '@/db/repositories/user.repository';
+import { addWide } from '@/lib/logging/wideEventStore.server';
 
 export const userRouter = {
-  /** GET /user */
   get: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.userId;
     const user = await userRepository.findById(userId);
@@ -16,11 +16,11 @@ export const userRouter = {
     return user;
   }),
 
-  /** PUT /user */
   update: protectedProcedure
     .input(updateUserSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.userId;
+      addWide({ settings_keys: Object.keys(input) });
       try {
         const user = await userRepository.update(userId, input);
         if (!user) {
@@ -36,11 +36,11 @@ export const userRouter = {
       }
     }),
 
-  /** PATCH /user/settings - Partial settings update */
   patchSettings: protectedProcedure
     .input(patchUserSettingsSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.userId;
+      addWide({ settings_keys: Object.keys(input) });
       try {
         const user = await userRepository.patchSettings(userId, input);
         if (!user) {
@@ -56,7 +56,6 @@ export const userRouter = {
       }
     }),
 
-  /** DELETE /user */
   delete: protectedProcedure.mutation(async ({ ctx }) => {
     const userId = ctx.userId;
     try {

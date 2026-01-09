@@ -1,43 +1,29 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
+
 import { TaskMetricBadge } from './TaskMetricBadge';
 import { SkillColorDot } from './SkillColorDot';
 import { EditTaskModal } from './EditTaskModal';
 import PriorityBadge from './PriorityBadge';
-import type { TaskWithSkillInfo } from '@/db/repositories/task.repository';
 import type { Task as TaskType } from '@/db/schemas/task.schema';
 import type { ReactNode } from 'react';
 import { useTRPC } from '@/integrations/trpc/react';
-import { TAG_MAX_WIDTH } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 
 interface UnassignedTaskProps {
-  task: TaskType | TaskWithSkillInfo;
-  className?: string;
+  task: TaskType;
   showSkillInfo?: boolean;
-}
-
-function hasSkillInfo(
-  task: TaskType | TaskWithSkillInfo,
-): task is TaskWithSkillInfo {
-  return 'skill' in task && 'metrics' in task;
 }
 
 export function UnassignedTask({
   task,
-  className,
   showSkillInfo = true,
 }: UnassignedTaskProps): ReactNode {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-
-  const { data: allTags = [] } = useQuery(trpc.tag.list.queryOptions());
-  const taskTags = allTags.filter((tag) => task.tagIds.includes(tag.tagId));
 
   // Check if this task has skill info for display
   const taskHasSkillInfo = hasSkillInfo(task);
@@ -52,13 +38,13 @@ export function UnassignedTask({
   const updateMutation = useMutation(
     trpc.task.update.mutationOptions({
       onMutate: async (variables) => {
-        const queryKey = trpc.task.listUnassignedWithSkillInfo.queryKey();
+        const queryKey = trpc.task.listUnassigned.queryKey();
         await queryClient.cancelQueries({ queryKey });
         const previous = queryClient.getQueryData(queryKey);
 
         queryClient.setQueryData(
           queryKey,
-          (old: Array<TaskWithSkillInfo> | undefined) => {
+          (old: Array<TaskType> | undefined) => {
             if (!old) return old;
             return old.map((t) =>
               t.id === variables.id ? { ...t, ...variables } : t,
@@ -75,7 +61,7 @@ export function UnassignedTask({
       },
       onSettled: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.task.listUnassignedWithSkillInfo.queryKey(),
+          queryKey: trpc.task.listUnassigned.queryKey(),
         });
       },
     }),
@@ -86,7 +72,7 @@ export function UnassignedTask({
     trpc.task.completeWithMetricUpdate.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.task.listUnassignedWithSkillInfo.queryKey(),
+          queryKey: trpc.task.listUnassigned.queryKey(),
         });
         // Also invalidate skill queries to update metric displays
         queryClient.invalidateQueries({
@@ -100,7 +86,7 @@ export function UnassignedTask({
     trpc.task.delete.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.task.listUnassignedWithSkillInfo.queryKey(),
+          queryKey: trpc.task.listUnassigned.queryKey(),
         });
       },
     }),
@@ -174,25 +160,6 @@ export function UnassignedTask({
             targetValue={totalTarget}
             className="shrink-0"
           />
-        )}
-
-        {taskTags.length > 0 && (
-          <div className="flex shrink-0 flex-wrap gap-1">
-            {taskTags.map((tag) => (
-              <Badge
-                key={tag.tagId}
-                variant="secondary"
-                className="truncate text-xs"
-                style={{
-                  backgroundColor: tag.color,
-                  borderColor: tag.color,
-                  maxWidth: TAG_MAX_WIDTH,
-                }}
-              >
-                {tag.title}
-              </Badge>
-            ))}
-          </div>
         )}
       </div>
 

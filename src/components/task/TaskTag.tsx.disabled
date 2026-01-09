@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Plus, X } from 'lucide-react';
 import { useState } from 'react';
-import type { Tag } from '@/db/schemas/tag.schema';
+// import type { Tag } from '@/db/schemas/tag.schema';
 import type { ReactNode } from 'react';
 import {
   Command,
@@ -16,7 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { TAG_DEFAULT_COLOR, TAG_MAX_WIDTH } from '@/lib/constants';
+// import { TAG_DEFAULT_COLOR, TAG_MAX_WIDTH } from '@/lib/constants';
 import { useTRPC } from '@/integrations/trpc/react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -55,23 +55,23 @@ export function TagPicker({ value, onChange }: TagPickerProps): ReactNode {
     }
   };
 
-  const handleCreateTag = (): void => {
-    if (!searchValue.trim()) return;
+  // const handleCreateTag = (): void => {
+  //   if (!searchValue.trim()) return;
 
-    const existingTag = availableTags.find(
-      (tag) => tag.title.toLowerCase() === searchValue.toLowerCase(),
-    );
+  //   const existingTag = availableTags.find(
+  //     (tag) => tag.title.toLowerCase() === searchValue.toLowerCase(),
+  //   );
 
-    if (existingTag) {
-      handleSelect(existingTag.tagId);
-      setSearchValue('');
-    } else {
-      createTagMutation.mutate({
-        title: searchValue.trim(),
-        color: TAG_DEFAULT_COLOR,
-      });
-    }
-  };
+  //   if (existingTag) {
+  //     handleSelect(existingTag.tagId);
+  //     setSearchValue('');
+  //   } else {
+  //     createTagMutation.mutate({
+  //       title: searchValue.trim(),
+  //       color: TAG_DEFAULT_COLOR,
+  //     });
+  //   }
+  // };
 
   const handleRemoveTag = (tagId: string): void => {
     onChange(value.filter((id) => id !== tagId));

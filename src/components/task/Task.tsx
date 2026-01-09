@@ -9,8 +9,8 @@ import { EditTaskModal } from './EditTaskModal';
 import PriorityBadge from './PriorityBadge';
 import type { Task as TaskType } from '@/db/schemas/task.schema';
 import type {
-  TaskWithSkillContext,
-  TodoListWithTasks,
+  TaskWithSkillInfo,
+  TodoListDay,
 } from '@/components/todo-list/types';
 import type { ReactNode } from 'react';
 import { useTRPC } from '@/integrations/trpc/react';
@@ -20,13 +20,13 @@ import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 
 interface TaskProps {
-  task: TaskType | TaskWithSkillContext;
+  task: TaskType | TaskWithSkillInfo;
   className?: string;
 }
 
 function hasSkillContext(
-  task: TaskType | TaskWithSkillContext,
-): task is TaskWithSkillContext {
+  task: TaskType | TaskWithSkillInfo,
+): task is TaskWithSkillInfo {
   return 'skill' in task && 'metrics' in task;
 }
 
@@ -54,7 +54,7 @@ export function Task({ task, className }: TaskProps): ReactNode {
 
         queryClient.setQueryData(
           queryKey,
-          (old: Array<TodoListWithTasks> | undefined) => {
+          (old: Array<TodoListDay> | undefined) => {
             if (!old) return old;
             return old.map((list) => ({
               ...list,

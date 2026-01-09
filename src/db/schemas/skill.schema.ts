@@ -13,7 +13,7 @@ export const skills = pgTable('skill', {
 
   name: text('name').notNull(),
   description: text('description'),
-  color: text('color').notNull().default('#3B82F6'),
+  color: text('color').notNull(),
   icon: text('icon'),
   goal: text('goal'),
 

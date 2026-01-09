@@ -2,8 +2,8 @@ import {
   Archive,
   ArrowBigLeft,
   ArrowBigRight,
-  ArrowDownAZ,
-  ArrowUpDown,
+  // ArrowDownAZ,
+  // ArrowUpDown,
   ChevronRight,
   Plus,
 } from 'lucide-react';
@@ -36,13 +36,13 @@ import { useIsMobile } from '@/hooks/use-mobile';
 type PageTitle =
   | 'Dashboard'
   | 'Todo List'
-  | 'Unassigned Tasks'
+  // | 'Unassigned Tasks'
   | 'Skills'
   | 'New Skill'
   | 'Skill Planner'
   | 'Docs'
-  | 'Calendar'
   | 'Settings';
+// | 'Calendar'  // DISABLED: Calendar feature;
 
 interface Breadcrumb {
   label: string;
@@ -81,16 +81,16 @@ function getPageTitle(pathname: string): PageTitle {
       return 'Dashboard';
     case 'todolist':
       return 'Todo List';
-    case 'unassigned':
-      return 'Unassigned Tasks';
+    // case 'unassigned':
+    //   return 'Unassigned Tasks';
     case 'skills':
       if (pathname.endsWith('/new')) return 'New Skill';
       if (pathname.includes('/planner')) return 'Skill Planner';
       return 'Skills';
     case 'docs':
       return 'Docs';
-    case 'calendar':
-      return 'Calendar';
+    // case 'calendar':
+    //   return 'Calendar';
     case 'settings':
       return 'Settings';
     default:
@@ -109,7 +109,7 @@ export default function AppHeader(): React.ReactNode {
   // Fetch user settings to get the timeSpan/view for navigation
   const { data: user } = useQuery(trpc.user.get.queryOptions());
   const timeSpan = user?.settings.todoList.timeSpan ?? 'day';
-  const calendarView = user?.settings.calendar.defaultView ?? 'week';
+  // const calendarView = user?.settings.calendar.defaultView ?? 'week';
 
   function handleNavigate(direction: 'prev' | 'next'): void {
     uiStoreActions.navigateTodoList(direction, timeSpan);
@@ -166,29 +166,29 @@ export default function AppHeader(): React.ReactNode {
           // <NewTaskModal key="new-task-button" />,
         ];
         break;
-      case 'Unassigned Tasks':
-        options = [
-          <Button
-            key="unassigned-sort-button"
-            variant="outline"
-            size="sm"
-            onClick={() => uiStoreActions.toggleUnassignedSort()}
-          >
-            {unassignedSortBy === 'priority' ? (
-              <>
-                <ArrowUpDown className="mr-2 h-4 w-4" />
-                Priority
-              </>
-            ) : (
-              <>
-                <ArrowDownAZ className="mr-2 h-4 w-4" />
-                A-Z
-              </>
-            )}
-          </Button>,
-          // <NewTaskModal key="new-task-button" />,
-        ];
-        break;
+      // case 'Unassigned Tasks':
+      //   options = [
+      //     <Button
+      //       key="unassigned-sort-button"
+      //       variant="outline"
+      //       size="sm"
+      //       onClick={() => uiStoreActions.toggleUnassignedSort()}
+      //     >
+      //       {unassignedSortBy === 'priority' ? (
+      //         <>
+      //           <ArrowUpDown className="mr-2 h-4 w-4" />
+      //           Priority
+      //         </>
+      //       ) : (
+      //         <>
+      //           <ArrowDownAZ className="mr-2 h-4 w-4" />
+      //           A-Z
+      //         </>
+      //       )}
+      //     </Button>,
+      //     // <NewTaskModal key="new-task-button" />,
+      //   ];
+      //   break;
       case 'Skills':
         options = [
           <Button
@@ -205,6 +205,17 @@ export default function AppHeader(): React.ReactNode {
               <Plus className="mr-2 size-4" />
               New Skill
             </Link>
+          </Button>,
+        ];
+        break;
+      case 'Skill Planner':
+        options = [
+          <Button
+            key="create-subskill-button"
+            onClick={() => uiStoreActions.setShowCreateSubSkillModal(true)}
+          >
+            <Plus className="mr-2 size-4" />
+            Create Sub-skill
           </Button>,
         ];
         break;
@@ -254,7 +265,7 @@ export default function AppHeader(): React.ReactNode {
                   {/* <SelectItem value="general">General</SelectItem> */}
                   <SelectItem value="appearance">Appearance</SelectItem>
                   <SelectItem value="todo-list">Todo List</SelectItem>
-                  <SelectItem value="tasks">Tasks</SelectItem>
+                  {/* <SelectItem value="tasks">Tasks</SelectItem> */}
                   {/* <SelectItem value="calendar">Calendar</SelectItem> */}
                   {/* <SelectItem value="integrations">Integrations</SelectItem> */}
                 </SelectContent>
@@ -273,7 +284,14 @@ export default function AppHeader(): React.ReactNode {
         break;
     }
     return withVerticalSeparators(options);
-  }, [title, timeSpan, isMobile, settingsTab, unassignedSortBy, showArchivedSkills]);
+  }, [
+    title,
+    timeSpan,
+    isMobile,
+    settingsTab,
+    unassignedSortBy,
+    showArchivedSkills,
+  ]);
 
   return (
     <header className="w-full flex items-center justify-between py-2 px-4">
@@ -304,9 +322,11 @@ export default function AppHeader(): React.ReactNode {
           ))}
         </div>
       </div>
-      {headerMenuOptions.length > 0 && <div className="flex h-full items-center gap-4 p-2 border-1">
-        {headerMenuOptions}
-      </div>}
+      {headerMenuOptions.length > 0 && (
+        <div className="flex h-full items-center gap-4 p-2 border-1">
+          {headerMenuOptions}
+        </div>
+      )}
     </header>
   );
 }

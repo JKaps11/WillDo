@@ -1,12 +1,11 @@
 import { CalendarIcon, Clock } from 'lucide-react';
 import { format, startOfDay } from 'date-fns';
 
-import { TagPicker } from './TaskTag';
-import type { ReactFormExtendedApi } from '@tanstack/react-form';
 import type { Priority } from '@/db/schemas/task.schema';
+import type { AnyFieldApi } from '@tanstack/react-form';
 import type { ReactNode } from 'react';
-import { formatPriority } from '@/components/todo-list/utils';
 import { priorityEnum } from '@/db/schemas/task.schema';
+import { formatPriority } from '@/components/todo-list/utils';
 
 import {
   Select,
@@ -26,18 +25,48 @@ import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-interface TaskFormValues {
+export interface TaskFormValues {
   name: string;
   description: string;
   priority: Priority;
   todoListDate: Date;
   dueDate: Date | null;
-  tagIds: Array<string>;
+  // tagIds: Array<string>;
   completed?: boolean;
 }
 
+type StringFieldApi = AnyFieldApi & {
+  state: { value: string };
+  handleChange: (value: string) => void;
+};
+
+type PriorityFieldApi = AnyFieldApi & {
+  state: { value: Priority };
+  handleChange: (value: Priority) => void;
+};
+
+type DateFieldApi = AnyFieldApi & {
+  state: { value: Date };
+  handleChange: (value: Date) => void;
+};
+
+type NullableDateFieldApi = AnyFieldApi & {
+  state: { value: Date | null };
+  handleChange: (value: Date | null) => void;
+};
+
+type BooleanFieldApi = AnyFieldApi & {
+  state: { value: boolean | undefined };
+  handleChange: (value: boolean) => void;
+};
+
 interface TaskFormProps {
-  form: ReactFormExtendedApi<TaskFormValues, undefined>;
+  form: {
+    Field: React.ComponentType<{
+      name: keyof TaskFormValues;
+      children: (field: AnyFieldApi) => ReactNode;
+    }>;
+  };
   showCompleted?: boolean;
 }
 
@@ -50,7 +79,7 @@ export function TaskForm({
       {/* Row 1: Name, Priority */}
       <form.Field
         name="name"
-        children={(field) => (
+        children={(field: StringFieldApi) => (
           <Field>
             <FieldLabel htmlFor={field.name}>Task Name</FieldLabel>
             <Input
@@ -67,7 +96,7 @@ export function TaskForm({
       />
       <form.Field
         name="priority"
-        children={(field) => (
+        children={(field: PriorityFieldApi) => (
           <Field>
             <FieldLabel>Priority</FieldLabel>
             <Select
@@ -92,7 +121,7 @@ export function TaskForm({
       {/* Row 2: Description */}
       <form.Field
         name="description"
-        children={(field) => (
+        children={(field: StringFieldApi) => (
           <Field className="col-span-2">
             <FieldLabel htmlFor={field.name}>Description</FieldLabel>
             <textarea
@@ -109,7 +138,7 @@ export function TaskForm({
         )}
       />
 
-      {/* Row 3: Tags */}
+      {/* Row 3: Tags
       <form.Field
         name="tagIds"
         children={(field) => (
@@ -121,12 +150,12 @@ export function TaskForm({
             />
           </Field>
         )}
-      />
+      /> */}
 
       {/* Row 4: Task Date, Due Date */}
       <form.Field
         name="todoListDate"
-        children={(field) => (
+        children={(field: DateFieldApi) => (
           <Field>
             <FieldLabel>Date</FieldLabel>
             <Popover>
@@ -156,7 +185,7 @@ export function TaskForm({
       />
       <form.Field
         name="dueDate"
-        children={(field) => (
+        children={(field: NullableDateFieldApi) => (
           <Field>
             <FieldLabel>Due Date</FieldLabel>
             <Popover>
@@ -202,7 +231,7 @@ export function TaskForm({
       {showCompleted && (
         <form.Field
           name="completed"
-          children={(field) => (
+          children={(field: BooleanFieldApi) => (
             <Field className="col-span-2">
               <div className="flex items-center gap-2">
                 <Checkbox

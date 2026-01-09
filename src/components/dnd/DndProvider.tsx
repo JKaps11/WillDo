@@ -6,8 +6,8 @@ import { useStore } from '@tanstack/react-store';
 import { DndStateContext } from './context';
 
 import type {
-  TaskWithSkillContext,
-  TodoListWithTasks,
+  TaskWithSkillInfo,
+  TodoListDay,
 } from '@/components/todo-list/types';
 import type { RecurringOptions } from '@/components/recurring/RecurringModal';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
@@ -28,7 +28,7 @@ interface DndProviderProps {
 }
 
 interface PendingDrop {
-  task: Task | TaskWithSkillContext;
+  task: Task | TaskWithSkillInfo;
   targetDate: Date;
 }
 
@@ -55,7 +55,7 @@ export function DndProvider({
   );
 
   // Store previous data for rollback on error
-  const previousDataRef = useRef<Array<TodoListWithTasks> | null>(null);
+  const previousDataRef = useRef<Array<TodoListDay> | null>(null);
 
   const updateTaskMutation = useMutation(
     trpc.task.update.mutationOptions({
@@ -90,7 +90,7 @@ export function DndProvider({
 
     queryClient.setQueryData(
       queryKey,
-      (old: Array<TodoListWithTasks> | undefined) => {
+      (old: Array<TodoListDay> | undefined) => {
         if (!old) return old;
 
         // Find the task being moved
@@ -128,12 +128,9 @@ export function DndProvider({
             return list;
           });
         } else {
-          // Create new todolist entry with the task
-          const newList: TodoListWithTasks = {
-            userId: movedTask.userId,
+          // Create new day entry with the task
+          const newList: TodoListDay = {
             date: todoListDate,
-            created_at: new Date(),
-            updated_at: new Date(),
             tasks: [{ ...movedTask, todoListDate }],
           };
           result = [...result, newList];

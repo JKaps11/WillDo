@@ -11,91 +11,65 @@ import {
 import { subSkillRepository } from '@/db/repositories/sub_skill.repository';
 import { skillRepository } from '@/db/repositories/skill.repository';
 import { taskRepository } from '@/db/repositories/task.repository';
+import { addWide } from '@/lib/logging/wideEventStore.server';
 
 export const skillRouter = {
-  /** GET /skill/list - List all skills */
   list: protectedProcedure
     .input(listSkillsSchema)
     .query(async ({ ctx, input }) => {
-      const userId = ctx.userId;
+      addWide({ include_archived: input.includeArchived ?? false });
       const skills = await skillRepository.findAll(
-        userId,
+        ctx.userId,
         input.includeArchived ?? false,
       );
+      addWide({ skills_count: skills.length });
 
-      // Fetch sub-skills for each skill to include stage info
-      const skillsWithSubSkills = await Promise.all(
+      return Promise.all(
         skills.map(async (skill) => {
           const subSkills = await subSkillRepository.findBySkillId(
             skill.id,
-            userId,
+            ctx.userId,
           );
-          return {
-            ...skill,
-            subSkills,
-          };
+          return { ...skill, subSkills };
         }),
       );
-
-      return skillsWithSubSkills;
     }),
 
-  /** GET /skill/:id - Get a specific skill with sub-skills */
   get: protectedProcedure
     .input(getSkillSchema)
     .query(async ({ ctx, input }) => {
-      const userId = ctx.userId;
-      const skill = await skillRepository.findById(input.id, userId);
-
+      addWide({ skill_id: input.id });
+      const skill = await skillRepository.findById(input.id, ctx.userId);
       if (!skill) {
         throw new TRPCError({ code: 'NOT_FOUND' });
       }
 
       const subSkills = await subSkillRepository.findBySkillId(
         skill.id,
-        userId,
+        ctx.userId,
       );
+      addWide({ sub_skills_count: subSkills.length });
 
-      // Fetch dependencies for each sub-skill
-      const subSkillsWithDeps = await Promise.all(
+      const enrichedSubSkills = await Promise.all(
         subSkills.map(async (subSkill) => {
-          const dependencies = await subSkillRepository.findDependencies(
-            subSkill.id,
-            userId,
-          );
-          const metrics = await skillRepository.findMetricsBySubSkillId(
-            subSkill.id,
-            userId,
-          );
-          const isLocked = await subSkillRepository.isLocked(
-            subSkill.id,
-            userId,
-          );
-
-          return {
-            ...subSkill,
-            dependencies: dependencies.map((d) => d.prerequisiteSubSkillId),
-            metrics,
-            isLocked,
-          };
+          const [metrics, isLocked] = await Promise.all([
+            skillRepository.findMetricsBySubSkillId(subSkill.id, ctx.userId),
+            subSkillRepository.isLocked(subSkill.id, ctx.userId),
+          ]);
+          return { ...subSkill, metrics, isLocked };
         }),
       );
 
-      return {
-        ...skill,
-        subSkills: subSkillsWithDeps,
-      };
+      return { ...skill, subSkills: enrichedSubSkills };
     }),
 
-  /** POST /skill - Create a new skill */
   create: protectedProcedure
     .input(createSkillSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.userId;
-
+      addWide({ skill_name: input.name });
       const skill = await skillRepository.create({
         ...input,
-        userId,
+        userId: ctx.userId,
       });
 
       if (!skill) {
@@ -104,21 +78,24 @@ export const skillRouter = {
           message: 'Failed to create skill',
         });
       }
+      addWide({ skill_id: skill.id });
 
       return skill;
     }),
 
-  /** POST /skill/createWithPlan - Create a skill with sub-skills, metrics, dependencies, and tasks */
   createWithPlan: protectedProcedure
     .input(createSkillWithPlanSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.userId;
       const { subSkills: subSkillsInput, createTasks, ...skillData } = input;
+      addWide({
+        skill_name: skillData.name,
+        sub_skills_planned: subSkillsInput.length,
+        create_tasks: createTasks,
+      });
 
-      // 1. Create the skill
       const skill = await skillRepository.create({
         ...skillData,
-        userId,
+        userId: ctx.userId,
       });
 
       if (!skill) {
@@ -127,18 +104,24 @@ export const skillRouter = {
           message: 'Failed to create skill',
         });
       }
+      addWide({ skill_id: skill.id });
 
-      // 2. Create sub-skills and store their IDs for dependency mapping
       const createdSubSkillIds: Array<string> = [];
 
-      for (let i = 0; i < subSkillsInput.length; i++) {
-        const ss = subSkillsInput[i];
+      for (const [index, ss] of subSkillsInput.entries()) {
+        const parentIndex: number | null = ss.parentIndex ?? null;
+        const parentSubSkillId: string | null =
+          parentIndex !== null && parentIndex >= 0
+            ? (createdSubSkillIds[parentIndex] ?? null)
+            : null;
+
         const createdSubSkill = await subSkillRepository.create({
           skillId: skill.id,
-          userId,
+          userId: ctx.userId,
           name: ss.name,
           description: ss.description,
-          sortOrder: i,
+          sortOrder: index,
+          parentSubSkillId,
         });
 
         if (!createdSubSkill) {
@@ -150,59 +133,39 @@ export const skillRouter = {
 
         createdSubSkillIds.push(createdSubSkill.id);
 
-        // 3. Create metrics for this sub-skill
-        for (const metric of ss.metrics) {
-          await skillRepository.createMetric({
-            subSkillId: createdSubSkill.id,
-            userId,
-            name: metric.name,
-            unit: metric.unit,
-            targetValue: metric.targetValue,
-            currentValue: 0,
-          });
-        }
+        await Promise.all(
+          ss.metrics.map((metric) =>
+            skillRepository.createMetric({
+              subSkillId: createdSubSkill.id,
+              userId: ctx.userId,
+              name: metric.name,
+              unit: metric.unit,
+              targetValue: metric.targetValue,
+              currentValue: 0,
+            }),
+          ),
+        );
 
-        // 4. Create a task for this sub-skill if requested
         if (createTasks) {
           await taskRepository.create({
-            userId,
+            userId: ctx.userId,
             name: ss.name,
             description: ss.description,
             subSkillId: createdSubSkill.id,
-            todoListDate: new Date(), // Today's date for todo list
-            // No dueDate - will show in unassigned
           });
         }
       }
-
-      // 5. Create dependencies between sub-skills
-      for (let i = 0; i < subSkillsInput.length; i++) {
-        const ss = subSkillsInput[i];
-        const dependentId = createdSubSkillIds[i];
-
-        for (const depIndex of ss.dependencyIndices) {
-          if (depIndex >= 0 && depIndex < createdSubSkillIds.length) {
-            const prerequisiteId = createdSubSkillIds[depIndex];
-            await subSkillRepository.addDependency({
-              userId,
-              dependentSubSkillId: dependentId,
-              prerequisiteSubSkillId: prerequisiteId,
-            });
-          }
-        }
-      }
+      addWide({ sub_skills_created: createdSubSkillIds.length });
 
       return skill;
     }),
 
-  /** PUT /skill - Update a skill */
   update: protectedProcedure
     .input(updateSkillSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.userId;
       const { id, ...updates } = input;
-
-      const skill = await skillRepository.update(id, userId, updates);
+      addWide({ skill_id: id });
+      const skill = await skillRepository.update(id, ctx.userId, updates);
 
       if (!skill) {
         throw new TRPCError({ code: 'NOT_FOUND' });
@@ -211,12 +174,11 @@ export const skillRouter = {
       return skill;
     }),
 
-  /** DELETE /skill - Delete a skill */
   delete: protectedProcedure
     .input(deleteSkillSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.userId;
-      const skill = await skillRepository.delete(input.id, userId);
+      addWide({ skill_id: input.id });
+      const skill = await skillRepository.delete(input.id, ctx.userId);
 
       if (!skill) {
         throw new TRPCError({ code: 'NOT_FOUND' });
@@ -225,12 +187,11 @@ export const skillRouter = {
       return skill;
     }),
 
-  /** POST /skill/archive - Archive a skill */
   archive: protectedProcedure
     .input(getSkillSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.userId;
-      const skill = await skillRepository.archive(input.id, userId);
+      addWide({ skill_id: input.id });
+      const skill = await skillRepository.archive(input.id, ctx.userId);
 
       if (!skill) {
         throw new TRPCError({ code: 'NOT_FOUND' });
@@ -239,12 +200,11 @@ export const skillRouter = {
       return skill;
     }),
 
-  /** POST /skill/unarchive - Unarchive a skill */
   unarchive: protectedProcedure
     .input(getSkillSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.userId;
-      const skill = await skillRepository.unarchive(input.id, userId);
+      addWide({ skill_id: input.id });
+      const skill = await skillRepository.unarchive(input.id, ctx.userId);
 
       if (!skill) {
         throw new TRPCError({ code: 'NOT_FOUND' });

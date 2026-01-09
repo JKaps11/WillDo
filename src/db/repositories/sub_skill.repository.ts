@@ -1,14 +1,9 @@
-import { and, eq, inArray } from 'drizzle-orm';
-import type {
-  NewSubSkillDependency,
-  SubSkillDependency,
-} from '@/db/schemas/sub_skill_dependency.schema';
+import { and, eq, isNull } from 'drizzle-orm';
 import type {
   NewSubSkill,
   SubSkill,
   SubSkillStage,
 } from '@/db/schemas/sub_skill.schema';
-import { subSkillDependencies } from '@/db/schemas/sub_skill_dependency.schema';
 import { subSkills } from '@/db/schemas/sub_skill.schema';
 import { db } from '@/db/index';
 
@@ -88,8 +83,8 @@ export const subSkillRepository = {
     if (!subSkill[0]) return null;
 
     const currentIndex = STAGE_ORDER.indexOf(subSkill[0].stage);
-    // Don't advance if already complete or at last stage before complete
-    if (currentIndex >= STAGE_ORDER.length - 2) {
+    // Don't advance if already complete
+    if (currentIndex >= STAGE_ORDER.length - 1) {
       return subSkill[0];
     }
 
@@ -113,99 +108,87 @@ export const subSkillRepository = {
     return result[0] ?? null;
   },
 
-  /* ---------- Dependencies ---------- */
+  /* ---------- Tree Hierarchy ---------- */
 
-  findDependencies: async (
-    subSkillId: string,
+  /**
+   * Find root sub-skills (those that connect directly to the Skill node)
+   */
+  findRootSubSkills: async (
+    skillId: string,
     userId: string,
-  ): Promise<Array<SubSkillDependency>> => {
+  ): Promise<Array<SubSkill>> => {
     return db
       .select()
-      .from(subSkillDependencies)
+      .from(subSkills)
       .where(
         and(
-          eq(subSkillDependencies.dependentSubSkillId, subSkillId),
-          eq(subSkillDependencies.userId, userId),
-        ),
-      );
-  },
-
-  findDependents: async (
-    subSkillId: string,
-    userId: string,
-  ): Promise<Array<SubSkillDependency>> => {
-    return db
-      .select()
-      .from(subSkillDependencies)
-      .where(
-        and(
-          eq(subSkillDependencies.prerequisiteSubSkillId, subSkillId),
-          eq(subSkillDependencies.userId, userId),
-        ),
-      );
-  },
-
-  addDependency: async (
-    data: Omit<NewSubSkillDependency, 'createdAt' | 'updatedAt'>,
-  ): Promise<SubSkillDependency | null> => {
-    const result = await db
-      .insert(subSkillDependencies)
-      .values(data)
-      .onConflictDoNothing()
-      .returning();
-
-    return result[0] ?? null;
-  },
-
-  removeDependency: async (
-    dependentSubSkillId: string,
-    prerequisiteSubSkillId: string,
-    userId: string,
-  ): Promise<SubSkillDependency | null> => {
-    const result = await db
-      .delete(subSkillDependencies)
-      .where(
-        and(
-          eq(subSkillDependencies.dependentSubSkillId, dependentSubSkillId),
-          eq(
-            subSkillDependencies.prerequisiteSubSkillId,
-            prerequisiteSubSkillId,
-          ),
-          eq(subSkillDependencies.userId, userId),
+          eq(subSkills.skillId, skillId),
+          eq(subSkills.userId, userId),
+          isNull(subSkills.parentSubSkillId),
         ),
       )
+      .orderBy(subSkills.sortOrder);
+  },
+
+  /**
+   * Find children of a specific sub-skill
+   */
+  findChildren: async (
+    parentSubSkillId: string,
+    userId: string,
+  ): Promise<Array<SubSkill>> => {
+    return db
+      .select()
+      .from(subSkills)
+      .where(
+        and(
+          eq(subSkills.parentSubSkillId, parentSubSkillId),
+          eq(subSkills.userId, userId),
+        ),
+      )
+      .orderBy(subSkills.sortOrder);
+  },
+
+  /**
+   * Update the parent of a sub-skill (for React Flow edge changes)
+   */
+  setParent: async (
+    id: string,
+    userId: string,
+    parentSubSkillId: string | null,
+  ): Promise<SubSkill | null> => {
+    const result = await db
+      .update(subSkills)
+      .set({ parentSubSkillId, updated_at: new Date() })
+      .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
       .returning();
 
     return result[0] ?? null;
   },
 
   /**
-   * Check if a sub-skill is locked (has incomplete prerequisites)
+   * Check if a sub-skill is locked (parent is not complete)
    */
   isLocked: async (subSkillId: string, userId: string): Promise<boolean> => {
-    const dependencies = await db
+    const subSkill = await db
       .select()
-      .from(subSkillDependencies)
-      .where(
-        and(
-          eq(subSkillDependencies.dependentSubSkillId, subSkillId),
-          eq(subSkillDependencies.userId, userId),
-        ),
-      );
+      .from(subSkills)
+      .where(and(eq(subSkills.id, subSkillId), eq(subSkills.userId, userId)))
+      .limit(1);
 
-    if (dependencies.length === 0) return false;
+    if (!subSkill[0] || !subSkill[0].parentSubSkillId) return false;
 
-    const prerequisiteIds = dependencies.map((d) => d.prerequisiteSubSkillId);
-    const prerequisites = await db
+    const parent = await db
       .select()
       .from(subSkills)
       .where(
         and(
-          inArray(subSkills.id, prerequisiteIds),
+          eq(subSkills.id, subSkill[0].parentSubSkillId),
           eq(subSkills.userId, userId),
         ),
-      );
+      )
+      .limit(1);
 
-    return prerequisites.some((p) => p.stage !== 'complete');
+    return parent[0] ? parent[0].stage !== 'complete' : false;
   },
 };

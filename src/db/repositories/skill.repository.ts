@@ -1,11 +1,10 @@
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import type {
   NewSkillMetric,
   SkillMetric,
 } from '@/db/schemas/skill_metric.schema';
 import type { NewSkill, Skill } from '@/db/schemas/skill.schema';
 import { skillMetrics } from '@/db/schemas/skill_metric.schema';
-import { subSkills } from '@/db/schemas/sub_skill.schema';
 import { skills } from '@/db/schemas/skill.schema';
 import { db } from '@/db/index';
 

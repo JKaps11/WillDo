@@ -2,9 +2,9 @@ import type { UserSettings } from '@/db/schemas/user.schema';
 
 // Re-export from repository for consistency
 export type {
-  TodoListWithTasks,
-  TaskWithSkillContext,
-} from '@/db/repositories/todo_list.repository';
+  TodoListDay,
+  TaskWithSkillInfo,
+} from '@/db/repositories/task.repository';
 
 export type TodoListOptions = UserSettings['todoList'];
 

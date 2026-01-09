@@ -7,7 +7,7 @@ import type { TRPCRouter } from '@/integrations/trpc/routes/router';
 
 import { TRPCProvider } from '@/integrations/trpc/react';
 
-function getUrl() {
+function getUrl(): string {
   const base = (() => {
     if (typeof window !== 'undefined') return '';
     return `http://localhost:${process.env.PORT ?? 3000}`;
@@ -15,6 +15,7 @@ function getUrl() {
   return `${base}/api/trpc`;
 }
 
+/** HTTP client for client-side usage */
 export const trpcClient = createTRPCClient<TRPCRouter>({
   links: [
     httpBatchStreamLink({
@@ -24,7 +25,7 @@ export const trpcClient = createTRPCClient<TRPCRouter>({
   ],
 });
 
-export function getContext() {
+export async function getContext() {
   const queryClient = new QueryClient({
     defaultOptions: {
       dehydrate: { serializeData: superjson.serialize },
@@ -32,10 +33,30 @@ export function getContext() {
     },
   });
 
-  const serverHelpers = createTRPCOptionsProxy({
-    client: trpcClient,
-    queryClient: queryClient,
-  });
+  // On server: use direct procedure calls (bypasses HTTP, has auth context)
+  // On client: use HTTP client
+  const isServer = typeof window === 'undefined';
+
+  let serverHelpers: ReturnType<typeof createTRPCOptionsProxy<TRPCRouter>>;
+
+  if (isServer) {
+    // Dynamic import to prevent server code from bundling into client
+    const { trpcRouter } = await import('@/integrations/trpc/routes/router');
+    const { createTRPCContext } = await import('@/integrations/trpc/context');
+
+    serverHelpers = createTRPCOptionsProxy<TRPCRouter>({
+      ctx: createTRPCContext,
+      router: trpcRouter,
+      queryClient: queryClient,
+    });
+  } else {
+    // Client: use HTTP client
+    serverHelpers = createTRPCOptionsProxy<TRPCRouter>({
+      client: trpcClient,
+      queryClient: queryClient,
+    });
+  }
+
   return {
     queryClient,
     trpc: serverHelpers,

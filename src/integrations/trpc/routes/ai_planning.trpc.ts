@@ -4,25 +4,16 @@ import {
   generateSkillPlanSchema,
   skillPlanResultSchema,
 } from '@/lib/zod-schemas';
+import { addWide } from '@/lib/logging/wideEventStore.server';
 
 type SkillPlanResult = z.infer<typeof skillPlanResultSchema>;
 
-/**
- * AI Planning router for generating skill learning plans.
- *
- * This is a placeholder implementation that returns a sample plan.
- * In production, this would integrate with an AI model (e.g., Claude API)
- * to generate personalized learning plans.
- */
 export const aiPlanningRouter = {
-  /** POST /aiPlanning/generate - Generate a skill learning plan */
   generateSkillPlan: protectedProcedure
     .input(generateSkillPlanSchema)
     .mutation(({ input }): SkillPlanResult => {
-      // This is a placeholder that generates a sample plan
-      // In production, this would call an AI API
-
       const { skillName, goal } = input;
+      addWide({ skill_name: skillName, goal_length: goal?.length ?? 0 });
 
       // Generate a sample plan based on the skill name
       const samplePlan: SkillPlanResult = {
@@ -54,7 +45,7 @@ export const aiPlanningRouter = {
                 targetValue: 8,
               },
             ],
-            dependencies: [0], // Depends on Fundamentals
+            dependencies: [0],
           },
           {
             name: `${skillName} Intermediate Concepts`,
@@ -71,7 +62,7 @@ export const aiPlanningRouter = {
                 targetValue: 2,
               },
             ],
-            dependencies: [1], // Depends on Core Techniques
+            dependencies: [1],
           },
           {
             name: `${skillName} Advanced Practice`,
@@ -88,7 +79,7 @@ export const aiPlanningRouter = {
                 targetValue: 1,
               },
             ],
-            dependencies: [2], // Depends on Intermediate Concepts
+            dependencies: [2],
           },
           {
             name: `${skillName} Mastery`,
@@ -100,15 +91,15 @@ export const aiPlanningRouter = {
                 targetValue: 3,
               },
             ],
-            dependencies: [3], // Depends on Advanced Practice
+            dependencies: [3],
           },
         ],
       };
+      addWide({ sub_skills_generated: samplePlan.subSkills.length });
 
       return samplePlan;
     }),
 
-  /** POST /aiPlanning/refine - Refine an existing skill plan (placeholder) */
   refineSkillPlan: protectedProcedure
     .input(
       z.object({
@@ -117,8 +108,10 @@ export const aiPlanningRouter = {
       }),
     )
     .mutation(({ input }): SkillPlanResult => {
-      // Placeholder: return the current plan unchanged
-      // In production, this would use AI to refine based on feedback
+      addWide({
+        current_sub_skills: input.currentPlan.subSkills.length,
+        feedback_length: input.feedback.length,
+      });
       return input.currentPlan;
     }),
 };

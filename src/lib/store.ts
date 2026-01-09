@@ -1,5 +1,5 @@
 import { Store } from '@tanstack/store';
-import type { CalendarView, TodoListTimeSpan } from '@/db/schemas/user.schema';
+import type { TodoListTimeSpan } from '@/db/schemas/user.schema';
 import { addDays, startOfDay } from '@/utils/dates';
 
 export const UI_STORE_SETTINGS_TABS = [
@@ -21,6 +21,7 @@ export interface UIStoreState {
   calendarBaseDate: Date;
   unassignedSortBy: UnassignedSortOption;
   showArchivedSkills: boolean;
+  showCreateSubSkillModal: boolean;
 }
 
 export type UIStoreActions = {
@@ -31,9 +32,10 @@ export type UIStoreActions = {
     timeSpan: TodoListTimeSpan,
   ) => void;
   setCalendarBaseDate: (date: Date) => void;
-  navigateCalendar: (direction: 'prev' | 'next', view: CalendarView) => void;
+  // navigateCalendar: (direction: 'prev' | 'next', view: CalendarView) => void;
   toggleUnassignedSort: () => void;
   toggleShowArchivedSkills: () => void;
+  setShowCreateSubSkillModal: (show: boolean) => void;
 };
 
 const initialState: UIStoreState = {
@@ -42,6 +44,7 @@ const initialState: UIStoreState = {
   calendarBaseDate: startOfDay(new Date()),
   unassignedSortBy: 'priority',
   showArchivedSkills: false,
+  showCreateSubSkillModal: false,
 };
 
 export const uiStore = new Store<UIStoreState>(initialState);
@@ -76,33 +79,33 @@ export const uiStoreActions: UIStoreActions = {
       calendarBaseDate: startOfDay(date),
     }));
   },
-  navigateCalendar: (direction: 'prev' | 'next', view: CalendarView) => {
-    uiStore.setState((state) => {
-      const current = state.calendarBaseDate;
-      let newDate: Date;
+  // navigateCalendar: (direction: 'prev' | 'next', view: CalendarView) => {
+  //   uiStore.setState((state) => {
+  //     const current = state.calendarBaseDate;
+  //     let newDate: Date;
 
-      switch (view) {
-        case 'month':
-          newDate = new Date(
-            current.getFullYear(),
-            current.getMonth() + (direction === 'prev' ? -1 : 1),
-            1,
-          );
-          break;
-        case 'week':
-          newDate = addDays(current, direction === 'prev' ? -7 : 7);
-          break;
-        case 'day':
-          newDate = addDays(current, direction === 'prev' ? -1 : 1);
-          break;
-      }
+  //     switch (view) {
+  //       case 'month':
+  //         newDate = new Date(
+  //           current.getFullYear(),
+  //           current.getMonth() + (direction === 'prev' ? -1 : 1),
+  //           1,
+  //         );
+  //         break;
+  //       case 'week':
+  //         newDate = addDays(current, direction === 'prev' ? -7 : 7);
+  //         break;
+  //       case 'day':
+  //         newDate = addDays(current, direction === 'prev' ? -1 : 1);
+  //         break;
+  //     }
 
-      return {
-        ...state,
-        calendarBaseDate: newDate,
-      };
-    });
-  },
+  //     return {
+  //       ...state,
+  //       calendarBaseDate: newDate,
+  //     };
+  //   });
+  // },
   toggleUnassignedSort: () => {
     uiStore.setState((state) => ({
       ...state,
@@ -114,6 +117,12 @@ export const uiStoreActions: UIStoreActions = {
     uiStore.setState((state) => ({
       ...state,
       showArchivedSkills: !state.showArchivedSkills,
+    }));
+  },
+  setShowCreateSubSkillModal: (show: boolean) => {
+    uiStore.setState((state) => ({
+      ...state,
+      showCreateSubSkillModal: show,
     }));
   },
 };

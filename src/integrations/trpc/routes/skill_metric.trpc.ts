@@ -9,12 +9,13 @@ import {
 } from '@/lib/zod-schemas';
 import { subSkillRepository } from '@/db/repositories/sub_skill.repository';
 import { skillRepository } from '@/db/repositories/skill.repository';
+import { addWide } from '@/lib/logging/wideEventStore.server';
 
 export const skillMetricRouter = {
-  /** GET /skillMetric/:id - Get a specific metric */
   get: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(z.object({ id: z.uuid() }))
     .query(async ({ ctx, input }) => {
+      addWide({ metric_id: input.id });
       const userId = ctx.userId;
       const metric = await skillRepository.findMetricById(input.id, userId);
 
@@ -25,26 +26,26 @@ export const skillMetricRouter = {
       return metric;
     }),
 
-  /** GET /skillMetric/bySubSkill - List metrics for a sub-skill */
   listBySubSkill: protectedProcedure
-    .input(z.object({ subSkillId: z.string().uuid() }))
+    .input(z.object({ subSkillId: z.uuid() }))
     .query(async ({ ctx, input }) => {
+      addWide({ sub_skill_id: input.subSkillId });
       const userId = ctx.userId;
       const metrics = await skillRepository.findMetricsBySubSkillId(
         input.subSkillId,
         userId,
       );
+      addWide({ metrics_count: metrics.length });
 
       return metrics;
     }),
 
-  /** POST /skillMetric - Create a new metric */
   create: protectedProcedure
     .input(createSkillMetricSchema)
     .mutation(async ({ ctx, input }) => {
+      addWide({ sub_skill_id: input.subSkillId, metric_name: input.name });
       const userId = ctx.userId;
 
-      // Verify sub-skill exists and belongs to user
       const subSkill = await subSkillRepository.findById(
         input.subSkillId,
         userId,
@@ -67,16 +68,17 @@ export const skillMetricRouter = {
           message: 'Failed to create metric',
         });
       }
+      addWide({ metric_id: metric.id });
 
       return metric;
     }),
 
-  /** PUT /skillMetric - Update a metric */
   update: protectedProcedure
     .input(updateSkillMetricSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.userId;
       const { id, ...updates } = input;
+      addWide({ metric_id: id });
 
       const metric = await skillRepository.updateMetric(id, userId, updates);
 
@@ -87,10 +89,10 @@ export const skillMetricRouter = {
       return metric;
     }),
 
-  /** POST /skillMetric/increment - Increment a metric's current value */
   increment: protectedProcedure
     .input(incrementSkillMetricSchema)
     .mutation(async ({ ctx, input }) => {
+      addWide({ metric_id: input.id, increment_amount: input.amount });
       const userId = ctx.userId;
 
       const metric = await skillRepository.incrementMetric(
@@ -102,14 +104,15 @@ export const skillMetricRouter = {
       if (!metric) {
         throw new TRPCError({ code: 'NOT_FOUND' });
       }
+      addWide({ new_value: metric.currentValue });
 
       return metric;
     }),
 
-  /** POST /skillMetric/bulkUpdate - Update multiple metrics at once */
   bulkUpdate: protectedProcedure
     .input(bulkUpdateSkillMetricsSchema)
     .mutation(async ({ ctx, input }) => {
+      addWide({ metrics_to_update: input.updates.length });
       const userId = ctx.userId;
 
       const results = await Promise.all(
@@ -128,14 +131,15 @@ export const skillMetricRouter = {
           return metric;
         }),
       );
+      addWide({ metrics_updated: results.length });
 
       return results;
     }),
 
-  /** DELETE /skillMetric - Delete a metric */
   delete: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
+      addWide({ metric_id: input.id });
       const userId = ctx.userId;
       const metric = await skillRepository.deleteMetric(input.id, userId);
 

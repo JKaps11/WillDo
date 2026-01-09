@@ -22,10 +22,6 @@ export const userRepository = {
     return {
       ...user,
       settings: {
-        general: {
-          ...DEFAULT_USER_SETTINGS.general,
-          ...user.settings.general,
-        },
         appearance: {
           ...DEFAULT_USER_SETTINGS.appearance,
           ...user.settings.appearance,
@@ -34,10 +30,10 @@ export const userRepository = {
           ...DEFAULT_USER_SETTINGS.todoList,
           ...user.settings.todoList,
         },
-        calendar: {
-          ...DEFAULT_USER_SETTINGS.calendar,
-          ...user.settings.calendar,
-        },
+        // calendar: {
+        //   ...DEFAULT_USER_SETTINGS.calendar,
+        //   ...user.settings.calendar,
+        // },
       },
     };
   },
@@ -77,10 +73,6 @@ export const userRepository = {
 
     // Merge patch with existing settings (currentUser already has defaults applied from findById)
     const mergedSettings: UserSettings = {
-      general: {
-        ...currentUser.settings.general,
-        ...patch.general,
-      },
       appearance: {
         ...currentUser.settings.appearance,
         ...patch.appearance,
@@ -89,10 +81,10 @@ export const userRepository = {
         ...currentUser.settings.todoList,
         ...patch.todoList,
       },
-      calendar: {
-        ...currentUser.settings.calendar,
-        ...patch.calendar,
-      },
+      // calendar: {
+      //   ...currentUser.settings.calendar,
+      //   ...patch.calendar,
+      // },
     };
 
     const result = await db

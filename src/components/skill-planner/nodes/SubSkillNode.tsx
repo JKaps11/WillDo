@@ -21,11 +21,10 @@ const STAGE_LABELS: Record<SubSkillStage, string> = {
   complete: 'Complete',
 };
 
-export interface SubSkillNodeData {
+export interface SubSkillNodeData extends Record<string, unknown> {
   subSkill: SubSkill;
   metrics: Array<SkillMetric>;
   isLocked: boolean;
-  isSelected: boolean;
 }
 
 export type SubSkillNodeType = Node<SubSkillNodeData, 'subSkill'>;

@@ -1,2 +1,0 @@
-CREATE TYPE "public"."default_home_page" AS ENUM('todolist', 'unassigned', 'calendar');--> statement-breakpoint
-ALTER TABLE "user" ALTER COLUMN "settings" SET DEFAULT '{"general":{"defaultHomePage":"todolist"},"appearance":{"theme":"system"},"todoList":{"sortBy":"priority","timeSpan":"week","showCompleted":true},"calendar":{"startOfWeek":0,"defaultEventDuration":60,"defaultView":"week","googleCalendarSync":false}}'::jsonb;

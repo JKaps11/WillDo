@@ -2,19 +2,14 @@ import {
   BookOpen,
   // CalendarDays, // DISABLED: Calendar feature
   CheckSquare,
-  Inbox,
+  // Inbox,
   LayoutDashboard,
-  LogOut,
   Settings,
   Target,
 } from 'lucide-react';
 import { Link, useRouterState } from '@tanstack/react-router';
 
-import {
-  SignOutButton,
-  UserButton,
-  useUser,
-} from '@clerk/tanstack-react-start';
+import { UserButton, useUser } from '@clerk/tanstack-react-start';
 import type { ForwardRefExoticComponent, RefAttributes } from 'react';
 import type { LucideProps } from 'lucide-react';
 import {
@@ -39,7 +34,7 @@ const navItems: Array<{
 }> = [
   { title: 'Dashboard', to: '/app/dashboard', icon: LayoutDashboard },
   { title: 'Skills Hub', to: '/app/skills', icon: Target },
-  { title: 'Unassigned Tasks', to: '/app/unassigned', icon: Inbox },
+  // { title: 'Unassigned Tasks', to: '/app/unassigned', icon: Inbox },
   { title: 'Todo List', to: '/app/todolist', icon: CheckSquare },
   { title: 'Settings', to: '/app/settings', icon: Settings },
   { title: 'Docs', to: '/app/docs', icon: BookOpen },
@@ -49,8 +44,6 @@ const navItems: Array<{
 export function AppSidebar(): React.ReactElement {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user } = useUser();
-  const isSettingsActive =
-    pathname === '/app/settings' || pathname.startsWith('/app/settings/');
 
   return (
     <Sidebar collapsible="icon">

@@ -1,9 +1,297 @@
 {
-  "id": "c9245f88-8e7f-4721-86a6-9725ef5b15ed",
+  "id": "95235a85-ad59-44ce-9a94-288e5dc44818",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.skill_metric": {
+      "name": "skill_metric",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sub_skill_id": {
+          "name": "sub_skill_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit": {
+          "name": "unit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "target_value": {
+          "name": "target_value",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "current_value": {
+          "name": "current_value",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "skill_metric_user_id_user_id_fk": {
+          "name": "skill_metric_user_id_user_id_fk",
+          "tableFrom": "skill_metric",
+          "tableTo": "user",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "skill_metric_sub_skill_id_sub_skill_id_fk": {
+          "name": "skill_metric_sub_skill_id_sub_skill_id_fk",
+          "tableFrom": "skill_metric",
+          "tableTo": "sub_skill",
+          "columnsFrom": ["sub_skill_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.skill": {
+      "name": "skill",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "color": {
+          "name": "color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "icon": {
+          "name": "icon",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "goal": {
+          "name": "goal",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "archived": {
+          "name": "archived",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "archived_at": {
+          "name": "archived_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "skill_user_id_user_id_fk": {
+          "name": "skill_user_id_user_id_fk",
+          "tableFrom": "skill",
+          "tableTo": "user",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sub_skill": {
+      "name": "sub_skill",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "skill_id": {
+          "name": "skill_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parent_sub_skill_id": {
+          "name": "parent_sub_skill_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stage": {
+          "name": "stage",
+          "type": "sub_skill_stage",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'not_started'"
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "sub_skill_user_id_user_id_fk": {
+          "name": "sub_skill_user_id_user_id_fk",
+          "tableFrom": "sub_skill",
+          "tableTo": "user",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "sub_skill_skill_id_skill_id_fk": {
+          "name": "sub_skill_skill_id_skill_id_fk",
+          "tableFrom": "sub_skill",
+          "tableTo": "skill",
+          "columnsFrom": ["skill_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "sub_skill_parent_fkey": {
+          "name": "sub_skill_parent_fkey",
+          "tableFrom": "sub_skill",
+          "tableTo": "sub_skill",
+          "columnsFrom": ["parent_sub_skill_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.task": {
       "name": "task",
       "schema": "",
@@ -25,7 +313,7 @@
           "name": "todo_list_date",
           "type": "date",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "name": {
           "name": "name",
@@ -60,6 +348,18 @@
           "notNull": true,
           "default": false
         },
+        "sub_skill_id": {
+          "name": "sub_skill_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recurrence_rule": {
+          "name": "recurrence_rule",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
         "updated_at": {
           "name": "updated_at",
           "type": "timestamp",
@@ -74,7 +374,29 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "task_user_date_idx": {
+          "name": "task_user_date_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "todo_list_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "task_user_id_user_id_fk": {
           "name": "task_user_id_user_id_fk",
@@ -85,70 +407,17 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "task_todo_list_date_user_id_todo_list_date_user_id_fk": {
-          "name": "task_todo_list_date_user_id_todo_list_date_user_id_fk",
+        "task_sub_skill_id_sub_skill_id_fk": {
+          "name": "task_sub_skill_id_sub_skill_id_fk",
           "tableFrom": "task",
-          "tableTo": "todo_list",
-          "columnsFrom": ["todo_list_date", "user_id"],
-          "columnsTo": ["date", "user_id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.todo_list": {
-      "name": "todo_list",
-      "schema": "",
-      "columns": {
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "date": {
-          "name": "date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "todo_list_user_id_user_id_fk": {
-          "name": "todo_list_user_id_user_id_fk",
-          "tableFrom": "todo_list",
-          "tableTo": "user",
-          "columnsFrom": ["user_id"],
+          "tableTo": "sub_skill",
+          "columnsFrom": ["sub_skill_id"],
           "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "todo_list_user_id_date_pk": {
-          "name": "todo_list_user_id_date_pk",
-          "columns": ["user_id", "date"]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -181,7 +450,7 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": true,
-          "default": "'{\"todoList\":{\"sortBy\":\"priority\",\"timeSpan\":\"week\",\"showCompleted\": true}}'::jsonb"
+          "default": "'{\"appearance\":{\"theme\":\"system\"},\"todoList\":{\"sortBy\":\"priority\",\"timeSpan\":\"week\",\"showCompleted\":true}}'::jsonb"
         }
       },
       "indexes": {},
@@ -200,10 +469,43 @@
     }
   },
   "enums": {
+    "public.sub_skill_stage": {
+      "name": "sub_skill_stage",
+      "schema": "public",
+      "values": ["not_started", "practice", "feedback", "evaluate", "complete"]
+    },
+    "public.days_of_week": {
+      "name": "days_of_week",
+      "schema": "public",
+      "values": [
+        "sunday",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday"
+      ]
+    },
     "public.priority": {
       "name": "priority",
       "schema": "public",
       "values": ["Very_Low", "Low", "Medium", "High", "Very_High"]
+    },
+    "public.recurrence_end_type": {
+      "name": "recurrence_end_type",
+      "schema": "public",
+      "values": ["never", "after_count", "on_date"]
+    },
+    "public.recurrence_frequency": {
+      "name": "recurrence_frequency",
+      "schema": "public",
+      "values": ["daily", "weekly"]
+    },
+    "public.appearance_theme": {
+      "name": "appearance_theme",
+      "schema": "public",
+      "values": ["light", "dark", "system"]
     },
     "public.todo_list_sort_by": {
       "name": "todo_list_sort_by",

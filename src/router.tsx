@@ -10,8 +10,8 @@ import { NotFoundPage } from './components/common/NotFound';
 import { routeTree } from './routeTree.gen';
 
 // Create a new router instance
-export const getRouter = () => {
-  const rqContext = TanstackQuery.getContext();
+export const getRouter = async () => {
+  const rqContext = await TanstackQuery.getContext();
 
   const router = createRouter({
     routeTree,

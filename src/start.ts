@@ -37,6 +37,15 @@ const wideEventMiddleware: AnyRequestMiddleware = createMiddleware({
       if (event) {
         event.status_code = result.response.status;
         event.duration_ms = Math.round(performance.now() - start);
+
+        // If we got a 5xx but no error was captured yet (caught internally),
+        // mark it as an untracked error for visibility
+        if (result.response.status >= 500 && !event.error) {
+          event.error = {
+            message: 'Untracked server error - caught before middleware',
+            code: 'UNTRACKED_ERROR',
+          };
+        }
       }
 
       return result;
@@ -45,12 +54,27 @@ const wideEventMiddleware: AnyRequestMiddleware = createMiddleware({
       if (event) {
         event.status_code = 500;
         event.duration_ms = Math.round(performance.now() - start);
-        if (err instanceof Error) {
-          event.error = {
-            message: err.message,
-            stack:
-              process.env.NODE_ENV === 'development' ? err.stack : undefined,
-          };
+
+        // Capture error details for any thrown value
+        if (!event.error) {
+          if (err instanceof Error) {
+            event.error = {
+              message: err.message,
+              stack:
+                process.env.NODE_ENV === 'development' ? err.stack : undefined,
+            };
+          } else if (typeof err === 'object' && err !== null) {
+            // Handle non-Error objects (e.g., redirect objects, custom throws)
+            event.error = {
+              message: JSON.stringify(err),
+              code: 'NON_ERROR_THROW',
+            };
+          } else {
+            event.error = {
+              message: String(err),
+              code: 'UNKNOWN_THROW',
+            };
+          }
         }
       }
       throw err;

@@ -1,4 +1,4 @@
-import { addWideError, addWideRpc } from './wideEventStore.server';
+import { addWide, addWideError, addWideRpc } from './wideEventStore.server';
 
 /**
  * Context object passed to server function handlers with input.
@@ -37,6 +37,13 @@ export function withLogging<TOutput>(
     } catch (err: unknown) {
       if (err instanceof Error) {
         addWideError(err);
+      } else if (typeof err === 'object' && err !== null) {
+        // Non-Error objects (redirects, custom throws)
+        addWide({
+          error: { message: JSON.stringify(err), code: 'NON_ERROR_THROW' },
+        });
+      } else {
+        addWide({ error: { message: String(err), code: 'UNKNOWN_THROW' } });
       }
       throw err;
     }
@@ -73,6 +80,13 @@ export function withLoggingInput<TInput, TOutput>(
     } catch (err: unknown) {
       if (err instanceof Error) {
         addWideError(err);
+      } else if (typeof err === 'object' && err !== null) {
+        // Non-Error objects (redirects, custom throws)
+        addWide({
+          error: { message: JSON.stringify(err), code: 'NON_ERROR_THROW' },
+        });
+      } else {
+        addWide({ error: { message: String(err), code: 'UNKNOWN_THROW' } });
       }
       throw err;
     }

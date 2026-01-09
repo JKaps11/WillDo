@@ -2,8 +2,8 @@ import { format } from 'date-fns';
 import { TodoListContext, useTodoListContext } from './context';
 import { TodoListDropZone } from './TodoListDropZone';
 import { sortAndFilterTasks } from './utils';
-import type { TodoListOptions, TodoListWithTasks } from './types';
 import type { Task as TaskType } from '@/db/schemas/task.schema';
+import type { TodoListDay, TodoListOptions } from './types';
 import type { ReactNode } from 'react';
 
 import {
@@ -72,7 +72,7 @@ function DisplayOptions(): ReactNode {
 /* ---------- DayView ---------- */
 
 interface DayViewProps {
-  lists: Array<TodoListWithTasks>;
+  lists: Array<TodoListDay>;
 }
 
 function DayView({ lists }: DayViewProps): ReactNode {
@@ -99,7 +99,7 @@ function DayView({ lists }: DayViewProps): ReactNode {
 /* ---------- WeekView ---------- */
 
 interface WeekViewProps {
-  lists: Array<TodoListWithTasks>;
+  lists: Array<TodoListDay>;
 }
 
 function WeekView({ lists }: WeekViewProps): ReactNode {
@@ -108,7 +108,7 @@ function WeekView({ lists }: WeekViewProps): ReactNode {
   const weekStart = startOfWeek(baseDate);
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
-  const byDay = new Map<string, TodoListWithTasks>();
+  const byDay = new Map<string, TodoListDay>();
   for (const l of lists) {
     byDay.set(format(utcDateToLocal(l.date), 'yyyy-MM-dd'), l);
   }
@@ -161,7 +161,7 @@ function EmptyDayCard({ date }: EmptyDayCardProps): ReactNode {
 /* ---------- TodoListCard ---------- */
 
 interface TodoListCardProps {
-  todoList: TodoListWithTasks;
+  todoList: TodoListDay;
   tasks: Array<TaskType>;
 }
 

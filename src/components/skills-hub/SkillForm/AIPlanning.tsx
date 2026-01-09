@@ -35,6 +35,13 @@ export function AIPlanning({
   const generateMutation = useMutation(
     trpc.aiPlanning.generateSkillPlan.mutationOptions({
       onSuccess: (data) => {
+        console.log('[AIPlanning] Plan generated:', {
+          subSkillsCount: data.subSkills.length,
+          subSkills: data.subSkills.map((ss) => ({
+            name: ss.name,
+            metricsCount: ss.metrics.length,
+          })),
+        });
         onPlanGenerated(data.subSkills);
       },
     }),

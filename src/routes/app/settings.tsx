@@ -1,10 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 
 import type {
-  CalendarView,
-  DefaultHomePage,
+  // CalendarView,
+  // DefaultHomePage,
   TodoListSortBy,
   TodoListTimeSpan,
   User,
@@ -15,18 +15,26 @@ import {
   // SettingsCalendarTab, // DISABLED: Calendar feature
   // SettingsGeneralTab, // DISABLED: General settings
   // SettingsIntegrationsTab, // DISABLED: Not implemented
-  SettingsTasksTab,
+  // SettingsTasksTab,
   SettingsTodoListTab,
 } from '@/components/settings';
 import { useTRPC } from '@/integrations/trpc/react';
 import { useTheme } from '@/lib/theme';
 import { uiStore } from '@/lib/store';
+// import { Settings } from 'lucide-react';
 
 export const Route = createFileRoute('/app/settings')({
+  loader: async ({ context }) => {
+    const user = await context.queryClient.ensureQueryData(
+      context.trpc.user.get.queryOptions(),
+    );
+    return { user };
+  },
   component: RouteComponent,
 });
 
 function RouteComponent(): React.ReactNode {
+  const { user } = Route.useLoaderData();
   const currentTab: UIStoreSettingsTab = useStore(
     uiStore,
     (s) => s.settingsTab,
@@ -36,20 +44,9 @@ function RouteComponent(): React.ReactNode {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  // Fetch user settings
-  const { data: user, isError } = useQuery(trpc.user.get.queryOptions());
-
-  if (isError || !user) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">Unable to load settings</p>
-      </div>
-    );
-  }
-
-  const generalSettings = user.settings.general;
+  // const generalSettings = user.settings.general;
   const todoListSettings = user.settings.todoList;
-  const calendarSettings = user.settings.calendar;
+  // const calendarSettings = user.settings.calendar;
 
   // Mutation with optimistic updates
   const patchMutation = useMutation(
@@ -100,13 +97,13 @@ function RouteComponent(): React.ReactNode {
     }),
   );
 
-  const handleDefaultHomePageChange = (
-    defaultHomePage: DefaultHomePage,
-  ): void => {
-    patchMutation.mutate({
-      general: { ...generalSettings, defaultHomePage },
-    });
-  };
+  // const handleDefaultHomePageChange = (
+  //   defaultHomePage: DefaultHomePage,
+  // ): void => {
+  //   patchMutation.mutate({
+  //     general: { ...generalSettings, defaultHomePage },
+  //   });
+  // };
 
   const handleSortByChange = (sortBy: TodoListSortBy): void => {
     patchMutation.mutate({
@@ -126,33 +123,33 @@ function RouteComponent(): React.ReactNode {
     });
   };
 
-  const handleStartOfWeekChange = (startOfWeek: 0 | 1 | 6): void => {
-    patchMutation.mutate({
-      calendar: { ...calendarSettings, startOfWeek },
-    });
-  };
+  // const handleStartOfWeekChange = (startOfWeek: 0 | 1 | 6): void => {
+  //   patchMutation.mutate({
+  //     calendar: { ...calendarSettings, startOfWeek },
+  //   });
+  // };
 
-  const handleDefaultEventDurationChange = (
-    defaultEventDuration: 30 | 60 | 90 | 120,
-  ): void => {
-    patchMutation.mutate({
-      calendar: { ...calendarSettings, defaultEventDuration },
-    });
-  };
+  // const handleDefaultEventDurationChange = (
+  //   defaultEventDuration: 30 | 60 | 90 | 120,
+  // ): void => {
+  //   patchMutation.mutate({
+  //     calendar: { ...calendarSettings, defaultEventDuration },
+  //   });
+  // };
 
-  const handleDefaultViewChange = (defaultView: CalendarView): void => {
-    patchMutation.mutate({
-      calendar: { ...calendarSettings, defaultView },
-    });
-  };
+  // const handleDefaultViewChange = (defaultView: CalendarView): void => {
+  //   patchMutation.mutate({
+  //     calendar: { ...calendarSettings, defaultView },
+  //   });
+  // };
 
-  const handleGoogleCalendarSyncChange = (
-    googleCalendarSync: boolean,
-  ): void => {
-    patchMutation.mutate({
-      calendar: { ...calendarSettings, googleCalendarSync },
-    });
-  };
+  // const handleGoogleCalendarSyncChange = (
+  //   googleCalendarSync: boolean,
+  // ): void => {
+  //   patchMutation.mutate({
+  //     calendar: { ...calendarSettings, googleCalendarSync },
+  //   });
+  // };
 
   switch (currentTab) {
     // DISABLED: General settings
@@ -176,8 +173,9 @@ function RouteComponent(): React.ReactNode {
           onShowCompletedChange={handleShowCompletedChange}
         />
       );
-    case 'tasks':
-      return <SettingsTasksTab />;
+    // case 'tasks':
+    //   return <SettingsTasksTab />;
+    // return <SettingsTasksTab />;
     // DISABLED: Calendar feature
     // case 'calendar':
     //   return (

@@ -1,39 +1,23 @@
 import { Link, createFileRoute } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 
-import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { SkillPlanner } from '@/components/skill-planner';
-import { useTRPC } from '@/integrations/trpc/react';
+import { CreateSubSkillModal, SkillPlanner } from '@/components/skill-planner';
 import { Button } from '@/components/ui/button';
 import { ensureUser } from '@/utils/auth';
 
 export const Route = createFileRoute('/app/skills_/$id/planner')({
-  loader: () => ensureUser(),
+  loader: async ({ context, params }) => {
+    await ensureUser();
+    const skill = await context.queryClient.ensureQueryData(
+      context.trpc.skill.get.queryOptions({ id: params.id }),
+    );
+    return { skill };
+  },
   component: RouteComponent,
 });
 
 function RouteComponent(): React.ReactNode {
-  const { id } = Route.useParams();
-  const trpc = useTRPC();
-
-  const {
-    data: skill,
-    isLoading,
-    isError,
-  } = useQuery(trpc.skill.get.queryOptions({ id }));
-
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
-
-  if (isError || !skill) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">Skill not found</p>
-      </div>
-    );
-  }
+  const { skill } = Route.useLoaderData();
 
   return (
     <div className="flex h-full flex-col p-6">
@@ -66,6 +50,8 @@ function RouteComponent(): React.ReactNode {
       </div>
 
       <SkillPlanner skill={skill} />
+
+      <CreateSubSkillModal skill={skill} />
     </div>
   );
 }

@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
-import { Route as AppUnassignedRouteImport } from './routes/app/unassigned'
 import { Route as AppTodolistRouteImport } from './routes/app/todolist'
 import { Route as AppSkillsRouteImport } from './routes/app/skills'
 import { Route as AppSettingsRouteImport } from './routes/app/settings'
@@ -35,11 +34,6 @@ const IndexRoute = IndexRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppUnassignedRoute = AppUnassignedRouteImport.update({
-  id: '/unassigned',
-  path: '/unassigned',
   getParentRoute: () => AppRoute,
 } as any)
 const AppTodolistRoute = AppTodolistRouteImport.update({
@@ -91,7 +85,6 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AppSettingsRoute
   '/app/skills': typeof AppSkillsRoute
   '/app/todolist': typeof AppTodolistRoute
-  '/app/unassigned': typeof AppUnassignedRoute
   '/app/': typeof AppIndexRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
   '/app/skills/new': typeof AppSkillsNewRoute
@@ -104,7 +97,6 @@ export interface FileRoutesByTo {
   '/app/settings': typeof AppSettingsRoute
   '/app/skills': typeof AppSkillsRoute
   '/app/todolist': typeof AppTodolistRoute
-  '/app/unassigned': typeof AppUnassignedRoute
   '/app': typeof AppIndexRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
   '/app/skills/new': typeof AppSkillsNewRoute
@@ -119,7 +111,6 @@ export interface FileRoutesById {
   '/app/settings': typeof AppSettingsRoute
   '/app/skills': typeof AppSkillsRoute
   '/app/todolist': typeof AppTodolistRoute
-  '/app/unassigned': typeof AppUnassignedRoute
   '/app/': typeof AppIndexRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
   '/app/skills_/new': typeof AppSkillsNewRoute
@@ -135,7 +126,6 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/skills'
     | '/app/todolist'
-    | '/app/unassigned'
     | '/app/'
     | '/api/trpc/$'
     | '/app/skills/new'
@@ -148,7 +138,6 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/skills'
     | '/app/todolist'
-    | '/app/unassigned'
     | '/app'
     | '/api/trpc/$'
     | '/app/skills/new'
@@ -162,7 +151,6 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/skills'
     | '/app/todolist'
-    | '/app/unassigned'
     | '/app/'
     | '/api/trpc/$'
     | '/app/skills_/new'
@@ -196,13 +184,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/unassigned': {
-      id: '/app/unassigned'
-      path: '/unassigned'
-      fullPath: '/app/unassigned'
-      preLoaderRoute: typeof AppUnassignedRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/todolist': {
@@ -270,7 +251,6 @@ interface AppRouteChildren {
   AppSettingsRoute: typeof AppSettingsRoute
   AppSkillsRoute: typeof AppSkillsRoute
   AppTodolistRoute: typeof AppTodolistRoute
-  AppUnassignedRoute: typeof AppUnassignedRoute
   AppIndexRoute: typeof AppIndexRoute
   AppSkillsNewRoute: typeof AppSkillsNewRoute
   AppSkillsIdPlannerRoute: typeof AppSkillsIdPlannerRoute
@@ -282,7 +262,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppSettingsRoute: AppSettingsRoute,
   AppSkillsRoute: AppSkillsRoute,
   AppTodolistRoute: AppTodolistRoute,
-  AppUnassignedRoute: AppUnassignedRoute,
   AppIndexRoute: AppIndexRoute,
   AppSkillsNewRoute: AppSkillsNewRoute,
   AppSkillsIdPlannerRoute: AppSkillsIdPlannerRoute,

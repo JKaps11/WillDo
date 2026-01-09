@@ -19,17 +19,11 @@ export const todoListSortByEnum = pgEnum('todo_list_sort_by', [
   'alphabetical',
 ]);
 
-export const calendarViewEnum = pgEnum('calendar_view', [
-  'month',
-  'week',
-  'day',
-]);
-
-export const defaultHomePageEnum = pgEnum('default_home_page', [
-  'todolist',
-  'unassigned',
-  'calendar',
-]);
+// export const calendarViewEnum = pgEnum('calendar_view', [
+//   'month',
+//   'week',
+//   'day',
+// ]);
 
 /* ---------- Types ---------- */
 export type AppearanceTheme = (typeof appearanceThemeEnum.enumValues)[number];
@@ -38,14 +32,9 @@ export type TodoListTimeSpan = (typeof todoListTimeSpanEnum.enumValues)[number];
 
 export type TodoListSortBy = (typeof todoListSortByEnum.enumValues)[number];
 
-export type CalendarView = (typeof calendarViewEnum.enumValues)[number];
-
-export type DefaultHomePage = (typeof defaultHomePageEnum.enumValues)[number];
+// export type CalendarView = (typeof calendarViewEnum.enumValues)[number];
 
 export interface UserSettings {
-  general: {
-    defaultHomePage: DefaultHomePage;
-  };
   appearance: {
     theme: AppearanceTheme;
   };
@@ -54,20 +43,17 @@ export interface UserSettings {
     timeSpan: TodoListTimeSpan;
     showCompleted: boolean;
   };
-  calendar: {
-    startOfWeek: 0 | 1 | 6; // 0 = Sunday, 1 = Monday, 6 = Saturday
-    defaultEventDuration: 30 | 60 | 90 | 120; // minutes
-    defaultView: CalendarView;
-    googleCalendarSync: boolean;
-  };
+  // calendar: {
+  //   startOfWeek: 0 | 1 | 6; // 0 = Sunday, 1 = Monday, 6 = Saturday
+  //   defaultEventDuration: 30 | 60 | 90 | 120; // minutes
+  //   defaultView: CalendarView;
+  //   googleCalendarSync: boolean;
+  // };
 }
 
 /* ---------- Defaults ---------- */
 
 export const DEFAULT_USER_SETTINGS: UserSettings = {
-  general: {
-    defaultHomePage: 'todolist',
-  },
   appearance: {
     theme: 'system',
   },
@@ -76,12 +62,12 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
     timeSpan: 'week',
     showCompleted: true,
   },
-  calendar: {
-    startOfWeek: 0,
-    defaultEventDuration: 60,
-    defaultView: 'week',
-    googleCalendarSync: false,
-  },
+  // calendar: {
+  //   startOfWeek: 0,
+  //   defaultEventDuration: 60,
+  //   defaultView: 'week',
+  //   googleCalendarSync: false,
+  // },
 };
 
 /* ---------- Table ---------- */

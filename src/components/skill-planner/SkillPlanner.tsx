@@ -8,7 +8,6 @@ import type { SubSkill } from '@/db/schemas/sub_skill.schema';
 import type { Skill } from '@/db/schemas/skill.schema';
 
 type EnrichedSubSkill = SubSkill & {
-  dependencies: Array<string>;
   metrics: Array<SkillMetric>;
   isLocked: boolean;
 };
@@ -29,11 +28,7 @@ export function SkillPlanner({ skill }: SkillPlannerProps): React.ReactElement {
   return (
     <ReactFlowProvider>
       <div className="relative h-[calc(100vh-12rem)] w-full overflow-hidden rounded-lg border bg-muted/30">
-        <PlannerCanvas
-          skill={skill}
-          selectedNodeId={selectedSubSkillId}
-          onNodeSelect={setSelectedSubSkillId}
-        />
+        <PlannerCanvas skill={skill} onNodeSelect={setSelectedSubSkillId} />
 
         {selectedSubSkill && (
           <SubSkillEditPanel

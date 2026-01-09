@@ -1,7 +1,7 @@
 import { BaseEdge, getSmoothStepPath } from '@xyflow/react';
 import type { Edge, EdgeProps } from '@xyflow/react';
 
-export interface DependencyEdgeData {
+export interface DependencyEdgeData extends Record<string, unknown> {
   isActive: boolean;
 }
 

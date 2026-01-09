@@ -5,8 +5,8 @@ import { Pencil } from 'lucide-react';
 import { useState } from 'react';
 
 import { TaskForm } from './TaskForm';
-import type { TodoListWithTasks } from '@/components/todo-list/types';
 import type { Task as TaskType } from '@/db/schemas/task.schema';
+import type { TodoListDay } from '@/components/todo-list/types';
 import type { ReactNode } from 'react';
 import { startOfDay, utcDateToLocal } from '@/utils/dates';
 import { useTRPC } from '@/integrations/trpc/react';
@@ -42,7 +42,7 @@ export function EditTaskModal({ task }: EditTaskModalProps): ReactNode {
 
         queryClient.setQueryData(
           queryKey,
-          (old: Array<TodoListWithTasks> | undefined) => {
+          (old: Array<TodoListDay> | undefined) => {
             if (!old) return old;
             return old.map((list) => ({
               ...list,
