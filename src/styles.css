@@ -79,7 +79,6 @@ code {
   /* Stage colors for skill progression */
   --stage-not-started: #9ca3af;
   --stage-practice: #3b82f6;
-  --stage-feedback: #f59e0b;
   --stage-evaluate: #8b5cf6;
   --stage-complete: #10b981;
 

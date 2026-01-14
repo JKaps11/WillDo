@@ -1,23 +1,26 @@
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link, createFileRoute } from '@tanstack/react-router';
 import { ArrowLeft } from 'lucide-react';
 
 import { CreateSubSkillModal, SkillPlanner } from '@/components/skill-planner';
+import { useTRPC } from '@/integrations/trpc/react';
 import { Button } from '@/components/ui/button';
 import { ensureUser } from '@/utils/auth';
 
 export const Route = createFileRoute('/app/skills_/$id/planner')({
   loader: async ({ context, params }) => {
     await ensureUser();
-    const skill = await context.queryClient.ensureQueryData(
+    await context.queryClient.ensureQueryData(
       context.trpc.skill.get.queryOptions({ id: params.id }),
     );
-    return { skill };
   },
   component: RouteComponent,
 });
 
 function RouteComponent(): React.ReactNode {
-  const { skill } = Route.useLoaderData();
+  const { id } = Route.useParams();
+  const trpc = useTRPC();
+  const { data: skill } = useSuspenseQuery(trpc.skill.get.queryOptions({ id }));
 
   return (
     <div className="flex h-full flex-col p-6">

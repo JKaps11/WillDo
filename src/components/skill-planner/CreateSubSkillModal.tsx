@@ -3,10 +3,8 @@ import { useStore } from '@tanstack/react-store';
 import { useForm } from '@tanstack/react-form';
 import { Loader2 } from 'lucide-react';
 
-import type { SkillMetric } from '@/db/schemas/skill_metric.schema';
-import type { SubSkill } from '@/db/schemas/sub_skill.schema';
 import type { AnyFieldApi } from '@tanstack/react-form';
-import type { Skill } from '@/db/schemas/skill.schema';
+import type { SkillWithSubSkills } from './types';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import {
   Select,
@@ -29,13 +27,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-type EnrichedSubSkill = SubSkill & {
-  metrics: Array<SkillMetric>;
-  isLocked: boolean;
-};
-
 interface CreateSubSkillModalProps {
-  skill: Skill & { subSkills: Array<EnrichedSubSkill> };
+  skill: SkillWithSubSkills;
 }
 
 type StringFieldApi = AnyFieldApi & {
@@ -57,9 +50,56 @@ export function CreateSubSkillModal({
 
   const createMutation = useMutation(
     trpc.subSkill.create.mutationOptions({
-      onSuccess: () => {
+      onMutate: async (newSubSkill) => {
+        await queryClient.cancelQueries({
+          queryKey: [['skill', 'get'], { input: { id: skill.id } }],
+        });
+
+        const previousSkill = queryClient.getQueryData<SkillWithSubSkills>([
+          ['skill', 'get'],
+          { input: { id: skill.id }, type: 'query' },
+        ]);
+
+        if (previousSkill) {
+          const optimisticSubSkill = {
+            id: `temp-${Date.now()}`,
+            skillId: skill.id,
+            name: newSubSkill.name,
+            description: newSubSkill.description ?? null,
+            parentSubSkillId: newSubSkill.parentSubSkillId ?? null,
+            stage: 'not_started' as const,
+            stageStartedAt: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            metrics: [],
+            isLocked: false,
+          };
+
+          queryClient.setQueryData<SkillWithSubSkills>(
+            [['skill', 'get'], { input: { id: skill.id }, type: 'query' }],
+            {
+              ...previousSkill,
+              subSkills: [...previousSkill.subSkills, optimisticSubSkill],
+            },
+          );
+        }
+
+        return { previousSkill };
+      },
+      onError: (_err, _newSubSkill, context) => {
+        if (context?.previousSkill) {
+          queryClient.setQueryData(
+            [['skill', 'get'], { input: { id: skill.id }, type: 'query' }],
+            context.previousSkill,
+          );
+        }
+      },
+      onSettled: () => {
         void queryClient.invalidateQueries({ queryKey: [['skill', 'get']] });
         void queryClient.invalidateQueries({ queryKey: [['skill', 'list']] });
+        void queryClient.invalidateQueries({ queryKey: [['subSkill']] });
+      },
+      onSuccess: () => {
         handleClose();
       },
     }),

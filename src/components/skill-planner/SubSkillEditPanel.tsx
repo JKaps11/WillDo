@@ -3,8 +3,8 @@ import { Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 
 import { StageAdvancer } from './StageAdvancer';
-import type { SkillMetric } from '@/db/schemas/skill_metric.schema';
-import type { SubSkill } from '@/db/schemas/sub_skill.schema';
+import { STAGE_LABELS } from './constants';
+import type { EnrichedSubSkill, SkillWithSubSkills } from './types';
 import { MetricsSummary } from '@/components/skills-hub/MetricsSummary';
 import { Separator } from '@/components/ui/separator';
 import { useTRPC } from '@/integrations/trpc/react';
@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 
 interface SubSkillEditPanelProps {
-  subSkill: SubSkill & { metrics: Array<SkillMetric>; isLocked: boolean };
+  subSkill: EnrichedSubSkill;
   onClose: () => void;
 }
 
@@ -24,13 +24,14 @@ export function SubSkillEditPanel({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const [name, setName] = useState(subSkill.name);
-  const [description, setDescription] = useState(subSkill.description || '');
+  const [formData, setFormData] = useState({
+    name: subSkill.name,
+    description: subSkill.description || '',
+  });
 
   const updateMutation = useMutation(
     trpc.subSkill.update.mutationOptions({
       onSuccess: () => {
-        // Invalidate both skill.get and skill.list queries
         void queryClient.invalidateQueries({ queryKey: [['skill', 'get']] });
         void queryClient.invalidateQueries({ queryKey: [['skill', 'list']] });
       },
@@ -39,29 +40,69 @@ export function SubSkillEditPanel({
 
   const deleteMutation = useMutation(
     trpc.subSkill.delete.mutationOptions({
-      onSuccess: () => {
-        // Invalidate both skill.get and skill.list queries
+      onMutate: async () => {
+        onClose();
+
+        await queryClient.cancelQueries({
+          queryKey: [['skill', 'get'], { input: { id: subSkill.skillId } }],
+        });
+
+        const previousSkill = queryClient.getQueryData<SkillWithSubSkills>([
+          ['skill', 'get'],
+          { input: { id: subSkill.skillId }, type: 'query' },
+        ]);
+
+        if (previousSkill) {
+          queryClient.setQueryData<SkillWithSubSkills>(
+            [
+              ['skill', 'get'],
+              { input: { id: subSkill.skillId }, type: 'query' },
+            ],
+            {
+              ...previousSkill,
+              subSkills: previousSkill.subSkills.filter(
+                (ss) => ss.id !== subSkill.id,
+              ),
+            },
+          );
+        }
+
+        return { previousSkill };
+      },
+      onError: (_err, _variables, context) => {
+        if (context?.previousSkill) {
+          queryClient.setQueryData(
+            [
+              ['skill', 'get'],
+              { input: { id: subSkill.skillId }, type: 'query' },
+            ],
+            context.previousSkill,
+          );
+        }
+      },
+      onSettled: () => {
         void queryClient.invalidateQueries({ queryKey: [['skill', 'get']] });
         void queryClient.invalidateQueries({ queryKey: [['skill', 'list']] });
-        onClose();
+        void queryClient.invalidateQueries({ queryKey: [['subSkill']] });
       },
     }),
   );
 
   const handleSave = (): void => {
-    if (name !== subSkill.name || description !== subSkill.description) {
+    if (
+      formData.name !== subSkill.name ||
+      formData.description !== subSkill.description
+    ) {
       updateMutation.mutate({
         id: subSkill.id,
-        name,
-        description: description || undefined,
+        name: formData.name,
+        description: formData.description || undefined,
       });
     }
   };
 
   const handleDelete = (): void => {
-    if (confirm('Delete this sub-skill? This action cannot be undone.')) {
-      deleteMutation.mutate({ id: subSkill.id });
-    }
+    deleteMutation.mutate({ id: subSkill.id });
   };
 
   // Check if metrics are filled
@@ -96,7 +137,7 @@ export function SubSkillEditPanel({
           <div className="space-y-6">
             {/* Stage Progress */}
             <div>
-              <Label className="mb-2 block text-sm font-medium">Stage</Label>
+              <Label className="mb-2 block text-sm font-medium"><strong>Stage: </strong>{STAGE_LABELS[subSkill.stage]}</Label>
               <StageAdvancer
                 subSkillId={subSkill.id}
                 currentStage={subSkill.stage}
@@ -112,8 +153,10 @@ export function SubSkillEditPanel({
               <Label htmlFor="subskillName">Name</Label>
               <Input
                 id="subskillName"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, name: e.target.value }))
+                }
                 onBlur={handleSave}
               />
             </div>
@@ -125,8 +168,13 @@ export function SubSkillEditPanel({
                 id="subskillDescription"
                 className="w-full rounded-md border bg-background px-3 py-2 text-sm"
                 rows={3}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
                 onBlur={handleSave}
               />
             </div>

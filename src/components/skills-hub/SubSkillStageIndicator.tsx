@@ -4,22 +4,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-
-const STAGE_COLORS: Record<SubSkillStage, string> = {
-  not_started: 'var(--stage-not-started)',
-  practice: 'var(--stage-practice)',
-  feedback: 'var(--stage-feedback)',
-  evaluate: 'var(--stage-evaluate)',
-  complete: 'var(--stage-complete)',
-};
-
-const STAGE_LABELS: Record<SubSkillStage, string> = {
-  not_started: 'Not Started',
-  practice: 'Practice',
-  feedback: 'Feedback',
-  evaluate: 'Evaluate',
-  complete: 'Complete',
-};
+import { STAGE_COLORS, STAGE_LABELS } from '@/components/skill-planner/constants';
 
 interface SubSkillStageIndicatorProps {
   stages: Array<SubSkillStage>;

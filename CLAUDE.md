@@ -58,3 +58,7 @@ bun run db:studio        # Open Drizzle Studio GUI
 - ALWAYS add explicit types for function params, return types, and exported items
 - Avoid `any` - use `unknown`, generics, or proper types
 - No implicit `any` - fix typing at source rather than casting
+
+## React Patterns
+
+- **Group related state**: Combine related state values into a single `useState` object rather than separate calls. For example, form fields like `name` and `description` should be `useState({ name, description })` not two separate `useState` calls. This reduces re-renders and keeps related data together.

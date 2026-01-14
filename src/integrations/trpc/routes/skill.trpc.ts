@@ -87,10 +87,61 @@ export const skillRouter = {
     .input(createSkillWithPlanSchema)
     .mutation(async ({ ctx, input }) => {
       const { subSkills: subSkillsInput, createTasks, ...skillData } = input;
+
+      // Default subskills structure when no AI planning is used
+      const defaultSubSkills: Array<{
+        name: string;
+        description: string;
+        metrics: Array<{ name: string; unit: string; targetValue: number }>;
+        parentIndex: number | null;
+      }> = [
+        {
+          name: 'Parent Subskill 1',
+          description: '',
+          metrics: [],
+          parentIndex: null,
+        },
+        {
+          name: 'Parent Subskill 2',
+          description: '',
+          metrics: [],
+          parentIndex: null,
+        },
+        {
+          name: 'Child Subskill 3',
+          description: '',
+          metrics: [],
+          parentIndex: 0, // Parent is "Parent Subskill 1"
+        },
+        {
+          name: 'Child Subskill 4',
+          description: '',
+          metrics: [],
+          parentIndex: 0, // Parent is "Parent Subskill 1"
+        },
+        {
+          name: 'Child Subskill 5',
+          description: '',
+          metrics: [],
+          parentIndex: 1, // Parent is "Parent Subskill 2"
+        },
+        {
+          name: 'Child Subskill 6',
+          description: '',
+          metrics: [],
+          parentIndex: 1, // Parent is "Parent Subskill 2"
+        },
+      ];
+
+      // Use provided subskills if any, otherwise use defaults
+      const subSkillsToCreate =
+        subSkillsInput.length > 0 ? subSkillsInput : defaultSubSkills;
+
       addWide({
         skill_name: skillData.name,
-        sub_skills_planned: subSkillsInput.length,
+        sub_skills_planned: subSkillsToCreate.length,
         create_tasks: createTasks,
+        used_default_subskills: subSkillsInput.length === 0,
       });
 
       const skill = await skillRepository.create({
@@ -108,7 +159,7 @@ export const skillRouter = {
 
       const createdSubSkillIds: Array<string> = [];
 
-      for (const [index, ss] of subSkillsInput.entries()) {
+      for (const [index, ss] of subSkillsToCreate.entries()) {
         const parentIndex: number | null = ss.parentIndex ?? null;
         const parentSubSkillId: string | null =
           parentIndex !== null && parentIndex >= 0

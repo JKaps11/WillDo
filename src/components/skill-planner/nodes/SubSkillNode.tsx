@@ -50,7 +50,7 @@ export function SubSkillNode({
     >
       <Handle
         type="target"
-        position={Position.Top}
+        position={Position.Right}
         className="!size-3 !border-2 !border-background !bg-muted-foreground"
       />
 
@@ -92,7 +92,7 @@ export function SubSkillNode({
 
       <Handle
         type="source"
-        position={Position.Bottom}
+        position={Position.Left}
         className="!size-3 !border-2 !border-background !bg-primary"
       />
     </div>

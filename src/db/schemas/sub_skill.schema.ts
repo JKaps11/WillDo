@@ -16,7 +16,6 @@ import { users } from './user.schema';
 export const subSkillStageEnum = pgEnum('sub_skill_stage', [
   'not_started',
   'practice',
-  'feedback',
   'evaluate',
   'complete',
 ]);

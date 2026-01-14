@@ -35,14 +35,11 @@ const DOCS_CONTENT: Record<
         <h3>Sub-Skills</h3>
         <p>
           Sub-skills are the building blocks of a skill. Each sub-skill
-          progresses through four stages:
+          progresses through three stages:
         </p>
         <ul>
           <li>
             <strong>Practice</strong> - Initial learning and repetition
-          </li>
-          <li>
-            <strong>Feedback</strong> - Getting feedback and refining technique
           </li>
           <li>
             <strong>Evaluate</strong> - Testing and self-assessment
@@ -245,7 +242,7 @@ const DOCS_CONTENT: Record<
         <h2>Celebrate Progress</h2>
         <p>
           Completing stages is an achievement! Take time to recognize your
-          progress through each Practice → Feedback → Evaluate → Complete cycle.
+          progress through each Practice → Evaluate → Complete cycle.
         </p>
       </>
     ),

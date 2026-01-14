@@ -36,7 +36,7 @@ export function SkillRootNode({
       </div>
       <Handle
         type="source"
-        position={Position.Bottom}
+        position={Position.Left}
         className="!size-3 !border-2 !border-background !bg-primary"
       />
     </div>

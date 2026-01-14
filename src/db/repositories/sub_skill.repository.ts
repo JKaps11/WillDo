@@ -10,7 +10,6 @@ import { db } from '@/db/index';
 const STAGE_ORDER: Array<SubSkillStage> = [
   'not_started',
   'practice',
-  'feedback',
   'evaluate',
   'complete',
 ];
@@ -167,7 +166,10 @@ export const subSkillRepository = {
   },
 
   /**
-   * Check if a sub-skill is locked (parent is not complete)
+   * Check if a sub-skill is locked.
+   * A subskill is unlocked (not locked) when:
+   * - It's a leaf node (has no children), OR
+   * - All of its child subskills are in the "complete" stage
    */
   isLocked: async (subSkillId: string, userId: string): Promise<boolean> => {
     const subSkill = await db
@@ -176,19 +178,28 @@ export const subSkillRepository = {
       .where(and(eq(subSkills.id, subSkillId), eq(subSkills.userId, userId)))
       .limit(1);
 
-    if (!subSkill[0] || !subSkill[0].parentSubSkillId) return false;
+    if (!subSkill[0]) return false;
 
-    const parent = await db
+    // Find all children of this subskill
+    const children = await db
       .select()
       .from(subSkills)
       .where(
         and(
-          eq(subSkills.id, subSkill[0].parentSubSkillId),
+          eq(subSkills.parentSubSkillId, subSkillId),
           eq(subSkills.userId, userId),
         ),
-      )
-      .limit(1);
+      );
 
-    return parent[0] ? parent[0].stage !== 'complete' : false;
+    // If no children (leaf node), it's unlocked
+    if (children.length === 0) return false;
+
+    // If has children, check if all children are complete
+    const allChildrenComplete = children.every(
+      (child) => child.stage === 'complete',
+    );
+
+    // Locked if NOT all children are complete
+    return !allChildrenComplete;
   },
 };

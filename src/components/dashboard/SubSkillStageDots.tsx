@@ -6,22 +6,10 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-
-const STAGE_COLORS: Record<SubSkillStage, string> = {
-  not_started: 'bg-muted-foreground/30',
-  practice: 'bg-blue-500',
-  feedback: 'bg-amber-500',
-  evaluate: 'bg-purple-500',
-  complete: 'bg-green-500',
-};
-
-const STAGE_LABELS: Record<SubSkillStage, string> = {
-  not_started: 'Not Started',
-  practice: 'Practice',
-  feedback: 'Feedback',
-  evaluate: 'Evaluate',
-  complete: 'Complete',
-};
+import {
+  STAGE_BG_CLASSES,
+  STAGE_LABELS,
+} from '@/components/skill-planner/constants';
 
 interface SubSkillStageDot {
   id: string;
@@ -52,7 +40,7 @@ export function SubSkillStageDots({
                 className={cn(
                   dotSize,
                   'shrink-0 rounded-full transition-colors',
-                  STAGE_COLORS[subSkill.stage],
+                  STAGE_BG_CLASSES[subSkill.stage],
                 )}
               />
             </TooltipTrigger>

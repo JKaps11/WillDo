@@ -1,25 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, ChevronRight } from 'lucide-react';
 
+import { STAGE_ACTION_LABELS, STAGE_ORDER } from './constants';
 import type { SubSkillStage } from '@/db/schemas/sub_skill.schema';
 import { useTRPC } from '@/integrations/trpc/react';
 import { Button } from '@/components/ui/button';
-
-const STAGE_ORDER: Array<SubSkillStage> = [
-  'not_started',
-  'practice',
-  'feedback',
-  'evaluate',
-  'complete',
-];
-
-const STAGE_LABELS: Record<SubSkillStage, string> = {
-  not_started: 'Not Started',
-  practice: 'Practice',
-  feedback: 'Feedback',
-  evaluate: 'Evaluate',
-  complete: 'Complete',
-};
 
 interface StageAdvancerProps {
   subSkillId: string;
@@ -59,7 +44,7 @@ export function StageAdvancer({
     !isLocked && !isComplete && currentIndex < STAGE_ORDER.length - 2;
   const canComplete = !isLocked && !isComplete && metricsFilled;
 
-  const nextStage = canAdvance ? STAGE_ORDER[currentIndex + 1] : null;
+  const nextStage = canAdvance ? STAGE_ORDER[currentIndex] : null;
 
   const handleAdvance = (): void => {
     advanceMutation.mutate({ id: subSkillId });
@@ -107,11 +92,11 @@ export function StageAdvancer({
         {canAdvance && (
           <Button
             size="sm"
-            variant="outline"
+            variant="default"
             onClick={handleAdvance}
             disabled={advanceMutation.isPending}
           >
-            Advance to {nextStage && STAGE_LABELS[nextStage]}
+            {nextStage && STAGE_ACTION_LABELS[nextStage]}
             <ChevronRight className="ml-1 size-4" />
           </Button>
         )}
