@@ -6,26 +6,25 @@ import {
   useNodesState,
 } from '@xyflow/react';
 import { useCallback, useEffect, useMemo } from 'react';
-import { DependencyEdge } from './edges/DependencyEdge';
+import { TreeEdge } from './edges';
 import { SkillRootNode } from './nodes/SkillRootNode';
 import { SubSkillNode } from './nodes/SubSkillNode';
 import { PlannerControls } from './PlannerControls';
+import {
+  HORIZONTAL_GAP,
+  NODE_HEIGHT,
+  NODE_WIDTH,
+  VERTICAL_GAP,
+} from './constants';
+import type { EnrichedSubSkill, LayoutNode, SkillWithSubSkills } from './types';
 import type { Edge, Node } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-
-import type { SkillMetric } from '@/db/schemas/skill_metric.schema';
 import type { SkillRootNodeData } from './nodes/SkillRootNode';
-import type { SubSkill } from '@/db/schemas/sub_skill.schema';
 import type { SubSkillNodeData } from './nodes/SubSkillNode';
 import type { Skill } from '@/db/schemas/skill.schema';
-
-type EnrichedSubSkill = SubSkill & {
-  metrics: Array<SkillMetric>;
-  isLocked: boolean;
-};
+import '@xyflow/react/dist/style.css';
 
 interface PlannerCanvasProps {
-  skill: Skill & { subSkills: Array<EnrichedSubSkill> };
+  skill: SkillWithSubSkills;
   onNodeSelect: (nodeId: string | null) => void;
 }
 
@@ -35,120 +34,161 @@ const nodeTypes = {
 };
 
 const edgeTypes = {
-  dependency: DependencyEdge,
+  tree: TreeEdge,
 };
 
-function calculateNodeDepths(
-  subSkills: Array<EnrichedSubSkill>,
-): Map<string, number> {
-  const depths = new Map<string, number>();
-  const subSkillMap = new Map(subSkills.map((ss) => [ss.id, ss]));
+function buildLayoutTree(skill: SkillWithSubSkills): LayoutNode {
+  const childrenMap: Map<string | null, Array<EnrichedSubSkill>> = new Map();
 
-  function getDepth(id: string, visited: Set<string> = new Set()): number {
-    if (depths.has(id)) return depths.get(id)!;
-    if (visited.has(id)) return 1; // Circular reference fallback
-
-    const subSkill = subSkillMap.get(id);
-    if (!subSkill || !subSkill.parentSubSkillId) {
-      // Root-level sub-skills (no parent) are at depth 1
-      depths.set(id, 1);
-      return 1;
+  skill.subSkills.forEach((ss: EnrichedSubSkill) => {
+    const parentId: string | null = ss.parentSubSkillId;
+    if (!childrenMap.has(parentId)) {
+      childrenMap.set(parentId, []);
     }
+    childrenMap.get(parentId)!.push(ss);
+  });
 
-    visited.add(id);
-    const parentDepth = getDepth(subSkill.parentSubSkillId, visited);
-    const depth = parentDepth + 1;
-    depths.set(id, depth);
-    return depth;
+  function buildSubSkillNode(subSkill: EnrichedSubSkill): LayoutNode {
+    const children: Array<LayoutNode> = (
+      childrenMap.get(subSkill.id) ?? []
+    ).map((child: EnrichedSubSkill) => buildSubSkillNode(child));
+
+    return {
+      id: `subskill-${subSkill.id}`,
+      type: 'subSkill',
+      data: subSkill,
+      children,
+      width: 0,
+      x: 0,
+      y: 0,
+    };
   }
 
-  subSkills.forEach((ss) => getDepth(ss.id));
-  return depths;
+  const rootChildren: Array<LayoutNode> = (childrenMap.get(null) ?? []).map(
+    (child: EnrichedSubSkill) => buildSubSkillNode(child),
+  );
+
+  return {
+    id: 'root',
+    type: 'skill',
+    data: skill,
+    children: rootChildren,
+    width: 0,
+    x: 0,
+    y: 0,
+  };
 }
 
-function buildNodesAndEdges(
-  skill: Skill & { subSkills: Array<EnrichedSubSkill> },
-): { nodes: Array<Node>; edges: Array<Edge> } {
-  const nodes: Array<Node> = [];
-  const edges: Array<Edge> = [];
-
-  // Root node
-  nodes.push({
-    id: 'root',
-    type: 'skillRoot',
-    position: { x: 400, y: 0 },
-    data: { skill } satisfies SkillRootNodeData,
-    draggable: true,
-  });
-
-  if (skill.subSkills.length === 0) {
-    return { nodes, edges };
+function calculateSubtreeWidths(node: LayoutNode): number {
+  if (node.children.length === 0) {
+    node.width = NODE_WIDTH;
+    return NODE_WIDTH;
   }
 
-  // Calculate depth for each node based on dependency chain
-  const depths = calculateNodeDepths(skill.subSkills);
+  const childrenWidth: number = node.children.reduce(
+    (sum: number, child: LayoutNode) => sum + calculateSubtreeWidths(child),
+    0,
+  );
+  const gapsWidth: number = (node.children.length - 1) * HORIZONTAL_GAP;
+  node.width = Math.max(NODE_WIDTH, childrenWidth + gapsWidth);
+  return node.width;
+}
 
-  // Group sub-skills by their depth level
-  const levelGroups = new Map<number, Array<EnrichedSubSkill>>();
-  skill.subSkills.forEach((subSkill) => {
-    const depth = depths.get(subSkill.id) ?? 1;
-    if (!levelGroups.has(depth)) {
-      levelGroups.set(depth, []);
-    }
-    levelGroups.get(depth)!.push(subSkill);
+function positionNodes(node: LayoutNode, x: number, y: number): void {
+  node.x = x;
+  node.y = y;
+
+  if (node.children.length === 0) return;
+
+  const childrenTotalWidth: number =
+    node.children.reduce(
+      (sum: number, child: LayoutNode) => sum + child.width,
+      0,
+    ) +
+    (node.children.length - 1) * HORIZONTAL_GAP;
+
+  let currentX: number = x - childrenTotalWidth / 2;
+  const childY: number = y + NODE_HEIGHT + VERTICAL_GAP;
+
+  node.children.forEach((child: LayoutNode) => {
+    const childCenterX: number = currentX + child.width / 2;
+    positionNodes(child, childCenterX, childY);
+    currentX += child.width + HORIZONTAL_GAP;
   });
+}
 
-  const horizontalSpacing = 240;
-  const verticalSpacing = 160;
+function createFlowNode(layoutNode: LayoutNode): Node {
+  const position = { x: layoutNode.x - NODE_WIDTH / 2, y: layoutNode.y };
 
-  // Create sub-skill nodes positioned by level
-  levelGroups.forEach((subSkillsAtLevel, level) => {
-    const levelWidth = (subSkillsAtLevel.length - 1) * horizontalSpacing;
-    const startX = 400 - levelWidth / 2;
+  if (layoutNode.type === 'skill') {
+    return {
+      id: layoutNode.id,
+      type: 'skillRoot',
+      position,
+      data: { skill: layoutNode.data as Skill } satisfies SkillRootNodeData,
+      draggable: true,
+    };
+  }
 
-    subSkillsAtLevel.forEach((subSkill, indexInLevel) => {
-      nodes.push({
-        id: `subskill-${subSkill.id}`,
-        type: 'subSkill',
-        position: {
-          x: startX + indexInLevel * horizontalSpacing,
-          y: level * verticalSpacing,
-        },
-        data: {
-          subSkill,
-          metrics: subSkill.metrics,
-          isLocked: subSkill.isLocked,
-        } satisfies SubSkillNodeData,
-        draggable: true,
-      });
+  const subSkill: EnrichedSubSkill = layoutNode.data as EnrichedSubSkill;
+  return {
+    id: layoutNode.id,
+    type: 'subSkill',
+    position,
+    data: {
+      subSkill,
+      metrics: subSkill.metrics,
+      isLocked: subSkill.isLocked,
+    } satisfies SubSkillNodeData,
+    draggable: true,
+  };
+}
+
+function flattenTree(
+  node: LayoutNode,
+  skill: SkillWithSubSkills,
+  parentId: string | null,
+  nodes: Array<Node>,
+  edges: Array<Edge>,
+): void {
+  nodes.push(createFlowNode(node));
+
+  if (parentId !== null) {
+    const parentSubSkill: EnrichedSubSkill | undefined =
+      parentId === 'root'
+        ? undefined
+        : skill.subSkills.find(
+            (ss: EnrichedSubSkill) => `subskill-${ss.id}` === parentId,
+          );
+
+    const isActive: boolean =
+      parentId === 'root' || parentSubSkill?.stage === 'complete';
+
+    edges.push({
+      id: `edge-${parentId}-${node.id}`,
+      source: parentId,
+      target: node.id,
+      type: 'tree',
+      data: { isActive },
     });
-  });
+  }
 
-  // Create edges based on parentSubSkillId
-  skill.subSkills.forEach((subSkill) => {
-    if (!subSkill.parentSubSkillId) {
-      // Connect to root if no parent
-      edges.push({
-        id: `edge-root-${subSkill.id}`,
-        source: 'root',
-        target: `subskill-${subSkill.id}`,
-        type: 'dependency',
-        data: { isActive: true },
-      });
-    } else {
-      // Connect to parent sub-skill
-      const parent = skill.subSkills.find(
-        (ss) => ss.id === subSkill.parentSubSkillId,
-      );
-      edges.push({
-        id: `edge-${subSkill.parentSubSkillId}-${subSkill.id}`,
-        source: `subskill-${subSkill.parentSubSkillId}`,
-        target: `subskill-${subSkill.id}`,
-        type: 'dependency',
-        data: { isActive: parent?.stage === 'complete' },
-      });
-    }
+  node.children.forEach((child: LayoutNode) => {
+    flattenTree(child, skill, node.id, nodes, edges);
   });
+}
+
+function buildNodesAndEdges(skill: SkillWithSubSkills): {
+  nodes: Array<Node>;
+  edges: Array<Edge>;
+} {
+  const tree: LayoutNode = buildLayoutTree(skill);
+  calculateSubtreeWidths(tree);
+  positionNodes(tree, 400, 0);
+
+  const nodes: Array<Node> = [];
+  const edges: Array<Edge> = [];
+  flattenTree(tree, skill, null, nodes, edges);
 
   return { nodes, edges };
 }
@@ -157,14 +197,17 @@ export function PlannerCanvas({
   skill,
   onNodeSelect,
 }: PlannerCanvasProps): React.ReactElement {
-  const initialLayout = useMemo(() => buildNodesAndEdges(skill), [skill]);
+  const initialLayout: { nodes: Array<Node>; edges: Array<Edge> } = useMemo(
+    () => buildNodesAndEdges(skill),
+    [skill],
+  );
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialLayout.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialLayout.edges);
 
-  // Update nodes when skill data changes
   useEffect(() => {
-    const newLayout = buildNodesAndEdges(skill);
+    const newLayout: { nodes: Array<Node>; edges: Array<Edge> } =
+      buildNodesAndEdges(skill);
     setNodes(newLayout.nodes);
     setEdges(newLayout.edges);
   }, [skill, setNodes, setEdges]);
@@ -172,7 +215,7 @@ export function PlannerCanvas({
   const handleNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
       if (node.id.startsWith('subskill-')) {
-        const subSkillId = node.id.replace('subskill-', '');
+        const subSkillId: string = node.id.replace('subskill-', '');
         onNodeSelect(subSkillId);
       } else {
         onNodeSelect(null);
@@ -201,7 +244,7 @@ export function PlannerCanvas({
         minZoom={0.5}
         maxZoom={2}
         defaultEdgeOptions={{
-          type: 'dependency',
+          type: 'tree',
         }}
       >
         <Background variant={BackgroundVariant.Dots} gap={16} size={1} />

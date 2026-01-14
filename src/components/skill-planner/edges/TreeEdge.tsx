@@ -1,13 +1,8 @@
 import { BaseEdge, getSmoothStepPath } from '@xyflow/react';
-import type { Edge, EdgeProps } from '@xyflow/react';
+import type { EdgeProps } from '@xyflow/react';
+import type { TreeEdgeType } from '../types';
 
-export interface DependencyEdgeData extends Record<string, unknown> {
-  isActive: boolean;
-}
-
-export type DependencyEdgeType = Edge<DependencyEdgeData, 'dependency'>;
-
-export function DependencyEdge({
+export function TreeEdge({
   id,
   sourceX,
   sourceY,
@@ -17,8 +12,8 @@ export function DependencyEdge({
   targetPosition,
   data,
   selected,
-}: EdgeProps<DependencyEdgeType>): React.ReactElement {
-  const [edgePath] = getSmoothStepPath({
+}: EdgeProps<TreeEdgeType>): React.ReactElement {
+  const [edgePath]: [string] = getSmoothStepPath({
     sourceX,
     sourceY,
     sourcePosition,
@@ -28,7 +23,7 @@ export function DependencyEdge({
     borderRadius: 8,
   });
 
-  const isActive = data?.isActive ?? false;
+  const isActive: boolean = data?.isActive ?? false;
 
   return (
     <BaseEdge
@@ -37,7 +32,6 @@ export function DependencyEdge({
       style={{
         strokeWidth: selected ? 3 : 2,
         stroke: isActive ? 'var(--stage-complete)' : 'var(--stage-not-started)',
-        strokeDasharray: isActive ? undefined : '5,5',
       }}
     />
   );

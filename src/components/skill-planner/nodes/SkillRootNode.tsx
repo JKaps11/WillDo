@@ -1,4 +1,5 @@
 import { Handle, Position } from '@xyflow/react';
+import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
 import type { Skill } from '@/db/schemas/skill.schema';
 import type { Node, NodeProps } from '@xyflow/react';
 
@@ -15,15 +16,19 @@ export function SkillRootNode({
 
   return (
     <div
-      className="rounded-lg border-2 bg-card px-4 py-3 shadow-lg"
-      style={{ borderColor: skill.color }}
+      className="flex flex-col justify-center rounded-lg border-2 bg-card px-4 py-3 shadow-lg"
+      style={{
+        width: NODE_WIDTH,
+        height: NODE_HEIGHT,
+        borderColor: skill.color,
+      }}
     >
       <div className="flex items-center gap-2">
         {skill.icon && <span className="text-2xl">{skill.icon}</span>}
-        <div>
-          <h3 className="font-semibold">{skill.name}</h3>
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate font-semibold">{skill.name}</h3>
           {skill.goal && (
-            <p className="max-w-48 truncate text-xs text-muted-foreground">
+            <p className="truncate text-xs text-muted-foreground">
               {skill.goal}
             </p>
           )}

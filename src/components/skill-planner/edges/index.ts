@@ -1,5 +1,2 @@
-export {
-  DependencyEdge,
-  type DependencyEdgeData,
-  type DependencyEdgeType,
-} from './DependencyEdge';
+export { TreeEdge } from './TreeEdge';
+export type { TreeEdgeData, TreeEdgeType } from '../types';

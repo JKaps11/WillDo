@@ -1,4 +1,4 @@
-import { Maximize2, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
+import { RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 
 import {
@@ -9,11 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 
 export function PlannerControls(): React.ReactElement {
-  const { zoomIn, zoomOut, fitView, setViewport } = useReactFlow();
-
-  const handleReset = (): void => {
-    setViewport({ x: 0, y: 0, zoom: 1 }, { duration: 300 });
-  };
+  const { zoomIn, zoomOut, fitView } = useReactFlow();
 
   return (
     <div className="absolute bottom-4 left-4 z-10 flex gap-1 rounded-lg border bg-background p-1 shadow-md">
@@ -52,20 +48,6 @@ export function PlannerControls(): React.ReactElement {
             size="icon"
             className="size-8"
             onClick={() => fitView({ duration: 300, padding: 0.2 })}
-          >
-            <Maximize2 className="size-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Fit View</TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            onClick={handleReset}
           >
             <RotateCcw className="size-4" />
           </Button>
