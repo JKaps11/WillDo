@@ -21,9 +21,6 @@ const config = {
   tabWidth: 2, // 2-space indents
   useTabs: false, // no hard tabs
 
-  // ––– IMPORT SORTING ––– //
-  plugins: ['prettier-plugin-organize-imports', 'prettier-plugin-sort-imports'],
-
   // ––– MISC ––– //
   endOfLine: 'lf', // normalize to Unix line-endings
 };

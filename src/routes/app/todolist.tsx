@@ -1,33 +1,35 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { useStore } from '@tanstack/react-store';
+import type { z } from 'zod';
 
+import { todoListSearchSchema } from '@/lib/zod-schemas';
 import { useTRPC } from '@/integrations/trpc/react';
 import { TodoList } from '@/components/todo-list';
 import { DndProvider } from '@/components/dnd';
+import { startOfDay } from '@/utils/dates';
 import { ensureUser } from '@/utils/auth';
-import { uiStore } from '@/lib/store';
 
 export const Route = createFileRoute('/app/todolist')({
-  loader: async ({ context }) => {
+  validateSearch: (search): z.infer<typeof todoListSearchSchema> =>
+    todoListSearchSchema.parse(search),
+  loaderDeps: ({ search }): { date: string } => ({ date: search.date }),
+  loader: async ({ context, deps }) => {
     await ensureUser();
     const user = await context.queryClient.ensureQueryData(
       context.trpc.user.get.queryOptions(),
     );
-    // Prefetch today's date as default
-    const today = new Date();
+    const baseDate = startOfDay(new Date(deps.date));
     await context.queryClient.ensureQueryData(
-      context.trpc.todoList.list.queryOptions(today),
+      context.trpc.todoList.list.queryOptions(baseDate),
     );
-    return { user };
+    return { user, baseDate };
   },
   component: RouteComponent,
 });
 
 function RouteComponent(): React.ReactNode {
-  const { user } = Route.useLoaderData();
+  const { user, baseDate } = Route.useLoaderData();
   const trpc = useTRPC();
-  const baseDate = useStore(uiStore, (s) => s.todoListBaseDate);
 
   const { data } = useSuspenseQuery(trpc.todoList.list.queryOptions(baseDate));
 

@@ -25,11 +25,8 @@ export function DashboardEmptyState({
         </div>
         <h3 className="mb-1 font-medium">No tasks for today</h3>
         <p className="mb-4 text-sm text-muted-foreground">
-          Drag tasks from unassigned or schedule skill practice
+          You have no tasks scheduled for today. Enjoy your free time!
         </p>
-        <Button variant="outline" size="sm" asChild>
-          <Link to="/app/unassigned">View Unassigned Tasks</Link>
-        </Button>
       </div>
     );
   }

@@ -7,7 +7,7 @@ import {
   ChevronRight,
   Plus,
 } from 'lucide-react';
-import { Link, useRouterState } from '@tanstack/react-router';
+import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
@@ -32,6 +32,7 @@ import TodoListConfig from '@/components/todo-list/TodoListConfig';
 // import CalendarConfig from '@/components/calendar/CalendarConfig'; // DISABLED: Calendar feature
 import { useTRPC } from '@/integrations/trpc/react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { addDays } from '@/utils/dates';
 
 type PageTitle =
   | 'Dashboard'
@@ -102,6 +103,8 @@ export default function AppHeader(): React.ReactNode {
   const isMobile: boolean = useIsMobile();
   const trpc = useTRPC();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const search = useRouterState({ select: (s) => s.location.search });
+  const navigate = useNavigate();
 
   const title: PageTitle = getPageTitle(pathname);
   const breadcrumbs: Array<Breadcrumb> = getBreadcrumbs(pathname);
@@ -112,7 +115,20 @@ export default function AppHeader(): React.ReactNode {
   // const calendarView = user?.settings.calendar.defaultView ?? 'week';
 
   function handleNavigate(direction: 'prev' | 'next'): void {
-    uiStoreActions.navigateTodoList(direction, timeSpan);
+    // Get current date from query params or use today
+    const currentDate =
+      'date' in search && typeof search.date === 'string'
+        ? new Date(search.date)
+        : new Date();
+
+    const amount = timeSpan === 'week' ? 7 : 1;
+    const delta = direction === 'prev' ? -amount : amount;
+    const newDate = addDays(currentDate, delta);
+
+    navigate({
+      to: '/app/todolist',
+      search: { date: newDate.toISOString() },
+    });
   }
 
   // function handleCalendarNavigate(direction: 'prev' | 'next'): void {

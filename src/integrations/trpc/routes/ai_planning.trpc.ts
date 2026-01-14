@@ -13,7 +13,7 @@ export const aiPlanningRouter = {
     .input(generateSkillPlanSchema)
     .mutation(({ input }): SkillPlanResult => {
       const { skillName, goal } = input;
-      addWide({ skill_name: skillName, goal_length: goal?.length ?? 0 });
+      addWide({ skill_name: skillName, goal_length: goal.length });
 
       // Generate a sample plan based on the skill name
       const samplePlan: SkillPlanResult = {
