@@ -28,6 +28,12 @@ export const taskRouter = {
     return tasks;
   }),
 
+  listUnassignedWithSkillInfo: protectedProcedure.query(async ({ ctx }) => {
+    const tasks = await taskRepository.findUnassignedWithSkillInfo(ctx.userId);
+    addWide({ tasks_count: tasks.length });
+    return tasks;
+  }),
+
   listBySubSkill: protectedProcedure
     .input(listTasksBySubSkillSchema)
     .query(async ({ ctx, input }) => {

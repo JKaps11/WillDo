@@ -1,7 +1,21 @@
 import { and, eq, gte, isNull, lte } from 'drizzle-orm';
 import type { NewTask, Task } from '@/db/schemas/task.schema';
 import { tasks } from '@/db/schemas/task.schema';
+import { subSkills } from '@/db/schemas/sub_skill.schema';
+import { skills } from '@/db/schemas/skill.schema';
 import { db } from '@/db/index';
+
+export interface TaskWithSkillInfo extends Task {
+  subSkillName: string;
+  skillId: string;
+  skillName: string;
+  skillColor: string;
+}
+
+export interface TodoListDay {
+  date: Date;
+  tasks: Array<Task>;
+}
 
 export const taskRepository = {
   findById: async (id: string, userId: string): Promise<Task | null> => {
@@ -78,5 +92,35 @@ export const taskRepository = {
         ),
       )
       .orderBy(tasks.todoListDate);
+  },
+
+  findUnassignedWithSkillInfo: async (
+    userId: string,
+  ): Promise<Array<TaskWithSkillInfo>> => {
+    const result = await db
+      .select({
+        id: tasks.id,
+        userId: tasks.userId,
+        todoListDate: tasks.todoListDate,
+        name: tasks.name,
+        description: tasks.description,
+        priority: tasks.priority,
+        dueDate: tasks.dueDate,
+        completed: tasks.completed,
+        subSkillId: tasks.subSkillId,
+        recurrenceRule: tasks.recurrenceRule,
+        createdAt: tasks.createdAt,
+        updatedAt: tasks.updatedAt,
+        subSkillName: subSkills.name,
+        skillId: skills.id,
+        skillName: skills.name,
+        skillColor: skills.color,
+      })
+      .from(tasks)
+      .innerJoin(subSkills, eq(tasks.subSkillId, subSkills.id))
+      .innerJoin(skills, eq(subSkills.skillId, skills.id))
+      .where(and(eq(tasks.userId, userId), isNull(tasks.todoListDate)));
+
+    return result;
   },
 };

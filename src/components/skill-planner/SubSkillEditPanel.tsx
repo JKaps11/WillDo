@@ -137,7 +137,10 @@ export function SubSkillEditPanel({
           <div className="space-y-6">
             {/* Stage Progress */}
             <div>
-              <Label className="mb-2 block text-sm font-medium"><strong>Stage: </strong>{STAGE_LABELS[subSkill.stage]}</Label>
+              <Label className="mb-2 block text-sm font-medium">
+                <strong>Stage: </strong>
+                {STAGE_LABELS[subSkill.stage]}
+              </Label>
               <StageAdvancer
                 subSkillId={subSkill.id}
                 currentStage={subSkill.stage}

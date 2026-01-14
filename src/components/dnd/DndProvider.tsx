@@ -9,11 +9,13 @@ import type {
   TaskWithSkillInfo,
   TodoListDay,
 } from '@/components/todo-list/types';
+import type { TaskWithSkillInfo as TaskWithSkillInfoRepo } from '@/db/repositories/task.repository';
 import type { RecurringOptions } from '@/components/recurring/RecurringModal';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import type { Task } from '@/db/schemas/task.schema';
 import type { DndContextValue } from './context';
 import type { ReactNode } from 'react';
+import { AssignTasksSheet } from '@/components/todo-list/AssignTasksSheet';
 import { RecurringModal } from '@/components/recurring/RecurringModal';
 import { formatPriority } from '@/components/todo-list/utils';
 import { startOfDay, utcDateToLocal } from '@/utils/dates';
@@ -219,6 +221,8 @@ export function DndProvider({
     // Check if this is a valid drop that requires an update
     const shouldUpdate = (() => {
       if (!over || !task || !targetDate) return false;
+      // Unassigned tasks (null todoListDate) should always be updated when dropped
+      if (!task.todoListDate) return true;
       const taskDate = utcDateToLocal(task.todoListDate).toDateString();
       const dropDate = targetDate.toDateString();
       return taskDate !== dropDate;
@@ -316,6 +320,9 @@ export function DndProvider({
           onConfirm={handleRecurringConfirm}
         />
       )}
+
+      {/* Assign Tasks Sheet for unassigned tasks */}
+      <AssignTasksSheet />
     </DndStateContext.Provider>
   );
 }

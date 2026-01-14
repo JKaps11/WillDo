@@ -22,6 +22,7 @@ export interface UIStoreState {
   unassignedSortBy: UnassignedSortOption;
   showArchivedSkills: boolean;
   showCreateSubSkillModal: boolean;
+  showAssignTasksSheet: boolean;
 }
 
 export type UIStoreActions = {
@@ -36,6 +37,7 @@ export type UIStoreActions = {
   toggleUnassignedSort: () => void;
   toggleShowArchivedSkills: () => void;
   setShowCreateSubSkillModal: (show: boolean) => void;
+  setShowAssignTasksSheet: (show: boolean) => void;
 };
 
 const initialState: UIStoreState = {
@@ -45,6 +47,7 @@ const initialState: UIStoreState = {
   unassignedSortBy: 'priority',
   showArchivedSkills: false,
   showCreateSubSkillModal: false,
+  showAssignTasksSheet: false,
 };
 
 export const uiStore = new Store<UIStoreState>(initialState);
@@ -123,6 +126,12 @@ export const uiStoreActions: UIStoreActions = {
     uiStore.setState((state) => ({
       ...state,
       showCreateSubSkillModal: show,
+    }));
+  },
+  setShowAssignTasksSheet: (show: boolean) => {
+    uiStore.setState((state) => ({
+      ...state,
+      showAssignTasksSheet: show,
     }));
   },
 };

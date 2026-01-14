@@ -11,6 +11,7 @@ import {
 } from '@/lib/zod-schemas';
 import { subSkillRepository } from '@/db/repositories/sub_skill.repository';
 import { skillRepository } from '@/db/repositories/skill.repository';
+import { taskRepository } from '@/db/repositories/task.repository';
 import { addWide } from '@/lib/logging/wideEventStore.server';
 
 export const subSkillRouter = {
@@ -84,6 +85,15 @@ export const subSkillRouter = {
         });
       }
       addWide({ sub_skill_id: subSkill.id });
+
+      // Auto-create a task for the new subskill
+      const task = await taskRepository.create({
+        userId: ctx.userId,
+        name: subSkill.name,
+        description: subSkill.description ?? undefined,
+        subSkillId: subSkill.id,
+      });
+      addWide({ created_task_id: task?.id });
 
       return subSkill;
     }),

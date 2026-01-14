@@ -38,8 +38,8 @@ export function PlannerCanvas({
     [skill],
   );
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialLayout.nodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialLayout.edges);
+  const [nodes, setNodes] = useNodesState(initialLayout.nodes);
+  const [edges, setEdges] = useEdgesState(initialLayout.edges);
 
   useEffect(() => {
     const newLayout: { nodes: Array<Node>; edges: Array<Edge> } =
@@ -70,8 +70,6 @@ export function PlannerCanvas({
         nodes={nodes}
         edges={edges}
         proOptions={{ hideAttribution: true }}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
         onNodeClick={handleNodeClick}
         onPaneClick={handlePaneClick}
         nodeTypes={nodeTypes}

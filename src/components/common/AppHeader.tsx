@@ -5,6 +5,7 @@ import {
   // ArrowDownAZ,
   // ArrowUpDown,
   ChevronRight,
+  ClipboardList,
   Plus,
 } from 'lucide-react';
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
@@ -179,6 +180,13 @@ export default function AppHeader(): React.ReactNode {
             </Button>
           </div>,
           <TodoListConfig key="todo-list-config-popover" />,
+          <Button
+            key="assign-tasks-button"
+            onClick={() => uiStoreActions.setShowAssignTasksSheet(true)}
+          >
+            <ClipboardList className="mr-2 size-4" />
+            Assign Tasks
+          </Button>,
           // <NewTaskModal key="new-task-button" />,
         ];
         break;

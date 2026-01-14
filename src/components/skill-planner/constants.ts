@@ -1,12 +1,9 @@
-import type {SubSkillStage} from '@/db/schemas/sub_skill.schema';
-import {
-  
-  subSkillStageEnum
-} from '@/db/schemas/sub_skill.schema';
+import type { SubSkillStage } from '@/db/schemas/sub_skill.schema';
+import { subSkillStageEnum } from '@/db/schemas/sub_skill.schema';
 
 export const NODE_WIDTH = 200;
 export const NODE_HEIGHT = 120;
-export const HORIZONTAL_GAP = 40;
+export const HORIZONTAL_GAP = 60;
 export const VERTICAL_GAP = 60;
 
 /** Ordered array of all subskill stages derived from the schema enum */

@@ -85,7 +85,7 @@ export const tasks = pgTable(
 
     subSkillId: uuid('sub_skill_id')
       .notNull()
-      .references(() => subSkills.id),
+      .references(() => subSkills.id, { onDelete: 'cascade' }),
 
     recurrenceRule: json('recurrence_rule').$type<RecurrenceRule>(),
 
