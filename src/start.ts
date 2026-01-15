@@ -46,6 +46,12 @@ const wideEventMiddleware: AnyRequestMiddleware = createMiddleware({
             code: 'UNTRACKED_ERROR',
           };
         }
+
+        // If an error was captured (e.g., by tRPC middleware) but HTTP status is 200,
+        // override to 500 since tRPC batch requests return 200 even on procedure errors
+        if (event.error && result.response.status < 400) {
+          event.status_code = 500;
+        }
       }
 
       return result;

@@ -2,6 +2,8 @@ import { createContext, useContext } from 'react';
 
 export interface DndContextValue {
   isDragging: boolean;
+  shouldReopenAssignSheet: boolean;
+  clearReopenFlag: () => void;
 }
 
 export const DndStateContext = createContext<DndContextValue | null>(null);

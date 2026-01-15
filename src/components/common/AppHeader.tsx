@@ -24,6 +24,7 @@ import { SidebarTrigger } from '../ui/sidebar';
 import { Separator } from '../ui/separator';
 // import NewTaskModal from '../NewTaskModal';
 import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
 import { withVerticalSeparators } from './utils';
 import type { ReactNode } from 'react';
 import type { UIStoreSettingsTab, UnassignedSortOption } from '@/lib/store';
@@ -182,10 +183,12 @@ export default function AppHeader(): React.ReactNode {
           <TodoListConfig key="todo-list-config-popover" />,
           <Button
             key="assign-tasks-button"
+            variant="outline"
             onClick={() => uiStoreActions.setShowAssignTasksSheet(true)}
           >
             <ClipboardList className="mr-2 size-4" />
             Assign Tasks
+            <Badge>1</Badge>
           </Button>,
           // <NewTaskModal key="new-task-button" />,
         ];

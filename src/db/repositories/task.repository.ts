@@ -119,7 +119,13 @@ export const taskRepository = {
       .from(tasks)
       .innerJoin(subSkills, eq(tasks.subSkillId, subSkills.id))
       .innerJoin(skills, eq(subSkills.skillId, skills.id))
-      .where(and(eq(tasks.userId, userId), isNull(tasks.todoListDate)));
+      .where(
+        and(
+          eq(tasks.userId, userId),
+          isNull(tasks.todoListDate),
+          eq(tasks.completed, false),
+        ),
+      );
 
     return result;
   },

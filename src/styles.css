@@ -220,3 +220,17 @@ code {
 .prose strong {
   @apply font-semibold;
 }
+
+/* Skill Planner - disable interactive cursors for view-only mode */
+.skill-planner-canvas .react-flow__node {
+  cursor: default !important;
+}
+
+.skill-planner-canvas .react-flow__node:active {
+  cursor: default !important;
+}
+
+.skill-planner-canvas .react-flow__handle {
+  cursor: default !important;
+  pointer-events: none !important;
+}

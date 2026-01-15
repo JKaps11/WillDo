@@ -5,11 +5,7 @@ import { useStore } from '@tanstack/react-store';
 
 import { DndStateContext } from './context';
 
-import type {
-  TaskWithSkillInfo,
-  TodoListDay,
-} from '@/components/todo-list/types';
-import type { TaskWithSkillInfo as TaskWithSkillInfoRepo } from '@/db/repositories/task.repository';
+import type { TaskWithSkillInfo, TodoListDay } from '@/components/todo-list/types';
 import type { RecurringOptions } from '@/components/recurring/RecurringModal';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import type { Task } from '@/db/schemas/task.schema';
@@ -44,6 +40,8 @@ export function DndProvider({
   const [isMounted, setIsMounted] = useState(false);
   const [showRecurringModal, setShowRecurringModal] = useState(false);
   const [pendingDrop, setPendingDrop] = useState<PendingDrop | null>(null);
+  const [dragSource, setDragSource] = useState<string | null>(null);
+  const [shouldReopenAssignSheet, setShouldReopenAssignSheet] = useState(false);
   const baseDate = useStore(uiStore, (s) => s.todoListBaseDate);
 
   // Only render DndContext on client to avoid SSR issues with dnd-kit accessing DOM
@@ -51,9 +49,17 @@ export function DndProvider({
     setIsMounted(true);
   }, []);
 
+  const clearReopenFlag = useCallback(() => {
+    setShouldReopenAssignSheet(false);
+  }, []);
+
   const dndStateValue = useMemo<DndContextValue>(
-    () => ({ isDragging: activeTask !== null }),
-    [activeTask],
+    () => ({
+      isDragging: activeTask !== null,
+      shouldReopenAssignSheet,
+      clearReopenFlag,
+    }),
+    [activeTask, shouldReopenAssignSheet, clearReopenFlag],
   );
 
   // Store previous data for rollback on error
@@ -145,8 +151,10 @@ export function DndProvider({
 
   function handleDragStart(event: DragStartEvent): void {
     const task = event.active.data.current?.task as Task | undefined;
+    const source = event.active.data.current?.source as string | undefined;
     if (task) {
       setActiveTask(task);
+      setDragSource(source ?? null);
       onDragStartCallback?.();
     }
   }
@@ -237,9 +245,13 @@ export function DndProvider({
         // For non-skill tasks, move immediately
         executeMoveTask(task, targetDate);
       }
+    } else if (dragSource === 'assign-sheet') {
+      // Drop was invalid, reopen the assign sheet
+      setShouldReopenAssignSheet(true);
     }
 
     setActiveTask(null);
+    setDragSource(null);
   }
 
   /** Handle recurring modal confirmation */

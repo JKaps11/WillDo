@@ -4,7 +4,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { STAGE_COLORS, STAGE_LABELS } from '@/components/skill-planner/constants';
+import {
+  STAGE_COLORS,
+  STAGE_LABELS,
+} from '@/components/skill-planner/constants';
 
 interface SubSkillStageIndicatorProps {
   stages: Array<SubSkillStage>;

@@ -65,7 +65,7 @@ export function PlannerCanvas({
   }, [onNodeSelect]);
 
   return (
-    <div className="relative h-full w-full">
+    <div className="skill-planner-canvas relative h-full w-full">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -81,6 +81,15 @@ export function PlannerCanvas({
         defaultEdgeOptions={{
           type: 'tree',
         }}
+        // Disable user interactivity for viewing-only mode
+        nodesDraggable={false}
+        nodesConnectable={false}
+        edgesFocusable={false}
+        edgesReconnectable={false}
+        connectOnClick={false}
+        elementsSelectable={false}
+        nodesFocusable={false}
+        disableKeyboardA11y
       >
         <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
         <PlannerControls />
