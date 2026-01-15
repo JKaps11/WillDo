@@ -17,7 +17,7 @@ export function TodoListDropZone({
   const { isDragging } = useDndState();
   const { isOver, setNodeRef } = useDroppable({
     id: `dropzone-${date.toISOString()}`,
-    data: { date },
+    data: { type: 'todolist', date },
   });
 
   return (

@@ -1,4 +1,4 @@
-import { and, eq, gte, isNull, lte } from 'drizzle-orm';
+import { and, eq, gte, isNotNull, isNull, lte, or } from 'drizzle-orm';
 import type { NewTask, Task } from '@/db/schemas/task.schema';
 import { tasks } from '@/db/schemas/task.schema';
 import { subSkills } from '@/db/schemas/sub_skill.schema';
@@ -89,6 +89,37 @@ export const taskRepository = {
           eq(tasks.userId, userId),
           gte(tasks.todoListDate, startDate),
           lte(tasks.todoListDate, endDate),
+        ),
+      )
+      .orderBy(tasks.todoListDate);
+  },
+
+  /**
+   * Find tasks for the todo list view within a date range.
+   * Fetches:
+   * 1. Non-recurring tasks with todoListDate in range
+   * 2. Recurring tasks with todoListDate <= endDate (they might recur into this range)
+   */
+  findForTodoList: async (
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Array<Task>> => {
+    return db
+      .select()
+      .from(tasks)
+      .where(
+        and(
+          eq(tasks.userId, userId),
+          or(
+            // Non-recurring tasks in range
+            and(
+              gte(tasks.todoListDate, startDate),
+              lte(tasks.todoListDate, endDate),
+            ),
+            // Recurring tasks that start before or on endDate
+            and(isNotNull(tasks.recurrenceRule), lte(tasks.todoListDate, endDate)),
+          ),
         ),
       )
       .orderBy(tasks.todoListDate);

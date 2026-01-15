@@ -110,7 +110,11 @@ function WeekView({ lists }: WeekViewProps): ReactNode {
 
   const byDay = new Map<string, TodoListDay>();
   for (const l of lists) {
-    byDay.set(format(utcDateToLocal(l.date), 'yyyy-MM-dd'), l);
+    // Defensive check - date can be undefined from optimistic updates
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (l.date) {
+      byDay.set(format(utcDateToLocal(l.date), 'yyyy-MM-dd'), l);
+    }
   }
 
   return (
@@ -207,11 +211,17 @@ function TaskList({ tasks }: TaskListProps): ReactNode {
   return (
     <div className="rounded-md border overflow-hidden">
       <div className="flex flex-col gap-1 p-1 max-h-[420px] overflow-y-auto overflow-x-hidden">
-        {tasks.map((task) => (
-          <div key={task.id} className="relative overflow-hidden">
-            <Task task={task} />
-          </div>
-        ))}
+        {tasks.map((task) => {
+          // Create unique key for recurring tasks (same task.id on multiple days)
+          const taskKey = task.todoListDate
+            ? `${task.id}-${task.todoListDate.toISOString().split('T')[0]}`
+            : task.id;
+          return (
+            <div key={taskKey} className="relative overflow-hidden">
+              <Task task={task} />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

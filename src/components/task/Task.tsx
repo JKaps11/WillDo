@@ -1,16 +1,18 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import { Pencil } from 'lucide-react';
 
-import { SkillColorDot } from './SkillColorDot';
 import PriorityBadge from './PriorityBadge';
 import type { Task as TaskType } from '@/db/schemas/task.schema';
 import type { TaskWithSkillInfo } from '@/db/repositories/task.repository';
 import type { ReactNode } from 'react';
 import { useTRPC } from '@/integrations/trpc/react';
+import { uiStoreActions } from '@/lib/store';
 import { cn } from '@/lib/utils';
 
 import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 
 type AnyTask = TaskType | TaskWithSkillInfo;
 
@@ -20,19 +22,9 @@ interface TaskProps {
   dragSource?: string;
 }
 
-function hasSkillInfo(task: AnyTask): task is TaskWithSkillInfo {
-  return 'skillId' in task && 'skillName' in task && 'skillColor' in task;
-}
-
 export function Task({ task, className, dragSource }: TaskProps): ReactNode {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-
-  // Check if this task has skill info (flat structure from repository)
-  const taskHasSkillInfo = hasSkillInfo(task);
-  const skill = taskHasSkillInfo
-    ? { name: task.skillName, color: task.skillColor }
-    : null;
 
   const updateMutation = useMutation(
     trpc.task.update.mutationOptions({
@@ -77,9 +69,14 @@ export function Task({ task, className, dragSource }: TaskProps): ReactNode {
     });
   }
 
+  // Create unique draggable ID for recurring tasks (same task.id on multiple days)
+  const draggableId = task.todoListDate
+    ? `${task.id}-${task.todoListDate.toISOString().split('T')[0]}`
+    : task.id;
+
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
-      id: task.id,
+      id: draggableId,
       data: { task, source: dragSource },
     });
 
@@ -118,22 +115,13 @@ export function Task({ task, className, dragSource }: TaskProps): ReactNode {
       {...attributes}
       onPointerDown={handlePointerDown}
       className={cn(
-        'group flex items-center justify-between gap-3 px-3 py-2 cursor-grab active:cursor-grabbing transition-colors hover:bg-accent/50',
+        'group flex items-center justify-between gap-3 px-3 py-2 cursor-grab active:cursor-grabbing transition-colors hover:bg-accent/50 select-none',
         '[&:has(.task-checkbox:hover)]:bg-transparent [&:has(.task-edit-btn:hover)]:bg-transparent',
         isDragging && 'overflow-hidden',
         className,
       )}
     >
       <div className="flex min-w-0 flex-1 items-center gap-2">
-        {/* Skill color dot */}
-        {skill && (
-          <SkillColorDot
-            color={skill.color}
-            skillName={skill.name}
-            className="shrink-0"
-          />
-        )}
-
         <div className="flex shrink-0 items-center justify-center gap-1">
           <PriorityBadge priority={task.priority} />
         </div>
@@ -148,15 +136,25 @@ export function Task({ task, className, dragSource }: TaskProps): ReactNode {
         </span>
       </div>
 
-      <div className="flex shrink-0 items-center gap-1">
-        <div className="task-checkbox flex items-center justify-center">
-          <Checkbox
-            className="cursor-pointer hover:border-ring hover:ring-[3px] hover:ring-ring/50"
-            checked={task.completed}
-            onCheckedChange={handleCheckboxChange}
-          />
+      {task.todoListDate !== null && (
+        <div className="flex shrink-0 items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="task-edit-btn size-7 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={() => uiStoreActions.openRecurrenceModal(task as TaskType)}
+          >
+            <Pencil className="size-3.5" />
+          </Button>
+          <div className="task-checkbox flex items-center justify-center">
+            <Checkbox
+              className="cursor-pointer hover:border-ring hover:ring-[3px] hover:ring-ring/50"
+              checked={task.completed}
+              onCheckedChange={handleCheckboxChange}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

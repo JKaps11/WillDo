@@ -11,7 +11,7 @@ import {
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import {
   Select,
@@ -114,24 +114,33 @@ export default function AppHeader(): React.ReactNode {
   // Fetch user settings to get the timeSpan/view for navigation
   const { data: user } = useQuery(trpc.user.get.queryOptions());
   const timeSpan = user?.settings.todoList.timeSpan ?? 'day';
+
+  // Fetch unassigned tasks count for the badge
+  const { data: unassignedTasks } = useQuery(
+    trpc.task.listUnassignedWithSkillInfo.queryOptions(),
+  );
+  const unassignedCount = unassignedTasks?.length ?? 0;
   // const calendarView = user?.settings.calendar.defaultView ?? 'week';
 
-  function handleNavigate(direction: 'prev' | 'next'): void {
-    // Get current date from query params or use today
-    const currentDate =
-      'date' in search && typeof search.date === 'string'
-        ? new Date(search.date)
-        : new Date();
+  const handleNavigate = useCallback(
+    (direction: 'prev' | 'next'): void => {
+      // Get current date from query params or use today
+      const currentDate =
+        'date' in search && typeof search.date === 'string'
+          ? new Date(search.date)
+          : new Date();
 
-    const amount = timeSpan === 'week' ? 7 : 1;
-    const delta = direction === 'prev' ? -amount : amount;
-    const newDate = addDays(currentDate, delta);
+      const amount = timeSpan === 'week' ? 7 : 1;
+      const delta = direction === 'prev' ? -amount : amount;
+      const newDate = addDays(currentDate, delta);
 
-    navigate({
-      to: '/app/todolist',
-      search: { date: newDate.toISOString() },
-    });
-  }
+      navigate({
+        to: '/app/todolist',
+        search: { date: newDate.toISOString() },
+      });
+    },
+    [search, timeSpan, navigate],
+  );
 
   // function handleCalendarNavigate(direction: 'prev' | 'next'): void {
   //   uiStoreActions.navigateCalendar(direction, calendarView);
@@ -181,41 +190,23 @@ export default function AppHeader(): React.ReactNode {
             </Button>
           </div>,
           <TodoListConfig key="todo-list-config-popover" />,
-          <Button
-            key="assign-tasks-button"
-            variant="outline"
-            onClick={() => uiStoreActions.setShowAssignTasksSheet(true)}
-          >
-            <ClipboardList className="mr-2 size-4" />
-            Assign Tasks
-            <Badge>1</Badge>
-          </Button>,
+          <div key="assign-tasks-button" className="relative">
+            <Button
+              variant="outline"
+              onClick={() => uiStoreActions.setShowAssignTasksSheet(true)}
+            >
+              <ClipboardList className="mr-2 size-4" />
+              Assign Tasks
+            </Button>
+            {unassignedCount > 0 && (
+              <Badge className="absolute -top-2 -right-2 size-5 flex items-center justify-center p-0 text-xs">
+                {unassignedCount}
+              </Badge>
+            )}
+          </div>,
           // <NewTaskModal key="new-task-button" />,
         ];
         break;
-      // case 'Unassigned Tasks':
-      //   options = [
-      //     <Button
-      //       key="unassigned-sort-button"
-      //       variant="outline"
-      //       size="sm"
-      //       onClick={() => uiStoreActions.toggleUnassignedSort()}
-      //     >
-      //       {unassignedSortBy === 'priority' ? (
-      //         <>
-      //           <ArrowUpDown className="mr-2 h-4 w-4" />
-      //           Priority
-      //         </>
-      //       ) : (
-      //         <>
-      //           <ArrowDownAZ className="mr-2 h-4 w-4" />
-      //           A-Z
-      //         </>
-      //       )}
-      //     </Button>,
-      //     // <NewTaskModal key="new-task-button" />,
-      //   ];
-      //   break;
       case 'Skills':
         options = [
           <Button
@@ -313,11 +304,12 @@ export default function AppHeader(): React.ReactNode {
     return withVerticalSeparators(options);
   }, [
     title,
-    timeSpan,
+    handleNavigate,
     isMobile,
     settingsTab,
     unassignedSortBy,
     showArchivedSkills,
+    unassignedCount,
   ]);
 
   return (

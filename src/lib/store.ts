@@ -1,4 +1,5 @@
 import { Store } from '@tanstack/store';
+import type { Task } from '@/db/schemas/task.schema';
 import type { TodoListTimeSpan } from '@/db/schemas/user.schema';
 import { addDays, startOfDay } from '@/utils/dates';
 
@@ -15,6 +16,12 @@ export type UIStoreSettingsTab = (typeof UI_STORE_SETTINGS_TABS)[number];
 
 export type UnassignedSortOption = 'priority' | 'alphabetical';
 
+export interface RecurrenceModalState {
+  isOpen: boolean;
+  task: Task | null;
+  targetDate: Date | null;
+}
+
 export interface UIStoreState {
   settingsTab: UIStoreSettingsTab;
   todoListBaseDate: Date;
@@ -23,6 +30,7 @@ export interface UIStoreState {
   showArchivedSkills: boolean;
   showCreateSubSkillModal: boolean;
   showAssignTasksSheet: boolean;
+  recurrenceModal: RecurrenceModalState;
 }
 
 export type UIStoreActions = {
@@ -38,6 +46,8 @@ export type UIStoreActions = {
   toggleShowArchivedSkills: () => void;
   setShowCreateSubSkillModal: (show: boolean) => void;
   setShowAssignTasksSheet: (show: boolean) => void;
+  openRecurrenceModal: (task: Task, targetDate?: Date) => void;
+  closeRecurrenceModal: () => void;
 };
 
 const initialState: UIStoreState = {
@@ -48,6 +58,11 @@ const initialState: UIStoreState = {
   showArchivedSkills: false,
   showCreateSubSkillModal: false,
   showAssignTasksSheet: false,
+  recurrenceModal: {
+    isOpen: false,
+    task: null,
+    targetDate: null,
+  },
 };
 
 export const uiStore = new Store<UIStoreState>(initialState);
@@ -132,6 +147,26 @@ export const uiStoreActions: UIStoreActions = {
     uiStore.setState((state) => ({
       ...state,
       showAssignTasksSheet: show,
+    }));
+  },
+  openRecurrenceModal: (task: Task, targetDate?: Date) => {
+    uiStore.setState((state) => ({
+      ...state,
+      recurrenceModal: {
+        isOpen: true,
+        task,
+        targetDate: targetDate ?? task.todoListDate ?? new Date(),
+      },
+    }));
+  },
+  closeRecurrenceModal: () => {
+    uiStore.setState((state) => ({
+      ...state,
+      recurrenceModal: {
+        isOpen: false,
+        task: null,
+        targetDate: null,
+      },
     }));
   },
 };

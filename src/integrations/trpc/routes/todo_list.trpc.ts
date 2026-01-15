@@ -1,10 +1,154 @@
 import { protectedProcedure } from '../init';
 import type { TRPCRouterRecord } from '@trpc/server';
 
+import type { DaysOfWeek, Task } from '@/db/schemas/task.schema';
+import type { TodoListDay } from '@/db/repositories/task.repository';
 import { taskRepository } from '@/db/repositories/task.repository';
 import { addWide } from '@/lib/logging/wideEventStore.server';
-import { endOfWeek, startOfWeek } from '@/utils/dates';
+import { addDays, endOfWeek, startOfWeek } from '@/utils/dates';
 import { weekDateSchema } from '@/lib/zod-schemas';
+
+const DAY_OF_WEEK_MAP: Record<DaysOfWeek, number> = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+};
+
+/** Check if a date matches the recurrence pattern */
+function matchesRecurrence(
+  task: Task,
+  date: Date,
+  occurrenceCount: number,
+): boolean {
+  const rule = task.recurrenceRule;
+  if (!rule?.isRecurring || !task.todoListDate) return false;
+
+  const startDate = task.todoListDate;
+
+  // Date must be on or after the start date
+  if (date < startDate) return false;
+
+  // Check end conditions
+  if (rule.endType === 'after_count' && rule.endAfterCount) {
+    if (occurrenceCount >= rule.endAfterCount) return false;
+  }
+  if (rule.endType === 'on_date' && rule.endOnDate) {
+    const endDate = new Date(rule.endOnDate);
+    if (date > endDate) return false;
+  }
+
+  if (rule.frequency === 'daily') {
+    // Check if the date is on the correct interval
+    const daysDiff = Math.floor(
+      (date.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    return daysDiff % rule.interval === 0;
+  }
+
+  if (rule.frequency === 'weekly') {
+    // For weekly, check if the day of week matches
+    const dayOfWeek = date.getDay();
+    const daysOfWeek = rule.daysOfWeek ?? [];
+
+    // If no specific days are set, use the start date's day
+    if (daysOfWeek.length === 0) {
+      const startDayOfWeek = startDate.getDay();
+      if (dayOfWeek !== startDayOfWeek) return false;
+    } else {
+      // Check if current day is in the allowed days
+      const matchesDay = daysOfWeek.some(
+        (day) => DAY_OF_WEEK_MAP[day] === dayOfWeek,
+      );
+      if (!matchesDay) return false;
+    }
+
+    // Check week interval
+    const weeksDiff = Math.floor(
+      (date.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7),
+    );
+    return weeksDiff % rule.interval === 0;
+  }
+
+  return false;
+}
+
+/** Expand recurring tasks within a date range */
+function expandRecurringTasks(
+  tasks: Array<Task>,
+  rangeStart: Date,
+  rangeEnd: Date,
+): Array<{ task: Task; date: Date }> {
+  const expanded: Array<{ task: Task; date: Date }> = [];
+
+  for (const task of tasks) {
+    if (!task.todoListDate) continue;
+
+    const rule = task.recurrenceRule;
+
+    // Non-recurring tasks: just add if in range
+    if (!rule?.isRecurring) {
+      if (task.todoListDate >= rangeStart && task.todoListDate <= rangeEnd) {
+        expanded.push({ task, date: task.todoListDate });
+      }
+      continue;
+    }
+
+    // Recurring tasks: check each day in the range
+    let currentDate = new Date(rangeStart);
+    let occurrenceCount = 0;
+
+    // Count occurrences before the range start
+    if (task.todoListDate < rangeStart) {
+      let countDate = new Date(task.todoListDate);
+      while (countDate < rangeStart) {
+        if (matchesRecurrence(task, countDate, occurrenceCount)) {
+          occurrenceCount++;
+        }
+        countDate = addDays(countDate, 1);
+      }
+    }
+
+    // Check each day in the range
+    while (currentDate <= rangeEnd) {
+      if (matchesRecurrence(task, currentDate, occurrenceCount)) {
+        expanded.push({ task, date: new Date(currentDate) });
+        occurrenceCount++;
+      }
+      currentDate = addDays(currentDate, 1);
+    }
+  }
+
+  return expanded;
+}
+
+/** Group expanded tasks by date */
+function groupTasksByDate(
+  expandedTasks: Array<{ task: Task; date: Date }>,
+): Array<TodoListDay> {
+  const byDate = new Map<string, TodoListDay>();
+
+  for (const { task, date } of expandedTasks) {
+    const dateKey = date.toISOString().split('T')[0];
+    const existing = byDate.get(dateKey);
+
+    if (existing) {
+      existing.tasks.push(task);
+    } else {
+      byDate.set(dateKey, {
+        date,
+        tasks: [task],
+      });
+    }
+  }
+
+  return Array.from(byDate.values()).sort(
+    (a, b) => a.date.getTime() - b.date.getTime(),
+  );
+}
 
 export const todoListRouter = {
   list: protectedProcedure
@@ -15,8 +159,14 @@ export const todoListRouter = {
       const end = endOfWeek(input);
       addWide({ week_start: start.toISOString(), week_end: end.toISOString() });
 
-      const tasks = await taskRepository.findByDateRange(userId, start, end);
+      // Fetch tasks that could appear in this range:
+      // 1. Non-recurring tasks with todoListDate in range
+      // 2. Recurring tasks with todoListDate <= end (they might recur into this range)
+      const tasks = await taskRepository.findForTodoList(userId, start, end);
       addWide({ tasks_count: tasks.length });
-      return tasks;
+
+      // Expand recurring tasks and group by date
+      const expandedTasks = expandRecurringTasks(tasks, start, end);
+      return groupTasksByDate(expandedTasks);
     }),
 } satisfies TRPCRouterRecord;

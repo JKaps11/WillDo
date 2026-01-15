@@ -1,5 +1,5 @@
 import { CalendarClock, Repeat } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { RecurrenceEndSelector } from './RecurrenceEndSelector';
 import { RecurrenceSelector } from './RecurrenceSelector';
@@ -37,8 +37,10 @@ export interface RecurringOptions {
 }
 
 const DEFAULT_RECURRENCE_RULE: RecurrenceRule = {
+  isRecurring: true,
   frequency: 'daily',
   interval: 1,
+  endType: 'never',
 };
 
 export function RecurringModal({
@@ -54,6 +56,31 @@ export function RecurringModal({
   );
   const [endType, setEndType] = useState<RecurrenceEndType>('never');
   const [endValue, setEndValue] = useState<number | undefined>(undefined);
+
+  // Pre-populate form when modal opens with existing recurrence rule
+  useEffect(() => {
+    if (open && task.recurrenceRule) {
+      const rule = task.recurrenceRule;
+      setIsRecurring(rule.isRecurring);
+      setRecurrenceRule({
+        isRecurring: rule.isRecurring,
+        frequency: rule.frequency,
+        interval: rule.interval,
+        daysOfWeek: rule.daysOfWeek,
+        endType: rule.endType,
+        endAfterCount: rule.endAfterCount,
+        endOnDate: rule.endOnDate,
+      });
+      setEndType(rule.endType);
+      setEndValue(rule.endAfterCount);
+    } else if (open) {
+      // Reset to defaults when opening without existing rule
+      setIsRecurring(false);
+      setRecurrenceRule(DEFAULT_RECURRENCE_RULE);
+      setEndType('never');
+      setEndValue(undefined);
+    }
+  }, [open, task.recurrenceRule]);
 
   const handleConfirm = (): void => {
     if (isRecurring) {

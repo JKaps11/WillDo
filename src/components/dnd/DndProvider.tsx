@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DndContext, DragOverlay, pointerWithin } from '@dnd-kit/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useStore } from '@tanstack/react-store';
 
 import { DndStateContext } from './context';
 
-import type { TaskWithSkillInfo, TodoListDay } from '@/components/todo-list/types';
+import type { TaskWithSkillInfo } from '@/components/todo-list/types';
 import type { RecurringOptions } from '@/components/recurring/RecurringModal';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import type { Task } from '@/db/schemas/task.schema';
@@ -17,7 +16,6 @@ import { formatPriority } from '@/components/todo-list/utils';
 import { startOfDay, utcDateToLocal } from '@/utils/dates';
 import { useTRPC } from '@/integrations/trpc/react';
 import { Badge } from '@/components/ui/badge';
-import { uiStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
 
 interface DndProviderProps {
@@ -42,7 +40,6 @@ export function DndProvider({
   const [pendingDrop, setPendingDrop] = useState<PendingDrop | null>(null);
   const [dragSource, setDragSource] = useState<string | null>(null);
   const [shouldReopenAssignSheet, setShouldReopenAssignSheet] = useState(false);
-  const baseDate = useStore(uiStore, (s) => s.todoListBaseDate);
 
   // Only render DndContext on client to avoid SSR issues with dnd-kit accessing DOM
   useEffect(() => {
@@ -62,21 +59,9 @@ export function DndProvider({
     [activeTask, shouldReopenAssignSheet, clearReopenFlag],
   );
 
-  // Store previous data for rollback on error
-  const previousDataRef = useRef<Array<TodoListDay> | null>(null);
-
   const updateTaskMutation = useMutation(
     trpc.task.update.mutationOptions({
-      onError: () => {
-        // Rollback to previous data on error
-        if (previousDataRef.current) {
-          const queryKey = trpc.todoList.list.queryKey(baseDate);
-          queryClient.setQueryData(queryKey, previousDataRef.current);
-          previousDataRef.current = null;
-        }
-      },
       onSettled: () => {
-        previousDataRef.current = null;
         // Invalidate all todoList.list queries regardless of date parameter
         queryClient.invalidateQueries({
           queryKey: trpc.todoList.list.pathKey(),
@@ -89,66 +74,6 @@ export function DndProvider({
     }),
   );
 
-  /** Synchronously update the cache before mutation to prevent flash */
-  function optimisticMoveTask(taskId: string, todoListDate: Date): void {
-    const queryKey = trpc.todoList.list.queryKey(baseDate);
-
-    // Save previous data for potential rollback
-    previousDataRef.current = queryClient.getQueryData(queryKey) ?? null;
-
-    queryClient.setQueryData(
-      queryKey,
-      (old: Array<TodoListDay> | undefined) => {
-        if (!old) return old;
-
-        // Find the task being moved
-        let movedTask: Task | undefined;
-        for (const list of old) {
-          const found = list.tasks.find((t) => t.id === taskId);
-          if (found) {
-            movedTask = found;
-            break;
-          }
-        }
-
-        if (!movedTask) return old;
-
-        const targetDateStr = todoListDate.toDateString();
-        const targetListExists = old.some(
-          (list) => utcDateToLocal(list.date).toDateString() === targetDateStr,
-        );
-
-        // Remove task from old list
-        let result = old.map((list) => ({
-          ...list,
-          tasks: list.tasks.filter((t) => t.id !== taskId),
-        }));
-
-        if (targetListExists) {
-          // Add task to existing target list
-          result = result.map((list) => {
-            if (utcDateToLocal(list.date).toDateString() === targetDateStr) {
-              return {
-                ...list,
-                tasks: [...list.tasks, { ...movedTask, todoListDate }],
-              };
-            }
-            return list;
-          });
-        } else {
-          // Create new day entry with the task
-          const newList: TodoListDay = {
-            date: todoListDate,
-            tasks: [{ ...movedTask, todoListDate }],
-          };
-          result = [...result, newList];
-        }
-
-        return result;
-      },
-    );
-  }
-
   function handleDragStart(event: DragStartEvent): void {
     const task = event.active.data.current?.task as Task | undefined;
     const source = event.active.data.current?.source as string | undefined;
@@ -159,26 +84,10 @@ export function DndProvider({
     }
   }
 
-  const createEventFromTaskMutation = useMutation(
-    trpc.event.createFromTask.mutationOptions({
-      onSettled: () => {
-        queryClient.invalidateQueries({
-          queryKey: trpc.event.list.pathKey(),
-        });
-        queryClient.invalidateQueries({
-          queryKey: trpc.task.listUnassigned.pathKey(),
-        });
-      },
-    }),
-  );
-
   /** Execute the actual task move */
   const executeMoveTask = useCallback(
     (task: Task, targetDate: Date, recurringOptions?: RecurringOptions) => {
       const newDate = startOfDay(targetDate);
-
-      // Synchronously update cache BEFORE React re-renders
-      optimisticMoveTask(task.id, newDate);
 
       // Build update payload
       const updatePayload: Parameters<typeof updateTaskMutation.mutate>[0] = {
@@ -186,12 +95,19 @@ export function DndProvider({
         todoListDate: newDate,
       };
 
-      // Add recurrence fields if making recurring
+      // Add recurrence rule if making recurring
       if (recurringOptions?.isRecurring && recurringOptions.recurrenceRule) {
-        updatePayload.isRecurring = true;
-        updatePayload.recurrenceRule = recurringOptions.recurrenceRule;
-        updatePayload.recurrenceEndType = recurringOptions.recurrenceEndType;
-        updatePayload.recurrenceEndValue = recurringOptions.recurrenceEndValue;
+        updatePayload.recurrenceRule = {
+          isRecurring: true,
+          frequency: recurringOptions.recurrenceRule.frequency,
+          interval: recurringOptions.recurrenceRule.interval,
+          daysOfWeek: recurringOptions.recurrenceRule.daysOfWeek,
+          endType: recurringOptions.recurrenceEndType ?? 'never',
+          endAfterCount:
+            recurringOptions.recurrenceEndType === 'after_count'
+              ? recurringOptions.recurrenceEndValue
+              : undefined,
+        };
       }
 
       // Trigger the server mutation
@@ -201,52 +117,52 @@ export function DndProvider({
   );
 
   function handleDragEnd(event: DragEndEvent): void {
-    const { active, over } = event;
+    const { over } = event;
 
-    const task = active.data.current?.task as Task | undefined;
+    // Use activeTask from state (saved during drag start) instead of event.active.data.current
+    // because the source component may have unmounted (e.g., when AssignTasksSheet closes)
+    const task = activeTask;
     const targetType = over?.data.current?.type as string | undefined;
 
-    // Check if this is a calendar drop
-    if (targetType === 'calendar-slot' && task) {
-      const slotTime = over?.data.current?.slotTime as Date | undefined;
-      if (slotTime) {
-        const endTime = new Date(slotTime);
-        endTime.setHours(endTime.getHours() + 1);
+    // Track if this was a valid drop to determine sheet behavior
+    let wasValidDrop = false;
 
-        createEventFromTaskMutation.mutate({
-          taskId: task.id,
-          startTime: slotTime,
-          endTime,
-        });
-        setActiveTask(null);
-        return;
+    // Check if this is a todolist drop
+    if (targetType === 'todolist' && task) {
+      const rawDate = over?.data.current?.date;
+      // Convert string date back to Date object if needed
+      const targetDate =
+        rawDate instanceof Date
+          ? rawDate
+          : rawDate
+            ? new Date(rawDate)
+            : undefined;
+
+      // Check if this is a valid drop that requires an update
+      const shouldUpdate = (() => {
+        if (!targetDate) return false;
+        // Unassigned tasks (null todoListDate) should always be updated when dropped
+        if (!task.todoListDate) return true;
+        const taskDate = utcDateToLocal(task.todoListDate).toDateString();
+        const dropDate = targetDate.toDateString();
+        return taskDate !== dropDate;
+      })();
+
+      if (shouldUpdate && targetDate) {
+        wasValidDrop = true;
+        // If task is linked to a skill, show recurring modal
+        if (task.subSkillId) {
+          setPendingDrop({ task, targetDate });
+          setShowRecurringModal(true);
+        } else {
+          // For non-skill tasks, move immediately
+          executeMoveTask(task, targetDate);
+        }
       }
     }
 
-    // Original todo list drop logic
-    const targetDate = over?.data.current?.date as Date | undefined;
-
-    // Check if this is a valid drop that requires an update
-    const shouldUpdate = (() => {
-      if (!over || !task || !targetDate) return false;
-      // Unassigned tasks (null todoListDate) should always be updated when dropped
-      if (!task.todoListDate) return true;
-      const taskDate = utcDateToLocal(task.todoListDate).toDateString();
-      const dropDate = targetDate.toDateString();
-      return taskDate !== dropDate;
-    })();
-
-    if (shouldUpdate && task && targetDate) {
-      // If task is linked to a skill, show recurring modal
-      if (task.subSkillId) {
-        setPendingDrop({ task, targetDate });
-        setShowRecurringModal(true);
-      } else {
-        // For non-skill tasks, move immediately
-        executeMoveTask(task, targetDate);
-      }
-    } else if (dragSource === 'assign-sheet') {
-      // Drop was invalid, reopen the assign sheet
+    // Only reopen sheet if drop was invalid and came from assign sheet
+    if (!wasValidDrop && dragSource === 'assign-sheet') {
       setShouldReopenAssignSheet(true);
     }
 
@@ -295,9 +211,9 @@ export function DndProvider({
         onDragEnd={handleDragEnd}
       >
         {children}
-        <DragOverlay dropAnimation={null}>
+        <DragOverlay dropAnimation={null} className="z-[100]">
           {activeTask && (
-            <div className="w-64 rounded-md border bg-background px-4 py-3 shadow-lg">
+            <div className="z-[100] w-64 rounded-md border bg-background px-4 py-3 shadow-lg">
               <div className="flex items-start justify-between gap-3">
                 <div
                   className={cn(
@@ -320,6 +236,9 @@ export function DndProvider({
             </div>
           )}
         </DragOverlay>
+
+        {/* Assign Tasks Sheet - must be inside DndContext for draggable to work */}
+        <AssignTasksSheet />
       </DndContext>
 
       {/* Recurring Modal for skill-linked tasks */}
@@ -332,9 +251,6 @@ export function DndProvider({
           onConfirm={handleRecurringConfirm}
         />
       )}
-
-      {/* Assign Tasks Sheet for unassigned tasks */}
-      <AssignTasksSheet />
     </DndStateContext.Provider>
   );
 }

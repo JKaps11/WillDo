@@ -34,7 +34,8 @@ interface SkillGroup {
 export function AssignTasksSheet(): ReactNode {
   const trpc = useTRPC();
   const open = useStore(uiStore, (s) => s.showAssignTasksSheet);
-  const { isDragging, shouldReopenAssignSheet, clearReopenFlag } = useDndState();
+  const { isDragging, shouldReopenAssignSheet, clearReopenFlag } =
+    useDndState();
   const wasOpenBeforeDragRef = useRef(false);
 
   // Close sheet when dragging starts
@@ -96,7 +97,7 @@ export function AssignTasksSheet(): ReactNode {
           </SheetDescription>
         </SheetHeader>
 
-        <div className="mt-4 flex-1 overflow-y-auto">
+        <div className="mt-4 mx-4 flex-1 overflow-y-auto">
           {tasks.length === 0 ? (
             <div className="py-8 text-center text-sm text-muted-foreground">
               No unassigned tasks
@@ -124,10 +125,7 @@ export function AssignTasksSheet(): ReactNode {
                     <div className="flex flex-col gap-1">
                       {group.tasks.map((task) => (
                         <div key={task.id} className="rounded-md border">
-                          <Task
-                            task={task}
-                            dragSource="assign-sheet"
-                          />
+                          <Task task={task} dragSource="assign-sheet" />
                         </div>
                       ))}
                     </div>
