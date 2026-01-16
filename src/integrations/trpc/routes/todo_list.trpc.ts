@@ -18,6 +18,39 @@ const DAY_OF_WEEK_MAP: Record<DaysOfWeek, number> = {
   saturday: 6,
 };
 
+/** Check if a date is skipped due to exceptions (skip or moved away) */
+function isDateSkipped(task: Task, date: Date): boolean {
+  const exceptions = task.recurrenceRule?.exceptions ?? [];
+  const dateKey = date.toISOString().split('T')[0];
+
+  // Any exception (skip or moved) means the original date should be skipped
+  return exceptions.some((ex) => ex.originalDate === dateKey);
+}
+
+/** Get moved exceptions that should appear in the date range */
+function getMovedExceptionsInRange(
+  task: Task,
+  rangeStart: Date,
+  rangeEnd: Date,
+): Array<{ task: Task; date: Date }> {
+  const exceptions = task.recurrenceRule?.exceptions ?? [];
+  const result: Array<{ task: Task; date: Date }> = [];
+
+  for (const exception of exceptions) {
+    if (exception.action === 'moved' && exception.movedToDate) {
+      const movedDate = new Date(exception.movedToDate);
+      if (movedDate >= rangeStart && movedDate <= rangeEnd) {
+        result.push({
+          task,
+          date: movedDate,
+        });
+      }
+    }
+  }
+
+  return result;
+}
+
 /** Check if a date matches the recurrence pattern */
 function matchesRecurrence(
   task: Task,
@@ -49,31 +82,27 @@ function matchesRecurrence(
     return daysDiff % rule.interval === 0;
   }
 
-  if (rule.frequency === 'weekly') {
-    // For weekly, check if the day of week matches
-    const dayOfWeek = date.getDay();
-    const daysOfWeek = rule.daysOfWeek ?? [];
+  // frequency === 'weekly': check if the day of week matches
+  const dayOfWeek = date.getDay();
+  const daysOfWeek = rule.daysOfWeek ?? [];
 
-    // If no specific days are set, use the start date's day
-    if (daysOfWeek.length === 0) {
-      const startDayOfWeek = startDate.getDay();
-      if (dayOfWeek !== startDayOfWeek) return false;
-    } else {
-      // Check if current day is in the allowed days
-      const matchesDay = daysOfWeek.some(
-        (day) => DAY_OF_WEEK_MAP[day] === dayOfWeek,
-      );
-      if (!matchesDay) return false;
-    }
-
-    // Check week interval
-    const weeksDiff = Math.floor(
-      (date.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7),
+  // If no specific days are set, use the start date's day
+  if (daysOfWeek.length === 0) {
+    const startDayOfWeek = startDate.getDay();
+    if (dayOfWeek !== startDayOfWeek) return false;
+  } else {
+    // Check if current day is in the allowed days
+    const matchesDay = daysOfWeek.some(
+      (day) => DAY_OF_WEEK_MAP[day] === dayOfWeek,
     );
-    return weeksDiff % rule.interval === 0;
+    if (!matchesDay) return false;
   }
 
-  return false;
+  // Check week interval
+  const weeksDiff = Math.floor(
+    (date.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 7),
+  );
+  return weeksDiff % rule.interval === 0;
 }
 
 /** Expand recurring tasks within a date range */
@@ -101,11 +130,14 @@ function expandRecurringTasks(
     let currentDate = new Date(rangeStart);
     let occurrenceCount = 0;
 
-    // Count occurrences before the range start
+    // Count occurrences before the range start (excluding skipped dates)
     if (task.todoListDate < rangeStart) {
       let countDate = new Date(task.todoListDate);
       while (countDate < rangeStart) {
-        if (matchesRecurrence(task, countDate, occurrenceCount)) {
+        if (
+          matchesRecurrence(task, countDate, occurrenceCount) &&
+          !isDateSkipped(task, countDate)
+        ) {
           occurrenceCount++;
         }
         countDate = addDays(countDate, 1);
@@ -115,11 +147,22 @@ function expandRecurringTasks(
     // Check each day in the range
     while (currentDate <= rangeEnd) {
       if (matchesRecurrence(task, currentDate, occurrenceCount)) {
-        expanded.push({ task, date: new Date(currentDate) });
+        // Only add if the date is not skipped due to an exception
+        if (!isDateSkipped(task, currentDate)) {
+          expanded.push({ task, date: new Date(currentDate) });
+        }
         occurrenceCount++;
       }
       currentDate = addDays(currentDate, 1);
     }
+
+    // Add moved exceptions that fall within the range
+    const movedExceptions = getMovedExceptionsInRange(
+      task,
+      rangeStart,
+      rangeEnd,
+    );
+    expanded.push(...movedExceptions);
   }
 
   return expanded;
@@ -135,12 +178,19 @@ function groupTasksByDate(
     const dateKey = date.toISOString().split('T')[0];
     const existing = byDate.get(dateKey);
 
+    // Create a task copy with todoListDate set to the expanded occurrence date
+    // This ensures dragging knows which occurrence is being moved
+    const expandedTask: Task = {
+      ...task,
+      todoListDate: date,
+    };
+
     if (existing) {
-      existing.tasks.push(task);
+      existing.tasks.push(expandedTask);
     } else {
       byDate.set(dateKey, {
         date,
-        tasks: [task],
+        tasks: [expandedTask],
       });
     }
   }

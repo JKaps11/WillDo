@@ -2,7 +2,10 @@ import { Outlet, createFileRoute } from '@tanstack/react-router';
 import { SignedIn } from '@clerk/tanstack-react-start';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/common/AppSidebar';
-import { GlobalRecurringModal } from '@/components/recurring';
+import {
+  GlobalRecurringModal,
+  MoveRecurringModal,
+} from '@/components/recurring';
 import AppHeader from '@/components/common/AppHeader';
 
 export const Route = createFileRoute('/app')({
@@ -22,6 +25,7 @@ export function AppLayout() {
         </SidebarInset>
       </SidebarProvider>
       <GlobalRecurringModal />
+      <MoveRecurringModal />
     </SignedIn>
   );
 }

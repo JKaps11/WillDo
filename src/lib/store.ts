@@ -22,6 +22,15 @@ export interface RecurrenceModalState {
   targetDate: Date | null;
 }
 
+export type MoveRecurringAction = 'this_only' | 'this_and_future' | 'all';
+
+export interface MoveRecurringModalState {
+  isOpen: boolean;
+  task: Task | null;
+  sourceDate: Date | null; // The expanded occurrence date being moved
+  targetDate: Date | null; // Where the task is being dropped
+}
+
 export interface UIStoreState {
   settingsTab: UIStoreSettingsTab;
   todoListBaseDate: Date;
@@ -31,6 +40,7 @@ export interface UIStoreState {
   showCreateSubSkillModal: boolean;
   showAssignTasksSheet: boolean;
   recurrenceModal: RecurrenceModalState;
+  moveRecurringModal: MoveRecurringModalState;
 }
 
 export type UIStoreActions = {
@@ -48,6 +58,12 @@ export type UIStoreActions = {
   setShowAssignTasksSheet: (show: boolean) => void;
   openRecurrenceModal: (task: Task, targetDate?: Date) => void;
   closeRecurrenceModal: () => void;
+  openMoveRecurringModal: (
+    task: Task,
+    sourceDate: Date,
+    targetDate: Date,
+  ) => void;
+  closeMoveRecurringModal: () => void;
 };
 
 const initialState: UIStoreState = {
@@ -61,6 +77,12 @@ const initialState: UIStoreState = {
   recurrenceModal: {
     isOpen: false,
     task: null,
+    targetDate: null,
+  },
+  moveRecurringModal: {
+    isOpen: false,
+    task: null,
+    sourceDate: null,
     targetDate: null,
   },
 };
@@ -165,6 +187,28 @@ export const uiStoreActions: UIStoreActions = {
       recurrenceModal: {
         isOpen: false,
         task: null,
+        targetDate: null,
+      },
+    }));
+  },
+  openMoveRecurringModal: (task: Task, sourceDate: Date, targetDate: Date) => {
+    uiStore.setState((state) => ({
+      ...state,
+      moveRecurringModal: {
+        isOpen: true,
+        task,
+        sourceDate,
+        targetDate,
+      },
+    }));
+  },
+  closeMoveRecurringModal: () => {
+    uiStore.setState((state) => ({
+      ...state,
+      moveRecurringModal: {
+        isOpen: false,
+        task: null,
+        sourceDate: null,
         targetDate: null,
       },
     }));

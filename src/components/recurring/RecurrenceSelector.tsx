@@ -10,7 +10,11 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 
-const DAYS_OF_WEEK: Array<{ value: DaysOfWeek; label: string; fullLabel: string }> = [
+const DAYS_OF_WEEK: Array<{
+  value: DaysOfWeek;
+  label: string;
+  fullLabel: string;
+}> = [
   { value: 'sunday', label: 'S', fullLabel: 'Sunday' },
   { value: 'monday', label: 'M', fullLabel: 'Monday' },
   { value: 'tuesday', label: 'T', fullLabel: 'Tuesday' },

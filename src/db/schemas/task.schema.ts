@@ -55,6 +55,14 @@ export type RecurrenceFrequency =
 
 export type DaysOfWeek = (typeof daysOfWeekEnum.enumValues)[number];
 
+export type RecurrenceExceptionAction = 'skip' | 'moved';
+
+export interface RecurrenceException {
+  originalDate: string; // ISO date (YYYY-MM-DD) of the occurrence being modified
+  action: RecurrenceExceptionAction;
+  movedToDate?: string; // ISO date where it was moved to (only for action='moved')
+}
+
 export interface RecurrenceRule {
   isRecurring: boolean;
   frequency: RecurrenceFrequency;
@@ -63,6 +71,7 @@ export interface RecurrenceRule {
   endType: RecurrenceEndType;
   endAfterCount?: number;
   endOnDate?: string;
+  exceptions?: Array<RecurrenceException>;
 }
 
 /* ---------- Table ---------- */

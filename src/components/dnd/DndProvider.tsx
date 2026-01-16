@@ -15,6 +15,7 @@ import { RecurringModal } from '@/components/recurring/RecurringModal';
 import { formatPriority } from '@/components/todo-list/utils';
 import { startOfDay, utcDateToLocal } from '@/utils/dates';
 import { useTRPC } from '@/integrations/trpc/react';
+import { uiStoreActions } from '@/lib/store';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
@@ -150,12 +151,25 @@ export function DndProvider({
 
       if (shouldUpdate && targetDate) {
         wasValidDrop = true;
-        // If task is linked to a skill, show recurring modal
-        if (task.subSkillId) {
+
+        const hasExistingRecurrence = task.recurrenceRule?.isRecurring === true;
+        const isAlreadyAssigned = task.todoListDate !== null;
+
+        if (isAlreadyAssigned && hasExistingRecurrence) {
+          // Scenario: Moving an existing recurring task occurrence
+          // Show MoveRecurringModal with 3 options (this only, this and future, all)
+          // task.todoListDate is the expanded occurrence date (set by groupTasksByDate)
+          uiStoreActions.openMoveRecurringModal(
+            task,
+            task.todoListDate,
+            targetDate,
+          );
+        } else if (!isAlreadyAssigned && task.subSkillId) {
+          // Scenario: Assigning an unassigned task (may want to set up recurrence)
           setPendingDrop({ task, targetDate });
           setShowRecurringModal(true);
         } else {
-          // For non-skill tasks, move immediately
+          // Scenario: Moving a non-recurring assigned task, or unassigned without skill
           executeMoveTask(task, targetDate);
         }
       }

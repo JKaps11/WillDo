@@ -17,6 +17,17 @@ export const daysOfWeekSchema = z.enum(daysOfWeekEnum.enumValues);
 
 /* ---------- Recurrence Rule Schema ---------- */
 
+export const recurrenceExceptionActionSchema = z.enum(['skip', 'moved']);
+
+export const recurrenceExceptionSchema = z.object({
+  originalDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  action: recurrenceExceptionActionSchema,
+  movedToDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+});
+
 export const recurrenceRuleSchema = z.object({
   isRecurring: z.boolean(),
   frequency: recurrenceFrequencySchema,
@@ -25,6 +36,7 @@ export const recurrenceRuleSchema = z.object({
   endType: recurrenceEndTypeSchema,
   endAfterCount: z.number().int().positive().optional(),
   endOnDate: z.string().optional(),
+  exceptions: z.array(recurrenceExceptionSchema).optional(),
 });
 
 /* ---------- Task Schemas ---------- */

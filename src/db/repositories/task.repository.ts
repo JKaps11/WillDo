@@ -118,7 +118,10 @@ export const taskRepository = {
               lte(tasks.todoListDate, endDate),
             ),
             // Recurring tasks that start before or on endDate
-            and(isNotNull(tasks.recurrenceRule), lte(tasks.todoListDate, endDate)),
+            and(
+              isNotNull(tasks.recurrenceRule),
+              lte(tasks.todoListDate, endDate),
+            ),
           ),
         ),
       )
