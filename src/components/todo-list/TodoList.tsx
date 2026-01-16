@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 import { TodoListContext, useTodoListContext } from './context';
 import { TodoListDropZone } from './TodoListDropZone';
 import { sortAndFilterTasks } from './utils';
-import type { Task as TaskType } from '@/db/schemas/task.schema';
+import type { TaskWithOptionalSkillInfo } from '@/db/repositories/task.repository';
 import type { TodoListDay, TodoListOptions } from './types';
 import type { ReactNode } from 'react';
 
@@ -166,7 +166,7 @@ function EmptyDayCard({ date }: EmptyDayCardProps): ReactNode {
 
 interface TodoListCardProps {
   todoList: TodoListDay;
-  tasks: Array<TaskType>;
+  tasks: Array<TaskWithOptionalSkillInfo>;
 }
 
 function TodoListCard({ todoList, tasks }: TodoListCardProps): ReactNode {
@@ -204,12 +204,12 @@ function TodoListCard({ todoList, tasks }: TodoListCardProps): ReactNode {
 /* ---------- TaskList ---------- */
 
 interface TaskListProps {
-  tasks: Array<TaskType>;
+  tasks: Array<TaskWithOptionalSkillInfo>;
 }
 
 function TaskList({ tasks }: TaskListProps): ReactNode {
   return (
-    <div className="rounded-md border overflow-hidden">
+    <div className="overflow-hidden">
       <div className="flex flex-col gap-1 p-1 max-h-[420px] overflow-y-auto overflow-x-hidden">
         {tasks.map((task) => {
           // Create unique key for recurring tasks (same task.id on multiple days)

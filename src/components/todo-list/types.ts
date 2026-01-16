@@ -4,6 +4,7 @@ import type { UserSettings } from '@/db/schemas/user.schema';
 export type {
   TodoListDay,
   TaskWithSkillInfo,
+  TaskWithOptionalSkillInfo,
 } from '@/db/repositories/task.repository';
 
 export type TodoListOptions = UserSettings['todoList'];

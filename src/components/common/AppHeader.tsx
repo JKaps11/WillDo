@@ -4,6 +4,7 @@ import {
   ArrowBigRight,
   // ArrowDownAZ,
   // ArrowUpDown,
+  ChevronDown,
   ChevronRight,
   ClipboardList,
   Plus,
@@ -20,6 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 import { SidebarTrigger } from '../ui/sidebar';
 import { Separator } from '../ui/separator';
 // import NewTaskModal from '../NewTaskModal';
@@ -28,6 +35,7 @@ import { Badge } from '../ui/badge';
 import { withVerticalSeparators } from './utils';
 import type { ReactNode } from 'react';
 import type { UIStoreSettingsTab, UnassignedSortOption } from '@/lib/store';
+import { HELP_TOPICS } from '@/components/help';
 import { UI_STORE_SETTINGS_TABS, uiStore, uiStoreActions } from '@/lib/store';
 
 import TodoListConfig from '@/components/todo-list/TodoListConfig';
@@ -43,7 +51,7 @@ type PageTitle =
   | 'Skills'
   | 'New Skill'
   | 'Skill Planner'
-  | 'Docs'
+  | 'Help'
   | 'Settings';
 // | 'Calendar'  // DISABLED: Calendar feature;
 
@@ -90,8 +98,8 @@ function getPageTitle(pathname: string): PageTitle {
       if (pathname.endsWith('/new')) return 'New Skill';
       if (pathname.includes('/planner')) return 'Skill Planner';
       return 'Skills';
-    case 'docs':
-      return 'Docs';
+    case 'help':
+      return 'Help';
     // case 'calendar':
     //   return 'Calendar';
     case 'settings':
@@ -266,6 +274,33 @@ export default function AppHeader(): React.ReactNode {
       //     <CalendarConfig key="calendar-config-popover" />,
       //   ];
       //   break;
+      case 'Help':
+        options = [
+          <DropdownMenu key="help-topic-dropdown">
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                {HELP_TOPICS.find(
+                  (t) => t.id === (search as { topic?: string }).topic,
+                )?.title ?? 'Getting Started'}
+                <ChevronDown className="ml-2 size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {HELP_TOPICS.map((topic) => {
+                const Icon = topic.icon;
+                return (
+                  <DropdownMenuItem key={topic.id} asChild>
+                    <Link to="/app/help" search={{ topic: topic.id }}>
+                      <Icon className="mr-2 size-4" />
+                      {topic.title}
+                    </Link>
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>,
+        ];
+        break;
       case 'Settings':
         options = isMobile
           ? [

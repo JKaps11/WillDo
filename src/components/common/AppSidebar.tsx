@@ -1,7 +1,7 @@
 import {
-  BookOpen,
   // CalendarDays, // DISABLED: Calendar feature
   CheckSquare,
+  HelpCircle,
   // Inbox,
   LayoutDashboard,
   Settings,
@@ -37,7 +37,7 @@ const navItems: Array<{
   // { title: 'Unassigned Tasks', to: '/app/unassigned', icon: Inbox },
   { title: 'Todo List', to: '/app/todolist', icon: CheckSquare },
   { title: 'Settings', to: '/app/settings', icon: Settings },
-  { title: 'Docs', to: '/app/docs', icon: BookOpen },
+  { title: 'Help', to: '/app/help', icon: HelpCircle },
   // { title: 'Calendar', to: '/app/calendar', icon: CalendarDays }, // DISABLED: Calendar feature
 ];
 

@@ -1,9 +1,16 @@
-import { Archive, GitBranch, MoreHorizontal, Pencil } from 'lucide-react';
+import {
+  Archive,
+  GitBranch,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 
 import { SubSkillStageIndicator } from './SubSkillStageIndicator';
 import { DeleteSkillModal } from './DeleteSkillModal';
+import { EditSkillModal } from './EditSkillModal';
 import type { SubSkill } from '@/db/schemas/sub_skill.schema';
 import type { Skill } from '@/db/schemas/skill.schema';
 import {
@@ -82,6 +89,19 @@ export function SkillCard({ skill }: SkillCardProps): React.ReactElement {
                   View Planner
                 </Link>
               </Button>
+              <EditSkillModal
+                skill={skill}
+                trigger={
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
+                    <Pencil className="mr-2 size-4" />
+                    Edit
+                  </Button>
+                }
+              />
               <Button
                 variant="ghost"
                 size="sm"
@@ -100,7 +120,7 @@ export function SkillCard({ skill }: SkillCardProps): React.ReactElement {
                     size="sm"
                     className="w-full justify-start text-destructive hover:text-destructive"
                   >
-                    <Pencil className="mr-2 size-4" />
+                    <Trash2 className="mr-2 size-4" />
                     Delete
                   </Button>
                 }

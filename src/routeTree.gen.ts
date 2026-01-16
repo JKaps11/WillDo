@@ -15,7 +15,7 @@ import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AppTodolistRouteImport } from './routes/app/todolist'
 import { Route as AppSkillsRouteImport } from './routes/app/skills'
 import { Route as AppSettingsRouteImport } from './routes/app/settings'
-import { Route as AppDocsRouteImport } from './routes/app/docs'
+import { Route as AppHelpRouteImport } from './routes/app/help'
 import { Route as AppDashboardRouteImport } from './routes/app/dashboard'
 import { Route as AppSkillsNewRouteImport } from './routes/app/skills_.new'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
@@ -51,9 +51,9 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
-const AppDocsRoute = AppDocsRouteImport.update({
-  id: '/docs',
-  path: '/docs',
+const AppHelpRoute = AppHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
@@ -81,7 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/app/dashboard': typeof AppDashboardRoute
-  '/app/docs': typeof AppDocsRoute
+  '/app/help': typeof AppHelpRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/skills': typeof AppSkillsRoute
   '/app/todolist': typeof AppTodolistRoute
@@ -93,7 +93,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app/dashboard': typeof AppDashboardRoute
-  '/app/docs': typeof AppDocsRoute
+  '/app/help': typeof AppHelpRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/skills': typeof AppSkillsRoute
   '/app/todolist': typeof AppTodolistRoute
@@ -107,7 +107,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/app/dashboard': typeof AppDashboardRoute
-  '/app/docs': typeof AppDocsRoute
+  '/app/help': typeof AppHelpRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/skills': typeof AppSkillsRoute
   '/app/todolist': typeof AppTodolistRoute
@@ -122,7 +122,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/app/dashboard'
-    | '/app/docs'
+    | '/app/help'
     | '/app/settings'
     | '/app/skills'
     | '/app/todolist'
@@ -134,7 +134,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/app/dashboard'
-    | '/app/docs'
+    | '/app/help'
     | '/app/settings'
     | '/app/skills'
     | '/app/todolist'
@@ -147,7 +147,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/app/dashboard'
-    | '/app/docs'
+    | '/app/help'
     | '/app/settings'
     | '/app/skills'
     | '/app/todolist'
@@ -207,11 +207,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/docs': {
-      id: '/app/docs'
-      path: '/docs'
-      fullPath: '/app/docs'
-      preLoaderRoute: typeof AppDocsRouteImport
+    '/app/help': {
+      id: '/app/help'
+      path: '/help'
+      fullPath: '/app/help'
+      preLoaderRoute: typeof AppHelpRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/dashboard': {
@@ -247,7 +247,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
-  AppDocsRoute: typeof AppDocsRoute
+  AppHelpRoute: typeof AppHelpRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppSkillsRoute: typeof AppSkillsRoute
   AppTodolistRoute: typeof AppTodolistRoute
@@ -258,7 +258,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
-  AppDocsRoute: AppDocsRoute,
+  AppHelpRoute: AppHelpRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppSkillsRoute: AppSkillsRoute,
   AppTodolistRoute: AppTodolistRoute,

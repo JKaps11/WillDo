@@ -1,5 +1,6 @@
-import { CalendarClock, Repeat } from 'lucide-react';
+import { CalendarClock, CalendarIcon, Repeat } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { format } from 'date-fns';
 
 import { RecurrenceEndSelector } from './RecurrenceEndSelector';
 import { RecurrenceSelector } from './RecurrenceSelector';
@@ -9,6 +10,11 @@ import type {
   Task,
 } from '@/db/schemas/task.schema';
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -16,6 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Calendar } from '@/components/ui/calendar';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
@@ -31,6 +38,7 @@ interface RecurringModalProps {
 
 export interface RecurringOptions {
   isRecurring: boolean;
+  selectedDate: Date;
   recurrenceRule?: RecurrenceRule;
   recurrenceEndType?: RecurrenceEndType;
   recurrenceEndValue?: number;
@@ -51,6 +59,7 @@ export function RecurringModal({
   onConfirm,
 }: RecurringModalProps): React.ReactElement {
   const [isRecurring, setIsRecurring] = useState<boolean>(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(targetDate);
   const [recurrenceRule, setRecurrenceRule] = useState<RecurrenceRule>(
     DEFAULT_RECURRENCE_RULE,
   );
@@ -62,6 +71,7 @@ export function RecurringModal({
     if (open && task.recurrenceRule) {
       const rule = task.recurrenceRule;
       setIsRecurring(rule.isRecurring);
+      setSelectedDate(targetDate);
       setRecurrenceRule({
         isRecurring: rule.isRecurring,
         frequency: rule.frequency,
@@ -76,22 +86,24 @@ export function RecurringModal({
     } else if (open) {
       // Reset to defaults when opening without existing rule
       setIsRecurring(false);
+      setSelectedDate(targetDate);
       setRecurrenceRule(DEFAULT_RECURRENCE_RULE);
       setEndType('never');
       setEndValue(undefined);
     }
-  }, [open, task.recurrenceRule]);
+  }, [open, task.recurrenceRule, targetDate]);
 
   const handleConfirm = (): void => {
     if (isRecurring) {
       onConfirm({
         isRecurring: true,
+        selectedDate,
         recurrenceRule,
         recurrenceEndType: endType,
         recurrenceEndValue: endValue,
       });
     } else {
-      onConfirm({ isRecurring: false });
+      onConfirm({ isRecurring: false, selectedDate });
     }
     onOpenChange(false);
   };
@@ -99,17 +111,12 @@ export function RecurringModal({
   const handleCancel = (): void => {
     // Reset state
     setIsRecurring(false);
+    setSelectedDate(targetDate);
     setRecurrenceRule(DEFAULT_RECURRENCE_RULE);
     setEndType('never');
     setEndValue(undefined);
     onOpenChange(false);
   };
-
-  const formattedDate = targetDate.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'short',
-    day: 'numeric',
-  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -120,11 +127,44 @@ export function RecurringModal({
             Schedule Task
           </DialogTitle>
           <DialogDescription>
-            Moving &quot;{task.name}&quot; to {formattedDate}
+            Configure schedule for &quot;{task.name}&quot;
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
+          {/* Date Picker */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-sm font-medium">
+              <CalendarIcon className="size-4" />
+              Date
+            </Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {format(selectedDate, 'EEEE, MMM d, yyyy')}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => {
+                    if (date) {
+                      setSelectedDate(date);
+                    }
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <Separator />
+
+          {/* Recurring Toggle */}
           <div className="flex items-center justify-between">
             <Label
               htmlFor="recurring-toggle"
@@ -163,7 +203,7 @@ export function RecurringModal({
             Cancel
           </Button>
           <Button onClick={handleConfirm}>
-            {isRecurring ? 'Schedule Recurring' : 'Move Task'}
+            {isRecurring ? 'Schedule Recurring' : 'Save'}
           </Button>
         </DialogFooter>
       </DialogContent>

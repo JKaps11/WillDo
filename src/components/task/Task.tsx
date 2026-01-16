@@ -5,7 +5,10 @@ import { Pencil } from 'lucide-react';
 
 import PriorityBadge from './PriorityBadge';
 import type { Task as TaskType } from '@/db/schemas/task.schema';
-import type { TaskWithSkillInfo } from '@/db/repositories/task.repository';
+import type {
+  TaskWithOptionalSkillInfo,
+  TaskWithSkillInfo,
+} from '@/db/repositories/task.repository';
 import type { ReactNode } from 'react';
 import { useTRPC } from '@/integrations/trpc/react';
 import { uiStoreActions } from '@/lib/store';
@@ -14,7 +17,7 @@ import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 
-type AnyTask = TaskType | TaskWithSkillInfo;
+type AnyTask = TaskType | TaskWithSkillInfo | TaskWithOptionalSkillInfo;
 
 interface TaskProps {
   task: AnyTask;
@@ -108,6 +111,9 @@ export function Task({ task, className, dragSource }: TaskProps): ReactNode {
     }
   }
 
+  // Check if task has skill color info (TaskWithSkillInfo)
+  const skillColor = 'skillColor' in task ? task.skillColor : null;
+
   return (
     <div
       ref={setNodeRef}
@@ -115,12 +121,18 @@ export function Task({ task, className, dragSource }: TaskProps): ReactNode {
       {...attributes}
       onPointerDown={handlePointerDown}
       className={cn(
-        'group flex items-center justify-between gap-3 px-3 py-2 cursor-grab active:cursor-grabbing transition-colors hover:bg-accent/50 select-none',
+        'group relative flex items-center justify-between gap-3 px-3 py-2 cursor-grab active:cursor-grabbing transition-colors hover:bg-accent/50 select-none border-1',
         '[&:has(.task-checkbox:hover)]:bg-transparent [&:has(.task-edit-btn:hover)]:bg-transparent',
         isDragging && 'overflow-hidden',
         className,
       )}
     >
+      {skillColor && (
+        <div
+          className="absolute left-0 top-0 h-full w-1"
+          style={{ backgroundColor: skillColor }}
+        />
+      )}
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <div className="flex shrink-0 items-center justify-center gap-1">
           <PriorityBadge priority={task.priority} />

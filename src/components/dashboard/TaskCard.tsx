@@ -3,7 +3,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RecurringBadge } from './RecurringBadge';
 import type { DashboardTask } from '@/integrations/trpc/routes/dashboard.trpc';
 import { TaskMetricBadge } from '@/components/task/TaskMetricBadge';
-import { SkillColorDot } from '@/components/task/SkillColorDot';
 import { useTRPC } from '@/integrations/trpc/react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
@@ -74,12 +73,18 @@ export function TaskCard({
   return (
     <div
       className={cn(
-        'flex items-start gap-3 rounded-lg border bg-card p-3 transition-colors',
+        'relative flex items-start gap-3 rounded-lg border bg-card p-3 transition-colors',
         task.completed && 'opacity-60',
         isMetricFilled && !task.completed && 'opacity-60',
         className,
       )}
     >
+      {task.skill && (
+        <div
+          className="absolute left-0 top-0 h-full w-1 rounded-l-lg"
+          style={{ backgroundColor: task.skill.color }}
+        />
+      )}
       <Checkbox
         className="mt-0.5 cursor-pointer"
         checked={task.completed}
@@ -88,23 +93,14 @@ export function TaskCard({
       />
 
       <div className="min-w-0 flex-1 space-y-1">
-        <div className="flex items-start gap-2">
-          {task.skill && (
-            <SkillColorDot
-              color={task.skill.color}
-              skillName={task.skill.name}
-              className="mt-1 shrink-0"
-            />
+        <span
+          className={cn(
+            'text-sm font-medium',
+            task.completed && 'text-muted-foreground line-through',
           )}
-          <span
-            className={cn(
-              'text-sm font-medium',
-              task.completed && 'text-muted-foreground line-through',
-            )}
-          >
-            {task.name}
-          </span>
-        </div>
+        >
+          {task.name}
+        </span>
 
         {task.description && (
           <p className="line-clamp-1 text-xs text-muted-foreground">

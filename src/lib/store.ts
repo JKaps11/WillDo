@@ -6,7 +6,7 @@ import { addDays, startOfDay } from '@/utils/dates';
 export const UI_STORE_SETTINGS_TABS = [
   'appearance',
   'todo-list',
-  'tasks',
+  // 'tasks',
   // 'general', // DISABLED: General settings
   // 'calendar', // DISABLED: Calendar feature
   // 'integrations', // DISABLED: Not implemented

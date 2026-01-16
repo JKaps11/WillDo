@@ -1,5 +1,5 @@
-import type { Priority, Task } from '@/db/schemas/task.schema';
-import type { TodoListOptions } from './types';
+import type { Priority } from '@/db/schemas/task.schema';
+import type { TaskWithOptionalSkillInfo, TodoListOptions } from './types';
 
 const PRIORITY_RANK: Record<Priority, number> = {
   Very_High: 5,
@@ -10,9 +10,9 @@ const PRIORITY_RANK: Record<Priority, number> = {
 };
 
 export function sortAndFilterTasks(
-  tasks: Array<Task>,
+  tasks: Array<TaskWithOptionalSkillInfo>,
   options: TodoListOptions,
-): Array<Task> {
+): Array<TaskWithOptionalSkillInfo> {
   const filtered = options.showCompleted
     ? tasks
     : tasks.filter((t) => !t.completed);

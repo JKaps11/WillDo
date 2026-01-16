@@ -12,9 +12,13 @@ export interface TaskWithSkillInfo extends Task {
   skillColor: string;
 }
 
+export interface TaskWithOptionalSkillInfo extends Task {
+  skillColor: string | null;
+}
+
 export interface TodoListDay {
   date: Date;
-  tasks: Array<Task>;
+  tasks: Array<TaskWithOptionalSkillInfo>;
 }
 
 export const taskRepository = {
@@ -126,6 +130,56 @@ export const taskRepository = {
         ),
       )
       .orderBy(tasks.todoListDate);
+  },
+
+  /**
+   * Find tasks for the todo list view within a date range, including skill color.
+   * Uses LEFT JOIN to include tasks without skills (skillColor will be null).
+   */
+  findForTodoListWithSkillInfo: async (
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Array<TaskWithOptionalSkillInfo>> => {
+    const result = await db
+      .select({
+        id: tasks.id,
+        userId: tasks.userId,
+        todoListDate: tasks.todoListDate,
+        name: tasks.name,
+        description: tasks.description,
+        priority: tasks.priority,
+        dueDate: tasks.dueDate,
+        completed: tasks.completed,
+        subSkillId: tasks.subSkillId,
+        recurrenceRule: tasks.recurrenceRule,
+        createdAt: tasks.createdAt,
+        updatedAt: tasks.updatedAt,
+        skillColor: skills.color,
+      })
+      .from(tasks)
+      .leftJoin(subSkills, eq(tasks.subSkillId, subSkills.id))
+      .leftJoin(skills, eq(subSkills.skillId, skills.id))
+      .where(
+        and(
+          eq(tasks.userId, userId),
+          or(
+            // Non-recurring tasks in range
+            and(
+              gte(tasks.todoListDate, startDate),
+              lte(tasks.todoListDate, endDate),
+            ),
+            // Recurring tasks that start before or on endDate
+            and(
+              isNotNull(tasks.recurrenceRule),
+              lte(tasks.todoListDate, endDate),
+            ),
+          ),
+        ),
+      )
+      .orderBy(tasks.todoListDate);
+
+    return result;
   },
 
   findUnassignedWithSkillInfo: async (

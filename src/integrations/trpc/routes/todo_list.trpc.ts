@@ -1,8 +1,11 @@
 import { protectedProcedure } from '../init';
 import type { TRPCRouterRecord } from '@trpc/server';
 
-import type { DaysOfWeek, Task } from '@/db/schemas/task.schema';
-import type { TodoListDay } from '@/db/repositories/task.repository';
+import type { DaysOfWeek } from '@/db/schemas/task.schema';
+import type {
+  TaskWithOptionalSkillInfo,
+  TodoListDay,
+} from '@/db/repositories/task.repository';
 import { taskRepository } from '@/db/repositories/task.repository';
 import { addWide } from '@/lib/logging/wideEventStore.server';
 import { addDays, endOfWeek, startOfWeek } from '@/utils/dates';
@@ -19,7 +22,7 @@ const DAY_OF_WEEK_MAP: Record<DaysOfWeek, number> = {
 };
 
 /** Check if a date is skipped due to exceptions (skip or moved away) */
-function isDateSkipped(task: Task, date: Date): boolean {
+function isDateSkipped(task: TaskWithOptionalSkillInfo, date: Date): boolean {
   const exceptions = task.recurrenceRule?.exceptions ?? [];
   const dateKey = date.toISOString().split('T')[0];
 
@@ -29,12 +32,12 @@ function isDateSkipped(task: Task, date: Date): boolean {
 
 /** Get moved exceptions that should appear in the date range */
 function getMovedExceptionsInRange(
-  task: Task,
+  task: TaskWithOptionalSkillInfo,
   rangeStart: Date,
   rangeEnd: Date,
-): Array<{ task: Task; date: Date }> {
+): Array<{ task: TaskWithOptionalSkillInfo; date: Date }> {
   const exceptions = task.recurrenceRule?.exceptions ?? [];
-  const result: Array<{ task: Task; date: Date }> = [];
+  const result: Array<{ task: TaskWithOptionalSkillInfo; date: Date }> = [];
 
   for (const exception of exceptions) {
     if (exception.action === 'moved' && exception.movedToDate) {
@@ -53,7 +56,7 @@ function getMovedExceptionsInRange(
 
 /** Check if a date matches the recurrence pattern */
 function matchesRecurrence(
-  task: Task,
+  task: TaskWithOptionalSkillInfo,
   date: Date,
   occurrenceCount: number,
 ): boolean {
@@ -107,11 +110,11 @@ function matchesRecurrence(
 
 /** Expand recurring tasks within a date range */
 function expandRecurringTasks(
-  tasks: Array<Task>,
+  tasks: Array<TaskWithOptionalSkillInfo>,
   rangeStart: Date,
   rangeEnd: Date,
-): Array<{ task: Task; date: Date }> {
-  const expanded: Array<{ task: Task; date: Date }> = [];
+): Array<{ task: TaskWithOptionalSkillInfo; date: Date }> {
+  const expanded: Array<{ task: TaskWithOptionalSkillInfo; date: Date }> = [];
 
   for (const task of tasks) {
     if (!task.todoListDate) continue;
@@ -170,7 +173,7 @@ function expandRecurringTasks(
 
 /** Group expanded tasks by date */
 function groupTasksByDate(
-  expandedTasks: Array<{ task: Task; date: Date }>,
+  expandedTasks: Array<{ task: TaskWithOptionalSkillInfo; date: Date }>,
 ): Array<TodoListDay> {
   const byDate = new Map<string, TodoListDay>();
 
@@ -180,7 +183,7 @@ function groupTasksByDate(
 
     // Create a task copy with todoListDate set to the expanded occurrence date
     // This ensures dragging knows which occurrence is being moved
-    const expandedTask: Task = {
+    const expandedTask: TaskWithOptionalSkillInfo = {
       ...task,
       todoListDate: date,
     };
@@ -209,10 +212,14 @@ export const todoListRouter = {
       const end = endOfWeek(input);
       addWide({ week_start: start.toISOString(), week_end: end.toISOString() });
 
-      // Fetch tasks that could appear in this range:
+      // Fetch tasks that could appear in this range (with skill color info):
       // 1. Non-recurring tasks with todoListDate in range
       // 2. Recurring tasks with todoListDate <= end (they might recur into this range)
-      const tasks = await taskRepository.findForTodoList(userId, start, end);
+      const tasks = await taskRepository.findForTodoListWithSkillInfo(
+        userId,
+        start,
+        end,
+      );
       addWide({ tasks_count: tasks.length });
 
       // Expand recurring tasks and group by date

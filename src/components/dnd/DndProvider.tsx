@@ -87,8 +87,8 @@ export function DndProvider({
 
   /** Execute the actual task move */
   const executeMoveTask = useCallback(
-    (task: Task, targetDate: Date, recurringOptions?: RecurringOptions) => {
-      const newDate = startOfDay(targetDate);
+    (task: Task, recurringOptions: RecurringOptions) => {
+      const newDate = startOfDay(recurringOptions.selectedDate);
 
       // Build update payload
       const updatePayload: Parameters<typeof updateTaskMutation.mutate>[0] = {
@@ -97,7 +97,7 @@ export function DndProvider({
       };
 
       // Add recurrence rule if making recurring
-      if (recurringOptions?.isRecurring && recurringOptions.recurrenceRule) {
+      if (recurringOptions.isRecurring && recurringOptions.recurrenceRule) {
         updatePayload.recurrenceRule = {
           isRecurring: true,
           frequency: recurringOptions.recurrenceRule.frequency,
@@ -109,6 +109,9 @@ export function DndProvider({
               ? recurringOptions.recurrenceEndValue
               : undefined,
         };
+      } else {
+        // Clear recurrence if turning it off
+        updatePayload.recurrenceRule = null;
       }
 
       // Trigger the server mutation
@@ -159,18 +162,17 @@ export function DndProvider({
           // Scenario: Moving an existing recurring task occurrence
           // Show MoveRecurringModal with 3 options (this only, this and future, all)
           // task.todoListDate is the expanded occurrence date (set by groupTasksByDate)
+          // Non-null assertion safe because isAlreadyAssigned checks todoListDate !== null
           uiStoreActions.openMoveRecurringModal(
             task,
-            task.todoListDate,
+            task.todoListDate!,
             targetDate,
           );
-        } else if (!isAlreadyAssigned && task.subSkillId) {
-          // Scenario: Assigning an unassigned task (may want to set up recurrence)
+        } else {
+          // Scenario: Moving a non-recurring task or assigning an unassigned task
+          // Show the schedule modal to allow date editing and recurrence setup
           setPendingDrop({ task, targetDate });
           setShowRecurringModal(true);
-        } else {
-          // Scenario: Moving a non-recurring assigned task, or unassigned without skill
-          executeMoveTask(task, targetDate);
         }
       }
     }
@@ -188,11 +190,7 @@ export function DndProvider({
   const handleRecurringConfirm = useCallback(
     (options: RecurringOptions) => {
       if (pendingDrop) {
-        executeMoveTask(
-          pendingDrop.task as Task,
-          pendingDrop.targetDate,
-          options,
-        );
+        executeMoveTask(pendingDrop.task as Task, options);
       }
       setPendingDrop(null);
       setShowRecurringModal(false);

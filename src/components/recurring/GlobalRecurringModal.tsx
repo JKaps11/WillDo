@@ -33,7 +33,7 @@ export function GlobalRecurringModal(): ReactNode {
   function handleConfirm(options: RecurringOptions): void {
     if (!task || !targetDate) return;
 
-    const newDate = startOfDay(targetDate);
+    const newDate = startOfDay(options.selectedDate);
 
     const updatePayload: Parameters<typeof updateTaskMutation.mutate>[0] = {
       id: task.id,

@@ -1,9 +1,13 @@
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { Lightbulb, Plus } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 
+import { SkillSummaryCard } from './SkillSummaryCard';
+import type { SkillSummary } from '@/integrations/trpc/routes/dashboard.trpc';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useTRPC } from '@/integrations/trpc/react';
 
 interface SkillsOverviewProps {
   className?: string;
@@ -12,6 +16,29 @@ interface SkillsOverviewProps {
 export function SkillsOverview({
   className,
 }: SkillsOverviewProps): React.ReactElement {
+  const trpc = useTRPC();
+  const { data: skills } = useSuspenseQuery(
+    trpc.skill.list.queryOptions({ includeArchived: false }),
+  );
+
+  const skillSummaries: Array<SkillSummary> = skills.map((skill) => ({
+    id: skill.id,
+    name: skill.name,
+    color: skill.color,
+    icon: skill.icon,
+    totalSubSkills: skill.subSkills.length,
+    completedSubSkills: skill.subSkills.filter((ss) => ss.stage === 'complete')
+      .length,
+    inProgressSubSkills: skill.subSkills.filter(
+      (ss) => ss.stage === 'practice' || ss.stage === 'evaluate',
+    ).length,
+    subSkills: skill.subSkills.map((ss) => ({
+      id: ss.id,
+      name: ss.name,
+      stage: ss.stage,
+    })),
+  }));
+
   return (
     <Card className={cn('flex flex-col', className)}>
       <CardHeader className="pb-3">
@@ -29,10 +56,16 @@ export function SkillsOverview({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 pt-0">
-        <div className="py-8 text-center text-sm text-muted-foreground">
-          Skills overview coming soon
-        </div>
+      <CardContent className="flex-1 space-y-2 overflow-y-auto pt-0">
+        {skillSummaries.length === 0 ? (
+          <div className="py-8 text-center text-sm text-muted-foreground">
+            No skills yet. Create your first skill to get started!
+          </div>
+        ) : (
+          skillSummaries.map((skill) => (
+            <SkillSummaryCard key={skill.id} skill={skill} />
+          ))
+        )}
       </CardContent>
     </Card>
   );
