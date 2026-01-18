@@ -227,25 +227,6 @@ function TaskList({ tasks }: TaskListProps): ReactNode {
   );
 }
 
-/* ---------- Loading  ---------- */
-
-/** fix styling if you want to use */
-// function LoadingSkeleton(): ReactNode {
-//     return (
-//         <div className="space-y-4">
-//             <Skeleton className="h-8 w-32" />
-//             <Skeleton className="h-4 w-48" />
-//             <Card>
-//                 <CardContent className="space-y-3 py-6">
-//                     <Skeleton className="h-12 w-full" />
-//                     <Skeleton className="h-12 w-full" />
-//                     <Skeleton className="h-12 w-full" />
-//                 </CardContent>
-//             </Card>
-//         </div>
-//     );
-// }
-
 /* ---------- Error State ---------- */
 
 function ErrorState(): ReactNode {

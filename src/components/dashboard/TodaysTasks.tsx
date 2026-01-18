@@ -5,15 +5,8 @@ import { DashboardEmptyState } from './DashboardEmptyState';
 import { TaskCard } from './TaskCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTRPC } from '@/integrations/trpc/react';
-import { cn } from '@/lib/utils';
 
-interface TodaysTasksProps {
-  className?: string;
-}
-
-export function TodaysTasks({
-  className,
-}: TodaysTasksProps): React.ReactElement {
+export function TodaysTasks(): React.ReactElement {
   const trpc = useTRPC();
 
   const { data: tasks } = useSuspenseQuery(
@@ -21,14 +14,14 @@ export function TodaysTasks({
   );
 
   return (
-    <Card className={cn('flex flex-col', className)}>
+    <Card className='flex min-h-[calc(100vh-12rem)] flex-col md:min-h-[calc(100vh-10rem)]'>
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <ListTodo className="size-5 text-muted-foreground" />
           <CardTitle className="text-base">Today's Tasks</CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 pt-0">
+      <CardContent className="flex-1 overflow-y-auto pt-0">
         {tasks.length === 0 ? (
           <DashboardEmptyState type="tasks" />
         ) : (

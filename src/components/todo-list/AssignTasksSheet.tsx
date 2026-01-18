@@ -6,7 +6,6 @@ import type { TaskWithSkillInfo } from '@/db/repositories/task.repository';
 import type { ReactNode } from 'react';
 import { useDndState } from '@/components/dnd/context';
 import { Task } from '@/components/task/Task';
-import { SkillColorDot } from '@/components/task/SkillColorDot';
 import {
   Accordion,
   AccordionContent,
@@ -111,9 +110,9 @@ export function AssignTasksSheet(): ReactNode {
                 <AccordionItem key={group.skillId} value={group.skillId}>
                   <AccordionTrigger className="px-1">
                     <div className="flex items-center gap-2">
-                      <SkillColorDot
-                        color={group.skillColor}
-                        skillName={group.skillName}
+                      <div
+                        className="h-4 w-1 rounded-full"
+                        style={{ backgroundColor: group.skillColor }}
                       />
                       <span>{group.skillName}</span>
                       <Badge variant="secondary" className="ml-1">

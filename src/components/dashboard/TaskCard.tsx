@@ -9,12 +9,10 @@ import { cn } from '@/lib/utils';
 
 interface TaskCardProps {
   task: DashboardTask;
-  className?: string;
 }
 
 export function TaskCard({
   task,
-  className,
 }: TaskCardProps): React.ReactElement {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -24,15 +22,11 @@ export function TaskCard({
   const totalTarget = task.metrics.reduce((sum, m) => sum + m.targetValue, 0);
   const isMetricFilled = totalTarget > 0 && totalCurrent >= totalTarget;
 
-  // Use completeWithMetricUpdate for tasks linked to sub-skills
   const completeWithMetricMutation = useMutation(
     trpc.task.completeWithMetricUpdate.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: trpc.dashboard.getTodaysTasks.queryKey(),
-        });
-        queryClient.invalidateQueries({
-          queryKey: trpc.dashboard.getStats.queryKey(),
         });
         queryClient.invalidateQueries({
           queryKey: ['skill'],
@@ -46,9 +40,6 @@ export function TaskCard({
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: trpc.dashboard.getTodaysTasks.queryKey(),
-        });
-        queryClient.invalidateQueries({
-          queryKey: trpc.dashboard.getStats.queryKey(),
         });
       },
     }),
@@ -76,58 +67,69 @@ export function TaskCard({
         'relative flex items-start gap-3 rounded-lg border bg-card p-3 transition-colors',
         task.completed && 'opacity-60',
         isMetricFilled && !task.completed && 'opacity-60',
-        className,
       )}
     >
+      {/* Skill color bar */}
       {task.skill && (
         <div
           className="absolute left-0 top-0 h-full w-1 rounded-l-lg"
           style={{ backgroundColor: task.skill.color }}
         />
       )}
-      <Checkbox
-        className="mt-0.5 cursor-pointer"
-        checked={task.completed}
-        onCheckedChange={handleCheckboxChange}
-        disabled={isMetricFilled && !task.completed}
-      />
 
-      <div className="min-w-0 flex-1 space-y-1">
+      <div className="min-w-0 flex-1 space-y-1.5">
+        {/* Task name */}
         <span
           className={cn(
-            'text-sm font-medium',
+            'block text-sm font-medium leading-tight',
             task.completed && 'text-muted-foreground line-through',
           )}
         >
           {task.name}
         </span>
 
+        {/* Skill path */}
+        {task.skill && (
+          <span className="text-xs text-muted-foreground">
+            {task.skill.name}
+            {task.subSkill && (
+              <span className="text-muted-foreground/60">
+                {' › '}
+                {task.subSkill.name}
+              </span>
+            )}
+          </span>
+        )}
+
+        {/* Description styled as a note */}
         {task.description && (
-          <p className="line-clamp-1 text-xs text-muted-foreground">
+          <p className="line-clamp-2 text-xs italic text-muted-foreground/80">
             {task.description}
           </p>
         )}
 
-        <div className="flex flex-wrap items-center gap-2">
-          {task.skill && (
-            <span className="text-xs text-muted-foreground">
-              {task.skill.name}
-              {task.subSkill && ` / ${task.subSkill.name}`}
-            </span>
-          )}
-
-          {task.metrics.length > 0 && totalTarget > 0 && (
-            <TaskMetricBadge
-              currentValue={totalCurrent}
-              targetValue={totalTarget}
-            />
-          )}
-
-          {task.isRecurring && task.recurrenceRule && (
-            <RecurringBadge recurrenceRule={task.recurrenceRule} />
-          )}
-        </div>
+        {/* Badges row */}
+        {(task.metrics.length > 0 || task.isRecurring) && (
+          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+            {task.metrics.length > 0 && totalTarget > 0 && (
+              <TaskMetricBadge
+                currentValue={totalCurrent}
+                targetValue={totalTarget}
+              />
+            )}
+            {task.isRecurring && task.recurrenceRule && (
+              <RecurringBadge recurrenceRule={task.recurrenceRule} />
+            )}
+          </div>
+        )}
       </div>
+
+      <Checkbox
+        className="mt-0.5 shrink-0 cursor-pointer"
+        checked={task.completed}
+        onCheckedChange={handleCheckboxChange}
+        disabled={isMetricFilled && !task.completed}
+      />
     </div>
   );
 }

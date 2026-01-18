@@ -3,7 +3,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { Pencil } from 'lucide-react';
 
-import PriorityBadge from './PriorityBadge';
+// import PriorityBadge from './PriorityBadge';
 import type { Task as TaskType } from '@/db/schemas/task.schema';
 import type {
   TaskWithOptionalSkillInfo,
@@ -134,9 +134,9 @@ export function Task({ task, className, dragSource }: TaskProps): ReactNode {
         />
       )}
       <div className="flex min-w-0 flex-1 items-center gap-2">
-        <div className="flex shrink-0 items-center justify-center gap-1">
+        {/* <div className="flex shrink-0 items-center justify-center gap-1">
           <PriorityBadge priority={task.priority} />
-        </div>
+        </div> */}
 
         <span
           className={cn(

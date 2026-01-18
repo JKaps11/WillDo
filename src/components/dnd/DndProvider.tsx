@@ -12,11 +12,9 @@ import type { DndContextValue } from './context';
 import type { ReactNode } from 'react';
 import { AssignTasksSheet } from '@/components/todo-list/AssignTasksSheet';
 import { RecurringModal } from '@/components/recurring/RecurringModal';
-import { formatPriority } from '@/components/todo-list/utils';
 import { startOfDay, utcDateToLocal } from '@/utils/dates';
 import { useTRPC } from '@/integrations/trpc/react';
 import { uiStoreActions } from '@/lib/store';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface DndProviderProps {
@@ -35,7 +33,9 @@ export function DndProvider({
 }: DndProviderProps): ReactNode {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [activeTask, setActiveTask] = useState<Task | TaskWithSkillInfo | null>(
+    null,
+  );
   const [isMounted, setIsMounted] = useState(false);
   const [showRecurringModal, setShowRecurringModal] = useState(false);
   const [pendingDrop, setPendingDrop] = useState<PendingDrop | null>(null);
@@ -76,7 +76,10 @@ export function DndProvider({
   );
 
   function handleDragStart(event: DragStartEvent): void {
-    const task = event.active.data.current?.task as Task | undefined;
+    const task = event.active.data.current?.task as
+      | Task
+      | TaskWithSkillInfo
+      | undefined;
     const source = event.active.data.current?.source as string | undefined;
     if (task) {
       setActiveTask(task);
@@ -225,26 +228,21 @@ export function DndProvider({
         {children}
         <DragOverlay dropAnimation={null} className="z-[100]">
           {activeTask && (
-            <div className="z-[100] w-64 rounded-md border bg-background px-4 py-3 shadow-lg">
-              <div className="flex items-start justify-between gap-3">
+            <div className="relative flex items-center gap-3 rounded-md border bg-background px-3 py-2 shadow-lg">
+              {'skillColor' in activeTask && activeTask.skillColor && (
                 <div
-                  className={cn(
-                    'min-w-0 truncate font-medium leading-5',
-                    activeTask.completed &&
-                      'text-muted-foreground line-through',
-                  )}
-                >
-                  {activeTask.name}
-                </div>
-                <Badge variant="outline" className="shrink-0 text-xs">
-                  {formatPriority(activeTask.priority)}
-                </Badge>
-              </div>
-              {activeTask.description && (
-                <div className="mt-1 line-clamp-1 text-sm text-muted-foreground">
-                  {activeTask.description}
-                </div>
+                  className="absolute left-0 top-0 h-full w-1 rounded-l-md"
+                  style={{ backgroundColor: activeTask.skillColor }}
+                />
               )}
+              <span
+                className={cn(
+                  'truncate',
+                  activeTask.completed && 'text-muted-foreground line-through',
+                )}
+              >
+                {activeTask.name}
+              </span>
             </div>
           )}
         </DragOverlay>

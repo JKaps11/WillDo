@@ -6,16 +6,9 @@ import { SkillSummaryCard } from './SkillSummaryCard';
 import type { SkillSummary } from '@/integrations/trpc/routes/dashboard.trpc';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { useTRPC } from '@/integrations/trpc/react';
 
-interface SkillsOverviewProps {
-  className?: string;
-}
-
-export function SkillsOverview({
-  className,
-}: SkillsOverviewProps): React.ReactElement {
+export function SkillsOverview(): React.ReactElement {
   const trpc = useTRPC();
   const { data: skills } = useSuspenseQuery(
     trpc.skill.list.queryOptions({ includeArchived: false }),
@@ -40,7 +33,7 @@ export function SkillsOverview({
   }));
 
   return (
-    <Card className={cn('flex flex-col', className)}>
+    <Card className='flex min-h-[calc(100vh-12rem)] flex-col md:min-h-[calc(100vh-10rem)]'>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -56,7 +49,7 @@ export function SkillsOverview({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 space-y-2 overflow-y-auto pt-0">
+      <CardContent className="flex-1 overflow-y-auto space-y-2 pt-0">
         {skillSummaries.length === 0 ? (
           <div className="py-8 text-center text-sm text-muted-foreground">
             No skills yet. Create your first skill to get started!
