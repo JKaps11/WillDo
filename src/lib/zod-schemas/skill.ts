@@ -42,6 +42,13 @@ export const listSkillsSchema = z.object({
 
 /* ---------- Sub-Skill Schemas ---------- */
 
+export const createSubSkillMetricSchema = z.object({
+  name: z.string().min(1).max(255),
+  unit: z.string().optional(),
+  targetValue: z.number().int().positive().default(1),
+  currentValue: z.number().int().min(0).default(0),
+});
+
 export const createSubSkillSchema = z.object({
   skillId: z.uuid(),
   name: z.string().min(1).max(255),
@@ -49,6 +56,7 @@ export const createSubSkillSchema = z.object({
   stage: subSkillStageSchema.optional(),
   sortOrder: z.number().int().optional(),
   parentSubSkillId: z.uuid().nullable().optional(),
+  metrics: z.array(createSubSkillMetricSchema).optional(),
 });
 
 export const updateSubSkillSchema = z.object({
@@ -159,5 +167,4 @@ export const createSkillWithPlanSchema = z.object({
   icon: z.string().optional(),
   goal: z.string().optional(),
   subSkills: z.array(subSkillPlanItemSchema),
-  createTasks: z.boolean().default(true),
 });

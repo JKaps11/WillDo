@@ -1,9 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useStore } from '@tanstack/react-store';
 import { useForm } from '@tanstack/react-form';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Plus, Trash2 } from 'lucide-react';
 
-import type { AnyFieldApi } from '@tanstack/react-form';
 import type { SkillWithSubSkills } from './types';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import {
@@ -31,15 +30,12 @@ interface CreateSubSkillModalProps {
   skill: SkillWithSubSkills;
 }
 
-type StringFieldApi = AnyFieldApi & {
-  state: { value: string };
-  handleChange: (value: string) => void;
-};
-
-type NullableStringFieldApi = AnyFieldApi & {
-  state: { value: string | null };
-  handleChange: (value: string | null) => void;
-};
+interface MetricFormValue {
+  name: string;
+  unit: string;
+  targetValue: number;
+  currentValue: number;
+}
 
 export function CreateSubSkillModal({
   skill,
@@ -63,12 +59,14 @@ export function CreateSubSkillModal({
         if (previousSkill) {
           const optimisticSubSkill = {
             id: `temp-${Date.now()}`,
+            userId: '',
             skillId: skill.id,
             name: newSubSkill.name,
             description: newSubSkill.description ?? null,
             parentSubSkillId: newSubSkill.parentSubSkillId ?? null,
             stage: 'not_started' as const,
             stageStartedAt: null,
+            sortOrder: 0,
             createdAt: new Date(),
             updatedAt: new Date(),
             metrics: [],
@@ -109,14 +107,25 @@ export function CreateSubSkillModal({
     defaultValues: {
       name: '',
       description: '',
-      parentSubSkillId: null,
+      parentSubSkillId: null as string | null,
+      metrics: [] as Array<MetricFormValue>,
     },
     onSubmit: ({ value }) => {
+      const metricsToSubmit = value.metrics
+        .filter((m) => m.name.trim())
+        .map((m) => ({
+          name: m.name.trim(),
+          unit: m.unit.trim() || undefined,
+          targetValue: m.targetValue,
+          currentValue: m.currentValue,
+        }));
+
       createMutation.mutate({
         skillId: skill.id,
         name: value.name.trim(),
         description: value.description.trim() || undefined,
         parentSubSkillId: value.parentSubSkillId,
+        metrics: metricsToSubmit.length > 0 ? metricsToSubmit : undefined,
       });
     },
   });
@@ -149,7 +158,7 @@ export function CreateSubSkillModal({
         >
           <form.Field
             name="name"
-            children={(field: StringFieldApi) => (
+            children={(field) => (
               <Field>
                 <FieldLabel htmlFor={field.name}>Name</FieldLabel>
                 <Input
@@ -168,7 +177,7 @@ export function CreateSubSkillModal({
 
           <form.Field
             name="description"
-            children={(field: StringFieldApi) => (
+            children={(field) => (
               <Field>
                 <FieldLabel htmlFor={field.name}>
                   Description (optional)
@@ -188,7 +197,7 @@ export function CreateSubSkillModal({
 
           <form.Field
             name="parentSubSkillId"
-            children={(field: NullableStringFieldApi) => (
+            children={(field) => (
               <Field>
                 <FieldLabel>Parent Sub-skill (optional)</FieldLabel>
                 <Select
@@ -216,6 +225,120 @@ export function CreateSubSkillModal({
                 <FieldDescription>
                   The parent determines where this sub-skill appears in the tree
                 </FieldDescription>
+              </Field>
+            )}
+          />
+
+          <form.Field
+            name="metrics"
+            mode="array"
+            children={(field) => (
+              <Field>
+                <div className="flex items-center justify-between">
+                  <FieldLabel>Metrics (optional)</FieldLabel>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      field.pushValue({
+                        name: '',
+                        unit: '',
+                        targetValue: 1,
+                        currentValue: 0,
+                      })
+                    }
+                  >
+                    <Plus className="mr-1 size-3" />
+                    Add
+                  </Button>
+                </div>
+                <FieldDescription>
+                  Track progress with measurable goals
+                </FieldDescription>
+                {field.state.value.length > 0 && (
+                  <div className="mt-2 space-y-3">
+                    {field.state.value.map((metric, index) => (
+                      <div
+                        key={index}
+                        className="bg-muted/50 rounded-md border p-3"
+                      >
+                        <div className="mb-2 flex items-start justify-between">
+                          <span className="text-muted-foreground text-xs">
+                            Metric {index + 1}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive h-6 w-6 p-0"
+                            onClick={() => field.removeValue(index)}
+                          >
+                            <Trash2 className="size-3" />
+                          </Button>
+                        </div>
+                        <div className="grid gap-2">
+                          <Input
+                            placeholder="Metric name"
+                            value={metric.name}
+                            onChange={(e) => {
+                              const updated = [...field.state.value];
+                              updated[index] = {
+                                ...updated[index],
+                                name: e.target.value,
+                              };
+                              field.handleChange(updated);
+                            }}
+                          />
+                          <div className="grid grid-cols-3 gap-2">
+                            <Input
+                              placeholder="Unit"
+                              value={metric.unit}
+                              onChange={(e) => {
+                                const updated = [...field.state.value];
+                                updated[index] = {
+                                  ...updated[index],
+                                  unit: e.target.value,
+                                };
+                                field.handleChange(updated);
+                              }}
+                            />
+                            <Input
+                              type="number"
+                              placeholder="Target"
+                              min={1}
+                              value={metric.targetValue}
+                              onChange={(e) => {
+                                const updated = [...field.state.value];
+                                updated[index] = {
+                                  ...updated[index],
+                                  targetValue:
+                                    parseInt(e.target.value, 10) || 1,
+                                };
+                                field.handleChange(updated);
+                              }}
+                            />
+                            <Input
+                              type="number"
+                              placeholder="Current"
+                              min={0}
+                              value={metric.currentValue}
+                              onChange={(e) => {
+                                const updated = [...field.state.value];
+                                updated[index] = {
+                                  ...updated[index],
+                                  currentValue:
+                                    parseInt(e.target.value, 10) || 0,
+                                };
+                                field.handleChange(updated);
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </Field>
             )}
           />

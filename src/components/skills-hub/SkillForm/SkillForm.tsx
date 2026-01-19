@@ -77,7 +77,6 @@ export function SkillForm(): React.ReactElement {
               ? 0
               : null,
       })),
-      createTasks: subSkills.length > 0, // Auto-create tasks when AI generates subskills
     };
 
     createSkillMutation.mutate(mutationInput);

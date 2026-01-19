@@ -73,8 +73,9 @@ export const subSkillRouter = {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Skill not found' });
       }
 
+      const { metrics, ...subSkillData } = input;
       const subSkill = await subSkillRepository.create({
-        ...input,
+        ...subSkillData,
         userId: ctx.userId,
       });
 
@@ -86,14 +87,22 @@ export const subSkillRouter = {
       }
       addWide({ sub_skill_id: subSkill.id });
 
-      // Auto-create a task for the new subskill
-      const task = await taskRepository.create({
-        userId: ctx.userId,
-        name: subSkill.name,
-        description: subSkill.description ?? undefined,
-        subSkillId: subSkill.id,
-      });
-      addWide({ created_task_id: task?.id });
+      // Create metrics if provided
+      if (metrics && metrics.length > 0) {
+        await Promise.all(
+          metrics.map((metric) =>
+            skillRepository.createMetric({
+              userId: ctx.userId,
+              subSkillId: subSkill.id,
+              name: metric.name,
+              unit: metric.unit,
+              targetValue: metric.targetValue,
+              currentValue: metric.currentValue,
+            }),
+          ),
+        );
+        addWide({ metrics_created: metrics.length });
+      }
 
       return subSkill;
     }),
@@ -147,6 +156,17 @@ export const subSkillRouter = {
         throw new TRPCError({ code: 'NOT_FOUND' });
       }
       addWide({ new_stage: subSkill.stage });
+
+      // Create task when advancing to practice stage
+      if (subSkill.stage === 'practice') {
+        const task = await taskRepository.create({
+          userId: ctx.userId,
+          name: subSkill.name,
+          description: subSkill.description ?? undefined,
+          subSkillId: subSkill.id,
+        });
+        addWide({ created_task_id: task?.id });
+      }
 
       return subSkill;
     }),

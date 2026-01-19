@@ -11,9 +11,7 @@ interface TaskCardProps {
   task: DashboardTask;
 }
 
-export function TaskCard({
-  task,
-}: TaskCardProps): React.ReactElement {
+export function TaskCard({ task }: TaskCardProps): React.ReactElement {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 

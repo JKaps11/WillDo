@@ -10,7 +10,6 @@ import {
 } from '@/lib/zod-schemas';
 import { subSkillRepository } from '@/db/repositories/sub_skill.repository';
 import { skillRepository } from '@/db/repositories/skill.repository';
-import { taskRepository } from '@/db/repositories/task.repository';
 import { addWide } from '@/lib/logging/wideEventStore.server';
 
 export const skillRouter = {
@@ -86,7 +85,7 @@ export const skillRouter = {
   createWithPlan: protectedProcedure
     .input(createSkillWithPlanSchema)
     .mutation(async ({ ctx, input }) => {
-      const { subSkills: subSkillsInput, createTasks, ...skillData } = input;
+      const { subSkills: subSkillsInput, ...skillData } = input;
 
       // Default subskills structure when no AI planning is used
       const defaultSubSkills: Array<{
@@ -140,7 +139,6 @@ export const skillRouter = {
       addWide({
         skill_name: skillData.name,
         sub_skills_planned: subSkillsToCreate.length,
-        create_tasks: createTasks,
         used_default_subskills: subSkillsInput.length === 0,
       });
 
@@ -196,15 +194,6 @@ export const skillRouter = {
             }),
           ),
         );
-
-        if (createTasks) {
-          await taskRepository.create({
-            userId: ctx.userId,
-            name: ss.name,
-            description: ss.description,
-            subSkillId: createdSubSkill.id,
-          });
-        }
       }
       addWide({ sub_skills_created: createdSubSkillIds.length });
 

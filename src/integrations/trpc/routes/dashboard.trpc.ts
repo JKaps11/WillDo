@@ -99,7 +99,10 @@ export const dashboardRouter = {
             : [];
 
         // Group metrics by subSkillId
-        const metricsBySubSkillId = new Map<string, Array<DashboardTaskMetric>>();
+        const metricsBySubSkillId = new Map<
+          string,
+          Array<DashboardTaskMetric>
+        >();
         for (const metric of metricsRows) {
           const existing = metricsBySubSkillId.get(metric.subSkillId) ?? [];
           existing.push({

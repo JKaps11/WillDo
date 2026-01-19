@@ -16,7 +16,8 @@ async function handler({ request }: { request: Request }): Promise<Response> {
         error: {
           message: error.message,
           code: error.code,
-          stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+          stack:
+            process.env.NODE_ENV === 'development' ? error.stack : undefined,
         },
         trpc_error_path: path,
       });

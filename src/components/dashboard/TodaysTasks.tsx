@@ -14,7 +14,7 @@ export function TodaysTasks(): React.ReactElement {
   );
 
   return (
-    <Card className='flex min-h-[calc(100vh-12rem)] flex-col md:min-h-[calc(100vh-10rem)]'>
+    <Card className="flex min-h-[calc(100vh-12rem)] flex-col md:min-h-[calc(100vh-10rem)]">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <ListTodo className="size-5 text-muted-foreground" />
