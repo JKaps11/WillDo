@@ -10,6 +10,9 @@ import {
 } from '@/lib/zod-schemas';
 import { subSkillRepository } from '@/db/repositories/sub_skill.repository';
 import { skillRepository } from '@/db/repositories/skill.repository';
+import { completionEventRepository } from '@/db/repositories/completion_event.repository';
+import { userMetricsRepository } from '@/db/repositories/user_metrics.repository';
+import { XP_SKILL_ARCHIVE } from '@/lib/constants/xp';
 import { addWide } from '@/lib/logging/wideEventStore.server';
 
 export const skillRouter = {
@@ -236,10 +239,32 @@ export const skillRouter = {
     .input(getSkillSchema)
     .mutation(async ({ ctx, input }) => {
       addWide({ skill_id: input.id });
+
+      // Check if already archived
+      const existingSkill = await skillRepository.findById(input.id, ctx.userId);
+      const wasArchived = existingSkill?.archived ?? false;
+
       const skill = await skillRepository.archive(input.id, ctx.userId);
 
       if (!skill) {
         throw new TRPCError({ code: 'NOT_FOUND' });
+      }
+
+      // Track skill archive (only if not already archived)
+      if (!wasArchived) {
+        await completionEventRepository.create({
+          userId: ctx.userId,
+          eventType: 'skill_archived',
+          entityId: skill.id,
+          skillId: skill.id,
+        });
+        await userMetricsRepository.incrementSkillsArchived(ctx.userId);
+        await userMetricsRepository.updateStreak(ctx.userId);
+        await userMetricsRepository.addXp(ctx.userId, XP_SKILL_ARCHIVE);
+        addWide({
+          completion_event_created: true,
+          xp_added: XP_SKILL_ARCHIVE,
+        });
       }
 
       return skill;
@@ -249,10 +274,31 @@ export const skillRouter = {
     .input(getSkillSchema)
     .mutation(async ({ ctx, input }) => {
       addWide({ skill_id: input.id });
+
+      // Check if was archived
+      const existingSkill = await skillRepository.findById(input.id, ctx.userId);
+      const wasArchived = existingSkill?.archived ?? false;
+
       const skill = await skillRepository.unarchive(input.id, ctx.userId);
 
       if (!skill) {
         throw new TRPCError({ code: 'NOT_FOUND' });
+      }
+
+      // Undo archive tracking (only if was archived)
+      if (wasArchived) {
+        await completionEventRepository.delete(
+          ctx.userId,
+          skill.id,
+          'skill_archived',
+        );
+        await userMetricsRepository.decrementSkillsArchived(ctx.userId);
+        await userMetricsRepository.recalculateStreak(ctx.userId);
+        await userMetricsRepository.removeXp(ctx.userId, XP_SKILL_ARCHIVE);
+        addWide({
+          completion_event_deleted: true,
+          xp_removed: XP_SKILL_ARCHIVE,
+        });
       }
 
       return skill;
