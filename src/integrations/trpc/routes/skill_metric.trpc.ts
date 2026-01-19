@@ -137,7 +137,7 @@ export const skillMetricRouter = {
     }),
 
   delete: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(z.object({ id: z.uuid() }))
     .mutation(async ({ ctx, input }) => {
       addWide({ metric_id: input.id });
       const userId = ctx.userId;

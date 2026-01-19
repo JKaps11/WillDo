@@ -19,6 +19,15 @@ export interface WideEventError {
   stack?: string;
 }
 
+export interface WideEventDbError {
+  operation: string;
+  message: string;
+  query?: string;
+  params?: Array<unknown>;
+  cause?: string;
+  stack?: string;
+}
+
 export interface WideEvent {
   event: 'http_request';
   request_id: string;
@@ -31,6 +40,7 @@ export interface WideEvent {
   user?: WideEventUser;
   rpc?: WideEventRpc;
   error?: WideEventError;
+  dbError?: WideEventDbError;
 
   [key: string]: unknown;
 }

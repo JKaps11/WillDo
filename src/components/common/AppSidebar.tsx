@@ -7,11 +7,12 @@ import {
   Settings,
   Target,
 } from 'lucide-react';
-import { Link, useRouterState } from '@tanstack/react-router';
+import { ClientOnly, Link, useRouterState } from '@tanstack/react-router';
 
 import { UserButton, useUser } from '@clerk/tanstack-react-start';
 import type { ForwardRefExoticComponent, RefAttributes } from 'react';
 import type { LucideProps } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Sidebar,
   SidebarContent,
@@ -117,13 +118,17 @@ export function AppSidebar(): React.ReactElement {
               className="overflow-visible hover:bg-transparent hover:text-inherit"
               tooltip="Profile"
             >
-              <UserButton
-                appearance={{
-                  elements: {
-                    avatarBox: 'size-8 ring-2 ring-primary',
-                  },
-                }}
-              />
+              <ClientOnly
+                fallback={<Skeleton className="size-8 rounded-full" />}
+              >
+                <UserButton
+                  appearance={{
+                    elements: {
+                      avatarBox: 'size-8 ring-2 ring-primary',
+                    },
+                  }}
+                />
+              </ClientOnly>
               {user && (
                 <div className="flex min-w-0 flex-col">
                   <span className="truncate text-sm font-medium">

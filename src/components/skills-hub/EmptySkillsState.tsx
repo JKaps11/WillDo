@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 
 export function EmptySkillsState(): React.ReactElement {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
+    <div className="h-[90%] flex flex-col items-center justify-center py-16 text-center">
       <div className="mb-4 rounded-full bg-muted p-4">
         <Target className="size-8 text-muted-foreground" />
       </div>

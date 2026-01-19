@@ -61,10 +61,6 @@ function RouteComponent(): React.ReactNode {
           queryClient.setQueryData(trpc.user.get.queryKey(), {
             ...previousUser,
             settings: {
-              general: {
-                ...previousUser.settings.general,
-                ...patch.general,
-              },
               appearance: {
                 ...previousUser.settings.appearance,
                 ...patch.appearance,
@@ -72,10 +68,6 @@ function RouteComponent(): React.ReactNode {
               todoList: {
                 ...previousUser.settings.todoList,
                 ...patch.todoList,
-              },
-              calendar: {
-                ...previousUser.settings.calendar,
-                ...patch.calendar,
               },
             },
           });

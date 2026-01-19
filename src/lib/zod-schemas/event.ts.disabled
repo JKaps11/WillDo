@@ -21,7 +21,7 @@ export const createEventSchema = z.object({
 });
 
 export const updateEventSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   title: z.string().min(1, 'Title is required').optional(),
   description: z.string().nullable().optional(),
   location: z.string().nullable().optional(),
@@ -35,11 +35,11 @@ export const updateEventSchema = z.object({
 });
 
 export const getEventSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const deleteEventSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const listEventsSchema = z.object({
@@ -48,7 +48,7 @@ export const listEventsSchema = z.object({
 });
 
 export const createEventFromTaskSchema = z.object({
-  taskId: z.string().uuid(),
+  taskId: z.uuid(),
   startTime: z.date(),
   endTime: z.date().optional(),
 });

@@ -95,10 +95,10 @@ export function SkillForm(): React.ReactElement {
   };
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="">
       {/* Progress Steps */}
       <div className="mb-8">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-start">
           {STEPS.map((step, index) => (
             <div key={step.id} className="flex items-center">
               <div

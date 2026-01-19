@@ -229,12 +229,17 @@ export const skillRouter = {
     .input(deleteSkillSchema)
     .mutation(async ({ ctx, input }) => {
       addWide({ skill_id: input.id });
+
       const skill = await skillRepository.delete(input.id, ctx.userId);
 
       if (!skill) {
-        throw new TRPCError({ code: 'NOT_FOUND' });
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: `Skill not found for user: ${ctx.userId} and skill: ${input.id}`,
+        });
       }
 
+      addWide({ deleted_skill: skill });
       return skill;
     }),
 

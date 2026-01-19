@@ -16,7 +16,7 @@ export const createSkillSchema = z.object({
 });
 
 export const updateSkillSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string().min(1).max(255).optional(),
   description: z.string().nullable().optional(),
   color: z
@@ -29,11 +29,11 @@ export const updateSkillSchema = z.object({
 });
 
 export const getSkillSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const deleteSkillSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const listSkillsSchema = z.object({
@@ -43,47 +43,47 @@ export const listSkillsSchema = z.object({
 /* ---------- Sub-Skill Schemas ---------- */
 
 export const createSubSkillSchema = z.object({
-  skillId: z.string().uuid(),
+  skillId: z.uuid(),
   name: z.string().min(1).max(255),
   description: z.string().optional(),
   stage: subSkillStageSchema.optional(),
   sortOrder: z.number().int().optional(),
-  parentSubSkillId: z.string().uuid().nullable().optional(),
+  parentSubSkillId: z.uuid().nullable().optional(),
 });
 
 export const updateSubSkillSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string().min(1).max(255).optional(),
   description: z.string().nullable().optional(),
   stage: subSkillStageSchema.optional(),
   sortOrder: z.number().int().optional(),
-  parentSubSkillId: z.string().uuid().nullable().optional(),
+  parentSubSkillId: z.uuid().nullable().optional(),
 });
 
 export const getSubSkillSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const deleteSubSkillSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const listSubSkillsSchema = z.object({
-  skillId: z.string().uuid(),
+  skillId: z.uuid(),
 });
 
 export const advanceSubSkillStageSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 export const completeSubSkillSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 /* ---------- Skill Metric Schemas ---------- */
 
 export const createSkillMetricSchema = z.object({
-  subSkillId: z.string().uuid(),
+  subSkillId: z.uuid(),
   name: z.string().min(1).max(255),
   unit: z.string().optional(),
   targetValue: z.number().int().positive().optional(),
@@ -91,7 +91,7 @@ export const createSkillMetricSchema = z.object({
 });
 
 export const updateSkillMetricSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string().min(1).max(255).optional(),
   unit: z.string().nullable().optional(),
   targetValue: z.number().int().positive().optional(),
@@ -99,14 +99,14 @@ export const updateSkillMetricSchema = z.object({
 });
 
 export const incrementSkillMetricSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   amount: z.number().int().positive().default(1),
 });
 
 export const bulkUpdateSkillMetricsSchema = z.object({
   updates: z.array(
     z.object({
-      id: z.string().uuid(),
+      id: z.uuid(),
       currentValue: z.number().int().min(0),
     }),
   ),

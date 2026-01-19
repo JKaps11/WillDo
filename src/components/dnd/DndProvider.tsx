@@ -71,6 +71,10 @@ export function DndProvider({
         queryClient.invalidateQueries({
           queryKey: trpc.task.listUnassignedWithSkillInfo.pathKey(),
         });
+        // Invalidate dashboard today tasks
+        queryClient.invalidateQueries({
+          queryKey: trpc.dashboard.getTodaysTasks.pathKey(),
+        });
       },
     }),
   );

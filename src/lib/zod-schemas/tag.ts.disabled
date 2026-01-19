@@ -8,7 +8,7 @@ export const createTagSchema = z.object({
 });
 
 export const updateTagSchema = z.object({
-  tagId: z.string().uuid(),
+  tagId: z.uuid(),
   title: z.string().min(1).optional(),
   color: z
     .string()
@@ -17,9 +17,9 @@ export const updateTagSchema = z.object({
 });
 
 export const getTagSchema = z.object({
-  tagId: z.string().uuid(),
+  tagId: z.uuid(),
 });
 
 export const deleteTagSchema = z.object({
-  tagId: z.string().uuid(),
+  tagId: z.uuid(),
 });
