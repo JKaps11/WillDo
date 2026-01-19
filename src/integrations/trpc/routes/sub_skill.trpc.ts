@@ -12,6 +12,9 @@ import {
 import { subSkillRepository } from '@/db/repositories/sub_skill.repository';
 import { skillRepository } from '@/db/repositories/skill.repository';
 import { taskRepository } from '@/db/repositories/task.repository';
+import { completionEventRepository } from '@/db/repositories/completion_event.repository';
+import { userMetricsRepository } from '@/db/repositories/user_metrics.repository';
+import { XP_SUBSKILL_COMPLETE } from '@/lib/constants/xp';
 import { addWide } from '@/lib/logging/wideEventStore.server';
 
 export const subSkillRouter = {
@@ -147,6 +150,13 @@ export const subSkillRouter = {
         });
       }
 
+      // Get current stage before advancing
+      const existingSubSkill = await subSkillRepository.findById(
+        input.id,
+        ctx.userId,
+      );
+      const wasComplete = existingSubSkill?.stage === 'complete';
+
       const subSkill = await subSkillRepository.advanceStage(
         input.id,
         ctx.userId,
@@ -166,6 +176,26 @@ export const subSkillRouter = {
           subSkillId: subSkill.id,
         });
         addWide({ created_task_id: task?.id });
+
+        // Track task creation
+        await userMetricsRepository.incrementTasksCreated(ctx.userId);
+      }
+
+      // Track subskill completion when advancing to complete stage
+      if (subSkill.stage === 'complete' && !wasComplete) {
+        await completionEventRepository.create({
+          userId: ctx.userId,
+          eventType: 'subskill_completed',
+          entityId: subSkill.id,
+          skillId: subSkill.skillId,
+        });
+        await userMetricsRepository.incrementSubSkillsCompleted(ctx.userId);
+        await userMetricsRepository.updateStreak(ctx.userId);
+        await userMetricsRepository.addXp(ctx.userId, XP_SUBSKILL_COMPLETE);
+        addWide({
+          completion_event_created: true,
+          xp_added: XP_SUBSKILL_COMPLETE,
+        });
       }
 
       return subSkill;
@@ -184,10 +214,34 @@ export const subSkillRouter = {
         });
       }
 
+      // Check if already complete
+      const existingSubSkill = await subSkillRepository.findById(
+        input.id,
+        ctx.userId,
+      );
+      const wasComplete = existingSubSkill?.stage === 'complete';
+
       const subSkill = await subSkillRepository.complete(input.id, ctx.userId);
 
       if (!subSkill) {
         throw new TRPCError({ code: 'NOT_FOUND' });
+      }
+
+      // Track subskill completion (only if not already complete)
+      if (!wasComplete) {
+        await completionEventRepository.create({
+          userId: ctx.userId,
+          eventType: 'subskill_completed',
+          entityId: subSkill.id,
+          skillId: subSkill.skillId,
+        });
+        await userMetricsRepository.incrementSubSkillsCompleted(ctx.userId);
+        await userMetricsRepository.updateStreak(ctx.userId);
+        await userMetricsRepository.addXp(ctx.userId, XP_SUBSKILL_COMPLETE);
+        addWide({
+          completion_event_created: true,
+          xp_added: XP_SUBSKILL_COMPLETE,
+        });
       }
 
       return subSkill;

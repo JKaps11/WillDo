@@ -33,7 +33,7 @@ export function SkillsOverview(): React.ReactElement {
   }));
 
   return (
-    <Card className="flex min-h-[calc(100vh-12rem)] flex-col md:min-h-[calc(100vh-10rem)]">
+    <Card className="flex flex-col">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

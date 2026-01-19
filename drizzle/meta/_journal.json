@@ -8,6 +8,13 @@
       "when": 1767922108640,
       "tag": "0000_soft_angel",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1768795440738,
+      "tag": "0001_useful_lady_vermin",
+      "breakpoints": true
     }
   ]
 }

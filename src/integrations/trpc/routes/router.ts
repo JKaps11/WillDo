@@ -4,6 +4,7 @@ import { aiPlanningRouter } from './ai_planning.trpc';
 import { dashboardRouter } from './dashboard.trpc';
 import { todoListRouter } from './todo_list.trpc';
 import { subSkillRouter } from './sub_skill.trpc';
+import { metricsRouter } from './metrics.trpc';
 import { skillRouter } from './skill.trpc';
 // import { eventRouter } from './event.trpc'; // DISABLED: Calendar feature
 import { userRouter } from './user.trpc';
@@ -14,6 +15,7 @@ export const trpcRouter = createTRPCRouter({
   // event: eventRouter, // DISABLED: Calendar feature
   aiPlanning: aiPlanningRouter,
   dashboard: dashboardRouter,
+  metrics: metricsRouter,
   skill: skillRouter,
   skillMetric: skillMetricRouter,
   subSkill: subSkillRouter,
