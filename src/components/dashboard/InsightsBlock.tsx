@@ -105,7 +105,11 @@ interface InsightCardProps {
   value: string;
 }
 
-function InsightCard({ icon, label, value }: InsightCardProps): React.ReactNode {
+function InsightCard({
+  icon,
+  label,
+  value,
+}: InsightCardProps): React.ReactNode {
   return (
     <div className="flex flex-col gap-1 rounded-lg border bg-muted/30 p-3">
       <div className="flex items-center gap-2">
@@ -121,7 +125,9 @@ interface SkillEngagementBarProps {
   skill: SkillEngagement;
 }
 
-function SkillEngagementBar({ skill }: SkillEngagementBarProps): React.ReactNode {
+function SkillEngagementBar({
+  skill,
+}: SkillEngagementBarProps): React.ReactNode {
   // Find max for relative bar width
   const maxCount = 100; // We'll cap at 100 for display
 

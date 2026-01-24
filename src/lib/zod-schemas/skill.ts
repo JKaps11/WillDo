@@ -128,21 +128,46 @@ export const generateSkillPlanSchema = z.object({
   additionalContext: z.string().optional(),
 });
 
-export const skillPlanResultSchema = z.object({
-  subSkills: z.array(
-    z.object({
-      name: z.string(),
-      description: z.string().optional(),
-      metrics: z.array(
-        z.object({
-          name: z.string(),
-          unit: z.string().optional(),
-          targetValue: z.number().int().positive(),
-        }),
-      ),
-      parentIndex: z.number().int().min(-1).nullable().optional(), // -1 or null = root level
-    }),
-  ),
+/** AI output schema with .describe() hints for structured output */
+export const aiSkillPlanOutputSchema = z.object({
+  subSkills: z
+    .array(
+      z.object({
+        name: z.string().describe('Name of the sub-skill'),
+        description: z
+          .string()
+          .describe('Brief description of what this sub-skill covers'),
+        metrics: z
+          .array(
+            z.object({
+              name: z.string().describe('Name of the metric to track progress'),
+              unit: z
+                .string()
+                .nullable()
+                .describe('Unit of measurement (e.g., "hours", "sessions"), or null if unitless'),
+              targetValue: z
+                .number()
+                .int()
+                .positive()
+                .describe('Target value to achieve'),
+            }),
+          )
+          .describe('1-3 measurable metrics for this sub-skill'),
+        parentIndex: z
+          .number()
+          .int()
+          .min(-1)
+          .nullable()
+          .describe(
+            'Index of prerequisite sub-skill (0-based), or null/-1 if root',
+          ),
+      }),
+    )
+    .describe('Array of 3-7 sub-skills in learning order'),
+});
+
+export const skillPlanResultSchema = aiSkillPlanOutputSchema.extend({
+  aiError: z.string().optional(),
 });
 
 /* ---------- Create Skill With Plan Schema ---------- */

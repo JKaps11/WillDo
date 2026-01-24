@@ -1,11 +1,13 @@
 import { useMutation } from '@tanstack/react-query';
-import { Loader2, Sparkles } from 'lucide-react';
+import { AlertCircle, Loader2, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 
 import type { SkillBasicInfo } from './BasicInfoStep';
 import { useTRPC } from '@/integrations/trpc/react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { SUPPORT_EMAIL } from '@/lib/constants/contact';
 
 export interface GeneratedSubSkill {
   name: string;
@@ -15,7 +17,7 @@ export interface GeneratedSubSkill {
     unit?: string;
     targetValue: number;
   }>;
-  dependencies: Array<number>;
+  parentIndex?: number | null;
 }
 
 interface AIPlanningProps {
@@ -30,24 +32,27 @@ export function AIPlanning({
   existingPlan,
 }: AIPlanningProps): React.ReactElement {
   const [additionalContext, setAdditionalContext] = useState('');
+  const [aiError, setAiError] = useState<string | null>(null);
   const trpc = useTRPC();
 
   const generateMutation = useMutation(
     trpc.aiPlanning.generateSkillPlan.mutationOptions({
       onSuccess: (data) => {
-        console.log('[AIPlanning] Plan generated:', {
-          subSkillsCount: data.subSkills.length,
-          subSkills: data.subSkills.map((ss) => ({
-            name: ss.name,
-            metricsCount: ss.metrics.length,
-          })),
-        });
+        if (data.aiError) {
+          // AI generation failed - show alert
+          setAiError(data.aiError);
+          return;
+        }
+
+        // AI generation succeeded
+        setAiError(null);
         onPlanGenerated(data.subSkills);
       },
     }),
   );
 
   const handleGenerate = (): void => {
+    setAiError(null);
     generateMutation.mutate({
       skillName: skillInfo.name,
       goal: skillInfo.goal || `Learn ${skillInfo.name}`,
@@ -69,6 +74,20 @@ export function AIPlanning({
           </div>
         </div>
       </div>
+
+      {aiError && (
+        <Alert variant="destructive">
+          <AlertCircle className="size-4" />
+          <AlertTitle>AI Generation Failed</AlertTitle>
+          <AlertDescription>
+            Unable to generate a plan automatically. Please try again or create
+            your plan manually. If the issue persists, contact{' '}
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="underline">
+              {SUPPORT_EMAIL}
+            </a>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="space-y-4">
         <div className="rounded-lg border p-4">

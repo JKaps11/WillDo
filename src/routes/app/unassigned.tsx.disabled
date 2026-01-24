@@ -101,7 +101,6 @@ function RouteComponent(): ReactNode {
 
   function handleCreateTask(): void {
     if (!newTaskTitle.trim()) return;
-    // TODO: need a subSkillId to create a task - this needs rework
     // createTaskMutation.mutate({
     //   name: newTaskTitle.trim(),
     //   subSkillId: ???,

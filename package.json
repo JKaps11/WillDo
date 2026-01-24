@@ -7,9 +7,9 @@
     "build": "vite build && mkdir -p dist/server && cp instrument.server.mjs dist/server/",
     "preview": "vite preview",
     "test": "vitest run",
-    "lint": "eslint",
-    "format": "prettier",
-    "check": "eslint --fix && prettier --write .",
+    "lint": "eslint src",
+    "format": "prettier --write src",
+    "check": "eslint --fix src && prettier --write src",
     "start": "node --import ./.output/server/instrument.server.mjs .output/server/index.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
@@ -18,6 +18,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.12",
     "@clerk/tanstack-react-start": "^0.27.11",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
@@ -58,6 +59,7 @@
     "@trpc/server": "^11.4.3",
     "@trpc/tanstack-react-query": "^11.4.3",
     "@xyflow/react": "^12.10.0",
+    "ai": "^6.0.42",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

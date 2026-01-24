@@ -53,7 +53,7 @@ export const subSkillRepository = {
   ): Promise<SubSkill | null> => {
     const result = await db
       .update(subSkills)
-      .set({ ...data, updated_at: new Date() })
+      .set({ ...data, updatedAt: new Date() })
       .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
       .returning();
 
@@ -90,7 +90,7 @@ export const subSkillRepository = {
     const nextStage = STAGE_ORDER[currentIndex + 1];
     const result = await db
       .update(subSkills)
-      .set({ stage: nextStage, updated_at: new Date() })
+      .set({ stage: nextStage, updatedAt: new Date() })
       .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
       .returning();
 
@@ -100,7 +100,7 @@ export const subSkillRepository = {
   complete: async (id: string, userId: string): Promise<SubSkill | null> => {
     const result = await db
       .update(subSkills)
-      .set({ stage: 'complete', updated_at: new Date() })
+      .set({ stage: 'complete', updatedAt: new Date() })
       .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
       .returning();
 
@@ -158,7 +158,7 @@ export const subSkillRepository = {
   ): Promise<SubSkill | null> => {
     const result = await db
       .update(subSkills)
-      .set({ parentSubSkillId, updated_at: new Date() })
+      .set({ parentSubSkillId, updatedAt: new Date() })
       .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
       .returning();
 

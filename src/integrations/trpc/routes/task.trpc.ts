@@ -165,7 +165,10 @@ export const taskRouter = {
         await userMetricsRepository.decrementTasksCompleted(ctx.userId);
         await userMetricsRepository.recalculateStreak(ctx.userId);
         await userMetricsRepository.removeXp(ctx.userId, XP_TASK_COMPLETE);
-        addWide({ completion_event_deleted: true, xp_removed: XP_TASK_COMPLETE });
+        addWide({
+          completion_event_deleted: true,
+          xp_removed: XP_TASK_COMPLETE,
+        });
       }
 
       return task;

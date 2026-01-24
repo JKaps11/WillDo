@@ -11,10 +11,10 @@ export function Dashboard(): React.ReactElement {
         <WelcomeBlock />
         <TodaysTasks />
         <SkillsOverview />
-      </div>      
+      </div>
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <MetricsTotals />
-        <CompletionChart className='col-span-2'/>
+        <CompletionChart className="col-span-2" />
       </div>
     </div>
   );

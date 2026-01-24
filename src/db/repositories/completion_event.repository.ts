@@ -1,13 +1,12 @@
 import { and, count, eq, gte, lt, sql } from 'drizzle-orm';
 
-import type {CompletionEvent, CompletionEventType, NewCompletionEvent} from '@/db/schemas/completion_event.schema';
-import { db } from '@/db/index';
-import {
-  
-  
-  
-  completionEvents
+import type {
+  CompletionEvent,
+  CompletionEventType,
+  NewCompletionEvent,
 } from '@/db/schemas/completion_event.schema';
+import { db } from '@/db/index';
+import { completionEvents } from '@/db/schemas/completion_event.schema';
 import { withDbError } from '@/db/withDbError';
 
 /* ---------- Types ---------- */
@@ -26,10 +25,7 @@ export const completionEventRepository = {
     data: Omit<NewCompletionEvent, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<CompletionEvent | null> => {
     return withDbError('completionEvent.create', async () => {
-      const result = await db
-        .insert(completionEvents)
-        .values(data)
-        .returning();
+      const result = await db.insert(completionEvents).values(data).returning();
 
       return result[0] ?? null;
     });

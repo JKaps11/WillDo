@@ -17,9 +17,6 @@ bun run check            # Format with Prettier and lint with ESLint (with fixes
 bun run lint             # ESLint only
 bun run format           # Prettier only
 
-# Testing
-bun run test             # Run all tests with Vitest
-
 # Database (Drizzle + Neon PostgreSQL)
 bun run db:generate      # Generate migrations from schema changes
 bun run db:migrate       # Run pending migrations
@@ -58,6 +55,19 @@ bun run db:studio        # Open Drizzle Studio GUI
 - ALWAYS add explicit types for function params, return types, and exported items
 - Avoid `any` - use `unknown`, generics, or proper types
 - No implicit `any` - fix typing at source rather than casting
+
+## Typing
+
+Derive types in this order of preference:
+
+1. **DB schemas** (`src/db/schemas/`) - use `$inferSelect`/`$inferInsert` from Drizzle tables
+2. **Zod schemas** - use `z.infer<typeof schema>` when DB types don't apply
+3. **Shared types** - put in `src/lib/types.ts` if no schema exists and type is reused
+4. **Component-specific** - keep in same file (e.g., prop types)
+
+## Zod Schemas
+
+- ALL Zod schemas must live in `src/lib/zod-schemas/` - never define schemas inline in other files
 
 ## React Patterns
 

@@ -1,11 +1,12 @@
-import { and, count, eq, gte, isNotNull, isNull, lt, sql } from 'drizzle-orm';
+import { and, count, eq, isNotNull, lt, sql } from 'drizzle-orm';
 import { startOfDay, subDays } from 'date-fns';
 
-import type {SubSkillStage} from '@/db/schemas/sub_skill.schema';
+import type { SubSkillStage } from '@/db/schemas/sub_skill.schema';
 import { db } from '@/db/index';
 import { tasks } from '@/db/schemas/task.schema';
-import {  subSkills } from '@/db/schemas/sub_skill.schema';
+import { subSkills } from '@/db/schemas/sub_skill.schema';
 import { skills } from '@/db/schemas/skill.schema';
+import { skillMetrics } from '@/db/schemas/skill_metric.schema';
 import { completionEvents } from '@/db/schemas/completion_event.schema';
 import { withDbError } from '@/db/withDbError';
 
@@ -110,9 +111,10 @@ export const insightsRepository = {
       const result = await db
         .select({
           total: count(),
-          abandoned: sql<number>`COUNT(*) FILTER (WHERE ${tasks.completed} = false)`.as(
-            'abandoned',
-          ),
+          abandoned:
+            sql<number>`COUNT(*) FILTER (WHERE ${tasks.completed} = false)`.as(
+              'abandoned',
+            ),
         })
         .from(tasks)
         .where(
@@ -133,9 +135,10 @@ export const insightsRepository = {
     return withDbError('insights.getMostProductiveDay', async () => {
       const result = await db
         .select({
-          dayOfWeek: sql<number>`EXTRACT(DOW FROM ${completionEvents.completedAt})`.as(
-            'day_of_week',
-          ),
+          dayOfWeek:
+            sql<number>`EXTRACT(DOW FROM ${completionEvents.completedAt})`.as(
+              'day_of_week',
+            ),
           count: count(),
         })
         .from(completionEvents)
@@ -193,14 +196,13 @@ export const insightsRepository = {
       const result = await db
         .select({
           total: count(),
-          completed: sql<number>`COUNT(*) FILTER (WHERE ${tasks.completed} = true)`.as(
-            'completed',
-          ),
+          completed:
+            sql<number>`COUNT(*) FILTER (WHERE ${tasks.completed} = true)`.as(
+              'completed',
+            ),
         })
         .from(tasks)
-        .where(
-          and(eq(tasks.userId, userId), isNotNull(tasks.recurrenceRule)),
-        );
+        .where(and(eq(tasks.userId, userId), isNotNull(tasks.recurrenceRule)));
 
       const { total, completed } = result[0] ?? { total: 0, completed: 0 };
       if (total === 0) return null;
@@ -237,7 +239,7 @@ export const insightsRepository = {
   },
 
   /**
-   * Percentage of tasks using metrics and recurrence features.
+   * Percentage of tasks using recurrence and subskills using metrics.
    */
   getFeatureUsage: async (userId: string): Promise<FeatureUsage> => {
     return withDbError('insights.getFeatureUsage', async () => {
@@ -253,24 +255,36 @@ export const insightsRepository = {
         .from(tasks)
         .where(eq(tasks.userId, userId));
 
-      // Count subskills with metrics (via skill_metrics table)
-      const subSkillsResult = await db
-        .select({
-          total: count(),
-        })
-        .from(subSkills)
-        .where(eq(subSkills.userId, userId));
-
-      // For metrics usage, we'd need to join with skill_metrics
-      // Simplified: return recurrence usage only for now
       const { total: taskTotal, withRecurrence } = tasksResult[0] ?? {
         total: 0,
         withRecurrence: 0,
       };
 
+      // Count subskills with at least one metric
+      const subSkillsWithMetrics = await db
+        .select({
+          total: count(subSkills.id).as('total'),
+          withMetrics:
+            sql<number>`COUNT(DISTINCT ${skillMetrics.subSkillId})`.as(
+              'with_metrics',
+            ),
+        })
+        .from(subSkills)
+        .leftJoin(skillMetrics, eq(subSkills.id, skillMetrics.subSkillId))
+        .where(eq(subSkills.userId, userId));
+
+      const { total: subSkillTotal, withMetrics } = subSkillsWithMetrics[0] ?? {
+        total: 0,
+        withMetrics: 0,
+      };
+
       return {
-        metricsUsage: 0, // TODO: Calculate from skill_metrics join
-        recurrenceUsage: taskTotal > 0 ? Math.round((withRecurrence / taskTotal) * 100) : 0,
+        metricsUsage:
+          subSkillTotal > 0
+            ? Math.round((withMetrics / subSkillTotal) * 100)
+            : 0,
+        recurrenceUsage:
+          taskTotal > 0 ? Math.round((withRecurrence / taskTotal) * 100) : 0,
       };
     });
   },

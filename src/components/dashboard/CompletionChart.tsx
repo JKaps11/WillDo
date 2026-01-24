@@ -1,11 +1,20 @@
 import { useState } from 'react';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { format, parseISO } from 'date-fns';
 
-import type { TimeSeriesPeriod, TimeSeriesPoint } from '@/lib/zod-schemas/metrics';
 import type {
-  ChartConfig} from '@/components/ui/chart';
+  TimeSeriesPeriod,
+  TimeSeriesPoint,
+} from '@/lib/zod-schemas/metrics';
+import type { ChartConfig } from '@/components/ui/chart';
 import { useTRPC } from '@/integrations/trpc/react';
 import {
   Card,
@@ -99,11 +108,12 @@ export function CompletionChart({
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div>
           <CardTitle className="text-base">Completion Trends</CardTitle>
-          <CardDescription>
-            Track your progress over time
-          </CardDescription>
+          <CardDescription>Track your progress over time</CardDescription>
         </div>
-        <Tabs value={period} onValueChange={(v) => setPeriod(v as TimeSeriesPeriod)}>
+        <Tabs
+          value={period}
+          onValueChange={(v) => setPeriod(v as TimeSeriesPeriod)}
+        >
           <TabsList className="h-8">
             <TabsTrigger value="week" className="text-xs px-2">
               Week
@@ -119,7 +129,10 @@ export function CompletionChart({
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[200px] w-full">
-          <LineChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+          <LineChart
+            data={data}
+            margin={{ top: 5, right: 10, left: 0, bottom: 0 }}
+          >
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
@@ -138,9 +151,7 @@ export function CompletionChart({
             />
             <ChartTooltip
               content={
-                <ChartTooltipContent
-                  labelFormatter={formatTooltipLabel}
-                />
+                <ChartTooltipContent labelFormatter={formatTooltipLabel} />
               }
             />
             <Line
@@ -187,10 +198,7 @@ interface LegendItemProps {
 function LegendItem({ color, label }: LegendItemProps): React.ReactNode {
   return (
     <div className="flex items-center gap-2 text-sm">
-      <div
-        className="size-3 rounded-full"
-        style={{ backgroundColor: color }}
-      />
+      <div className="size-3 rounded-full" style={{ backgroundColor: color }} />
       <span className="text-muted-foreground">{label}</span>
     </div>
   );

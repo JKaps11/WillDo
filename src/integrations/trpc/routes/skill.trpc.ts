@@ -185,6 +185,9 @@ export const skillRouter = {
 
         createdSubSkillIds.push(createdSubSkill.id);
 
+        // Track subskill creation metric
+        await userMetricsRepository.incrementSubSkillsCreated(ctx.userId);
+
         await Promise.all(
           ss.metrics.map((metric) =>
             skillRepository.createMetric({
@@ -241,7 +244,10 @@ export const skillRouter = {
       addWide({ skill_id: input.id });
 
       // Check if already archived
-      const existingSkill = await skillRepository.findById(input.id, ctx.userId);
+      const existingSkill = await skillRepository.findById(
+        input.id,
+        ctx.userId,
+      );
       const wasArchived = existingSkill?.archived ?? false;
 
       const skill = await skillRepository.archive(input.id, ctx.userId);
@@ -276,7 +282,10 @@ export const skillRouter = {
       addWide({ skill_id: input.id });
 
       // Check if was archived
-      const existingSkill = await skillRepository.findById(input.id, ctx.userId);
+      const existingSkill = await skillRepository.findById(
+        input.id,
+        ctx.userId,
+      );
       const wasArchived = existingSkill?.archived ?? false;
 
       const skill = await skillRepository.unarchive(input.id, ctx.userId);

@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { useUser } from '@clerk/tanstack-react-start';
-import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from '@tanstack/react-query';
 import { Check, Flame, Pencil, Target, Trophy, X, Zap } from 'lucide-react';
 
 import { useTRPC } from '@/integrations/trpc/react';
@@ -66,7 +70,9 @@ export function WelcomeBlock(): React.ReactNode {
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <CardTitle className="text-xl">Welcome back, {firstName}!</CardTitle>
+            <CardTitle className="text-xl">
+              Welcome back, {firstName}!
+            </CardTitle>
             <CardDescription className="mt-1">
               {motivationalMessage}
             </CardDescription>
@@ -139,7 +145,10 @@ export function WelcomeBlock(): React.ReactNode {
                 </div>
               )}
               <p className="text-xs text-muted-foreground">
-                {Math.round((metrics.weeklyCompleted / metrics.weeklyGoal) * 100)}%
+                {Math.round(
+                  (metrics.weeklyCompleted / metrics.weeklyGoal) * 100,
+                )}
+                %
               </p>
             </div>
           </div>
@@ -162,16 +171,19 @@ interface StatCardProps {
   subtext?: string;
 }
 
-function StatCard({ icon, label, value, subtext }: StatCardProps): React.ReactNode {
+function StatCard({
+  icon,
+  label,
+  value,
+  subtext,
+}: StatCardProps): React.ReactNode {
   return (
     <div className="flex items-start gap-3 rounded-lg border bg-muted/30 p-3">
       <div className="mt-0.5">{icon}</div>
       <div className="flex-1">
         <p className="text-xs text-muted-foreground">{label}</p>
         <p className="text-sm font-medium">{value}</p>
-        {subtext && (
-          <p className="text-xs text-muted-foreground">{subtext}</p>
-        )}
+        {subtext && <p className="text-xs text-muted-foreground">{subtext}</p>}
       </div>
     </div>
   );
@@ -179,10 +191,10 @@ function StatCard({ icon, label, value, subtext }: StatCardProps): React.ReactNo
 
 function getMotivationalMessage(streak: number): string {
   if (streak === 0) {
-    return "Start your streak today! Complete a task to begin.";
+    return 'Start your streak today! Complete a task to begin.';
   }
   if (streak === 1) {
-    return "Great start! Keep the momentum going.";
+    return 'Great start! Keep the momentum going.';
   }
   if (streak < 7) {
     return `${streak} days strong! You're building a habit.`;

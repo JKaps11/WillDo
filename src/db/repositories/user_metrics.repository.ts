@@ -8,12 +8,9 @@ import {
 } from 'date-fns';
 
 import { completionEventRepository } from './completion_event.repository';
-import type {UserMetrics} from '@/db/schemas/user_metrics.schema';
+import type { UserMetrics } from '@/db/schemas/user_metrics.schema';
 import { db } from '@/db/index';
-import {
-  
-  userMetrics
-} from '@/db/schemas/user_metrics.schema';
+import { userMetrics } from '@/db/schemas/user_metrics.schema';
 import { withDbError } from '@/db/withDbError';
 
 /* ---------- Repository ---------- */
@@ -170,13 +167,33 @@ export const userMetricsRepository = {
     });
   },
 
-  incrementTasksCreated: async (userId: string): Promise<UserMetrics | null> => {
+  incrementTasksCreated: async (
+    userId: string,
+  ): Promise<UserMetrics | null> => {
     return withDbError('userMetrics.incrementTasksCreated', async () => {
       await ensureMetricsExist(userId);
       const result = await db
         .update(userMetrics)
         .set({
           tasksCreated: sql`${userMetrics.tasksCreated} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(userMetrics.userId, userId))
+        .returning();
+
+      return result[0] ?? null;
+    });
+  },
+
+  incrementSubSkillsCreated: async (
+    userId: string,
+  ): Promise<UserMetrics | null> => {
+    return withDbError('userMetrics.incrementSubSkillsCreated', async () => {
+      await ensureMetricsExist(userId);
+      const result = await db
+        .update(userMetrics)
+        .set({
+          subSkillsCreated: sql`${userMetrics.subSkillsCreated} + 1`,
           updatedAt: new Date(),
         })
         .where(eq(userMetrics.userId, userId))
@@ -247,12 +264,11 @@ export const userMetricsRepository = {
       const lookbackStart = subDays(today, 365); // Look back up to a year
 
       // Get all activity dates
-      const activityDates =
-        await completionEventRepository.getActivityDates(
-          userId,
-          lookbackStart,
-          new Date(),
-        );
+      const activityDates = await completionEventRepository.getActivityDates(
+        userId,
+        lookbackStart,
+        new Date(),
+      );
 
       if (activityDates.length === 0) {
         // No activity, reset everything
@@ -312,7 +328,10 @@ export const userMetricsRepository = {
 
   /* ---------- XP Operations ---------- */
 
-  addXp: async (userId: string, amount: number): Promise<UserMetrics | null> => {
+  addXp: async (
+    userId: string,
+    amount: number,
+  ): Promise<UserMetrics | null> => {
     return withDbError('userMetrics.addXp', async () => {
       const result = await db
         .update(userMetrics)

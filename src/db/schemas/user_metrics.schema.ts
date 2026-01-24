@@ -13,6 +13,7 @@ export const userMetrics = pgTable('user_metrics', {
   tasksCompleted: integer('tasks_completed').default(0).notNull(),
   tasksCreated: integer('tasks_created').default(0).notNull(),
   subSkillsCompleted: integer('sub_skills_completed').default(0).notNull(),
+  subSkillsCreated: integer('sub_skills_created').default(0).notNull(),
   skillsArchived: integer('skills_archived').default(0).notNull(),
 
   // Streaks

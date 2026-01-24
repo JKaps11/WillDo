@@ -9,17 +9,18 @@ import {
 } from 'date-fns';
 
 import { protectedProcedure } from '../init';
-import type {TimeSeriesPoint, UserMetricsResponse} from '@/lib/zod-schemas/metrics';
+import type {
+  TimeSeriesPoint,
+  UserMetricsResponse,
+} from '@/lib/zod-schemas/metrics';
 import { addWide } from '@/lib/logging/wideEventStore.server';
 import { completionEventRepository } from '@/db/repositories/completion_event.repository';
 import { userMetricsRepository } from '@/db/repositories/user_metrics.repository';
 import { insightsRepository } from '@/db/repositories/insights.repository';
 import { getLevelProgress } from '@/lib/constants/xp';
 import {
-  
-  
   getTimeSeriesSchema,
-  updateWeeklyGoalSchema
+  updateWeeklyGoalSchema,
 } from '@/lib/zod-schemas/metrics';
 
 /* ---------- Router ---------- */
@@ -114,7 +115,11 @@ export const metricsRouter = {
 
         case 'year':
           startDate = subMonths(today, 11); // Last 12 months
-          startDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+          startDate = new Date(
+            startDate.getFullYear(),
+            startDate.getMonth(),
+            1,
+          );
           return getTimeSeriesWithFilledMonths(ctx.userId, startDate, endDate);
 
         default:

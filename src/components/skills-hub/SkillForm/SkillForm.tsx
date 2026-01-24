@@ -69,13 +69,7 @@ export function SkillForm(): React.ReactElement {
         name: ss.name,
         description: ss.description,
         metrics: ss.metrics,
-        // Convert dependencies array to parentIndex (first dependency becomes parent)
-        parentIndex:
-          ss.dependencies.length > 0
-            ? ss.dependencies[0]
-            : index > 0
-              ? 0
-              : null,
+        parentIndex: ss.parentIndex ?? (index > 0 ? 0 : null),
       })),
     };
 

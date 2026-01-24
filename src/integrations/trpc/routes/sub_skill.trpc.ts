@@ -90,6 +90,9 @@ export const subSkillRouter = {
       }
       addWide({ sub_skill_id: subSkill.id });
 
+      // Track subskill creation metric
+      await userMetricsRepository.incrementSubSkillsCreated(ctx.userId);
+
       // Create metrics if provided
       if (metrics && metrics.length > 0) {
         await Promise.all(
