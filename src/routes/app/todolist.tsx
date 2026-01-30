@@ -6,8 +6,8 @@ import { todoListSearchSchema } from '@/lib/zod-schemas';
 import { useTRPC } from '@/integrations/trpc/react';
 import { TodoList } from '@/components/todo-list';
 import { DndProvider } from '@/components/dnd';
-import { startOfDay } from '@/utils/dates';
-import { ensureUser } from '@/utils/auth';
+import { startOfDay } from '@/lib/dates';
+import { ensureUser } from '@/serverFunctions/auth';
 
 export const Route = createFileRoute('/app/todolist')({
   validateSearch: (search): z.infer<typeof todoListSearchSchema> =>

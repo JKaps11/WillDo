@@ -6,7 +6,7 @@ import type { RecurringOptions } from './RecurringModal';
 import type { ReactNode } from 'react';
 import { useTRPC } from '@/integrations/trpc/react';
 import { uiStore, uiStoreActions } from '@/lib/store';
-import { startOfDay } from '@/utils/dates';
+import { startOfDay } from '@/lib/dates';
 
 export function GlobalRecurringModal(): ReactNode {
   const trpc = useTRPC();

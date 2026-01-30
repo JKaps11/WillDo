@@ -178,7 +178,7 @@ export const subSkillPlanItemSchema = z.object({
   metrics: z.array(
     z.object({
       name: z.string().min(1),
-      unit: z.string().optional(),
+      unit: z.string().nullable().optional(),
       targetValue: z.number().int().positive(),
     }),
   ),

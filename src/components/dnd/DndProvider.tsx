@@ -12,7 +12,7 @@ import type { DndContextValue } from './context';
 import type { ReactNode } from 'react';
 import { AssignTasksSheet } from '@/components/todo-list/AssignTasksSheet';
 import { RecurringModal } from '@/components/recurring/RecurringModal';
-import { startOfDay, utcDateToLocal } from '@/utils/dates';
+import { startOfDay, utcDateToLocal } from '@/lib/dates';
 import { useTRPC } from '@/integrations/trpc/react';
 import { uiStoreActions } from '@/lib/store';
 import { cn } from '@/lib/utils';

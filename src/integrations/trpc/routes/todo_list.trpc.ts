@@ -8,7 +8,7 @@ import type {
 } from '@/db/repositories/task.repository';
 import { taskRepository } from '@/db/repositories/task.repository';
 import { addWide } from '@/lib/logging/wideEventStore.server';
-import { addDays, endOfWeek, startOfWeek } from '@/utils/dates';
+import { addDays, endOfWeek, startOfWeek } from '@/lib/dates';
 import { weekDateSchema } from '@/lib/zod-schemas';
 
 const DAY_OF_WEEK_MAP: Record<DaysOfWeek, number> = {

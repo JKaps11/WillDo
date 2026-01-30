@@ -14,7 +14,7 @@ import { Link, createFileRoute } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { authStateFn } from '@/utils/auth';
+import { authStateFn } from '@/serverFunctions/auth';
 
 export const Route = createFileRoute('/')({
   beforeLoad: async () => authStateFn(),

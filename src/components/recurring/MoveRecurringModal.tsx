@@ -21,7 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useTRPC } from '@/integrations/trpc/react';
 import { uiStore, uiStoreActions } from '@/lib/store';
-import { addDays, startOfDay } from '@/utils/dates';
+import { addDays, startOfDay } from '@/lib/dates';
 
 interface MoveOption {
   value: MoveRecurringAction;

@@ -12,7 +12,7 @@ import {
   isSameDay,
   startOfWeek,
   utcDateToLocal,
-} from '@/utils/dates';
+} from '@/lib/dates';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

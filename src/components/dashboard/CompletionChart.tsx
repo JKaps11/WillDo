@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import {
   CartesianGrid,
   Line,
   LineChart,
-  Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
@@ -12,7 +11,6 @@ import { format, parseISO } from 'date-fns';
 
 import type {
   TimeSeriesPeriod,
-  TimeSeriesPoint,
 } from '@/lib/zod-schemas/metrics';
 import type { ChartConfig } from '@/components/ui/chart';
 import { useTRPC } from '@/integrations/trpc/react';
@@ -66,7 +64,7 @@ export function CompletionChart({
     trpc.metrics.getTimeSeries.queryOptions({ period: 'year' }),
   );
 
-  const getData = (): Array<TimeSeriesPoint> => {
+  const lineChartData = useMemo(() => {
     switch (period) {
       case 'week':
         return weekData;
@@ -75,11 +73,9 @@ export function CompletionChart({
       case 'year':
         return yearData;
       default:
-        return weekData;
+        period satisfies never;
     }
-  };
-
-  const data = getData();
+  }, [period, weekData, monthData, yearData]);
 
   const formatXAxis = (dateStr: string): string => {
     if (period === 'year') {
@@ -130,7 +126,7 @@ export function CompletionChart({
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[200px] w-full">
           <LineChart
-            data={data}
+            data={lineChartData}
             margin={{ top: 5, right: 10, left: 0, bottom: 0 }}
           >
             <CartesianGrid strokeDasharray="3 3" vertical={false} />

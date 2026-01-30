@@ -23,7 +23,6 @@ export {
 } from './wideEventStore.server';
 
 export {
-  type TailSamplingContext,
   shouldLog,
   emitWideEvent,
   finalizeAndEmit,

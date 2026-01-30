@@ -28,7 +28,7 @@ export const STAGE_BG_CLASSES: Record<SubSkillStage, string> = {
 };
 
 /** Human-readable labels for each stage */
-function getStageLabelText(stage: SubSkillStage): string {
+function getStageLabelText(stage: SubSkillStage) {
   switch (stage) {
     case 'not_started':
       return 'Not Started';
@@ -38,6 +38,8 @@ function getStageLabelText(stage: SubSkillStage): string {
       return 'Evaluate';
     case 'complete':
       return 'Complete';
+    default:
+      stage satisfies never;
   }
 }
 
@@ -46,7 +48,7 @@ export const STAGE_LABELS: Record<SubSkillStage, string> = Object.fromEntries(
 ) as Record<SubSkillStage, string>;
 
 /** Action button labels for advancing to each stage */
-function getStageActionText(stage: SubSkillStage): string {
+function getStageActionText(stage: SubSkillStage) {
   switch (stage) {
     case 'not_started':
       return 'Start Subskill';
@@ -56,6 +58,8 @@ function getStageActionText(stage: SubSkillStage): string {
       return 'Evaluate';
     case 'complete':
       return 'Complete';
+    default:
+      stage satisfies never;
   }
 }
 

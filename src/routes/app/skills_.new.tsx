@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { SkillForm } from '@/components/skills-hub/SkillForm';
-import { ensureUser } from '@/utils/auth';
+import { ensureUser } from '@/serverFunctions/auth';
 
 export const Route = createFileRoute('/app/skills_/new')({
   loader: () => ensureUser(),

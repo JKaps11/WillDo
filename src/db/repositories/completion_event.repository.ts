@@ -225,6 +225,8 @@ function aggregateTimeSeries(
       case 'skill_archived':
         point.skills = row.count;
         break;
+      default:
+        row.eventType satisfies never;
     }
   }
 

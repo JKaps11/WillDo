@@ -2,8 +2,6 @@ import {
   Archive,
   ArrowBigLeft,
   ArrowBigRight,
-  // ArrowDownAZ,
-  // ArrowUpDown,
   ChevronDown,
   ChevronRight,
   ClipboardList,
@@ -29,7 +27,6 @@ import {
 } from '../ui/dropdown-menu';
 import { SidebarTrigger } from '../ui/sidebar';
 import { Separator } from '../ui/separator';
-// import NewTaskModal from '../NewTaskModal';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { withVerticalSeparators } from './utils';
@@ -39,24 +36,12 @@ import { HELP_TOPICS } from '@/components/help';
 import { UI_STORE_SETTINGS_TABS, uiStore, uiStoreActions } from '@/lib/store';
 
 import TodoListConfig from '@/components/todo-list/TodoListConfig';
-// import CalendarConfig from '@/components/calendar/CalendarConfig'; // DISABLED: Calendar feature
 import { useTRPC } from '@/integrations/trpc/react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { addDays } from '@/utils/dates';
-
-type PageTitle =
-  | 'Dashboard'
-  | 'Todo List'
-  // | 'Unassigned Tasks'
-  | 'Skills'
-  | 'New Skill'
-  | 'Skill Planner'
-  | 'Help'
-  | 'Settings';
-// | 'Calendar'  // DISABLED: Calendar feature;
+import { addDays } from '@/lib/dates';
 
 interface Breadcrumb {
-  label: string;
+  label: PageTitle;
   href?: string;
 }
 
@@ -65,16 +50,16 @@ function getBreadcrumbs(pathname: string): Array<Breadcrumb> {
 
   if (segment === 'skills') {
     const breadcrumbs: Array<Breadcrumb> = [
-      { label: 'Skills', href: '/app/skills' },
+      { label: 'Skill Hub', href: '/app/skills' },
     ];
 
     if (pathname.endsWith('/new')) {
       breadcrumbs.push({ label: 'New Skill' });
     } else if (pathname.includes('/planner')) {
-      breadcrumbs.push({ label: 'Planner' });
+      breadcrumbs.push({ label: 'Skill Planner' });
     } else {
       // On the main skills page, no href needed for last item
-      breadcrumbs[0] = { label: 'Skills' };
+      breadcrumbs[0] = { label: 'Skill Hub' };
     }
 
     return breadcrumbs;
@@ -92,16 +77,12 @@ function getPageTitle(pathname: string): PageTitle {
       return 'Dashboard';
     case 'todolist':
       return 'Todo List';
-    // case 'unassigned':
-    //   return 'Unassigned Tasks';
     case 'skills':
       if (pathname.endsWith('/new')) return 'New Skill';
       if (pathname.includes('/planner')) return 'Skill Planner';
-      return 'Skills';
+      return 'Skill Hub';
     case 'help':
       return 'Help';
-    // case 'calendar':
-    //   return 'Calendar';
     case 'settings':
       return 'Settings';
     default:
@@ -119,20 +100,16 @@ export default function AppHeader(): React.ReactNode {
   const title: PageTitle = getPageTitle(pathname);
   const breadcrumbs: Array<Breadcrumb> = getBreadcrumbs(pathname);
 
-  // Fetch user settings to get the timeSpan/view for navigation
   const { data: user } = useQuery(trpc.user.get.queryOptions());
   const timeSpan = user?.settings.todoList.timeSpan ?? 'day';
 
-  // Fetch unassigned tasks count for the badge
   const { data: unassignedTasks } = useQuery(
     trpc.task.listUnassignedWithSkillInfo.queryOptions(),
   );
   const unassignedCount = unassignedTasks?.length ?? 0;
-  // const calendarView = user?.settings.calendar.defaultView ?? 'week';
 
   const handleNavigate = useCallback(
     (direction: 'prev' | 'next'): void => {
-      // Get current date from query params or use today
       const currentDate =
         'date' in search && typeof search.date === 'string'
           ? new Date(search.date)
@@ -149,10 +126,6 @@ export default function AppHeader(): React.ReactNode {
     },
     [search, timeSpan, navigate],
   );
-
-  // function handleCalendarNavigate(direction: 'prev' | 'next'): void {
-  //   uiStoreActions.navigateCalendar(direction, calendarView);
-  // }
 
   const settingsTab: UIStoreSettingsTab = useStore(
     uiStore,
@@ -212,10 +185,9 @@ export default function AppHeader(): React.ReactNode {
               </Badge>
             )}
           </div>,
-          // <NewTaskModal key="new-task-button" />,
         ];
         break;
-      case 'Skills':
+      case 'Skill Hub':
         options = [
           <Button
             key="toggle-archived-button"
@@ -245,35 +217,6 @@ export default function AppHeader(): React.ReactNode {
           </Button>,
         ];
         break;
-      // DISABLED: Calendar feature
-      // case 'Calendar':
-      //   options = [
-      //     <div key="calendar-nav-buttons" className="flex gap-2">
-      //       <Button
-      //         variant="outline"
-      //         size="icon"
-      //         onClick={() => handleCalendarNavigate('prev')}
-      //       >
-      //         <ArrowBigLeft />
-      //       </Button>
-      //       <Button
-      //         variant="outline"
-      //         size="icon"
-      //         onClick={() => handleCalendarNavigate('next')}
-      //       >
-      //         <ArrowBigRight />
-      //       </Button>
-      //     </div>,
-      //     <Button
-      //       key="calendar-today-button"
-      //       variant="outline"
-      //       onClick={() => uiStoreActions.setCalendarBaseDate(new Date())}
-      //     >
-      //       Today
-      //     </Button>,
-      //     <CalendarConfig key="calendar-config-popover" />,
-      //   ];
-      //   break;
       case 'Help':
         options = [
           <DropdownMenu key="help-topic-dropdown">
@@ -315,12 +258,8 @@ export default function AppHeader(): React.ReactNode {
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {/* <SelectItem value="general">General</SelectItem> */}
                   <SelectItem value="appearance">Appearance</SelectItem>
                   <SelectItem value="todo-list">Todo List</SelectItem>
-                  {/* <SelectItem value="tasks">Tasks</SelectItem> */}
-                  {/* <SelectItem value="calendar">Calendar</SelectItem> */}
-                  {/* <SelectItem value="integrations">Integrations</SelectItem> */}
                 </SelectContent>
               </Select>,
             ]
@@ -335,6 +274,12 @@ export default function AppHeader(): React.ReactNode {
             ));
 
         break;
+      case 'Dashboard':
+        break;
+      case 'New Skill':
+        break;
+      default:
+        title satisfies never;
     }
     return withVerticalSeparators(options);
   }, [

@@ -8,7 +8,7 @@ import { subSkills } from '@/db/schemas/sub_skill.schema';
 import { skills } from '@/db/schemas/skill.schema';
 import { skillMetrics } from '@/db/schemas/skill_metric.schema';
 import { addWide } from '@/lib/logging/wideEventStore.server';
-import { startOfDay } from '@/utils/dates';
+import { startOfDay } from '@/lib/dates';
 import { db } from '@/db/index';
 
 /* ---------- Types ---------- */

@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import { CreateSubSkillModal, SkillPlanner } from '@/components/skill-planner';
 import { useTRPC } from '@/integrations/trpc/react';
 import { Button } from '@/components/ui/button';
-import { ensureUser } from '@/utils/auth';
+import { ensureUser } from '@/serverFunctions/auth';
 
 export const Route = createFileRoute('/app/skills_/$id/planner')({
   loader: async ({ context, params }) => {

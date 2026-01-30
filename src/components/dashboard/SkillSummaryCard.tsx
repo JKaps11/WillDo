@@ -28,7 +28,6 @@ export function SkillSummaryCard({
         className,
       )}
     >
-      {/* Skill color indicator */}
       <div
         className="size-10 shrink-0 rounded-lg"
         style={{ backgroundColor: skill.color }}

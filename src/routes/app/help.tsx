@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
 
 import { HelpContent } from '@/components/help';
-import { ensureUser } from '@/utils/auth';
+import { ensureUser } from '@/serverFunctions/auth';
 
 const helpSearchSchema = z.object({
   topic: z.string().optional(),

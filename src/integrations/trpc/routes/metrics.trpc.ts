@@ -87,7 +87,7 @@ export const metricsRouter = {
    */
   getTimeSeries: protectedProcedure
     .input(getTimeSeriesSchema)
-    .query(async ({ ctx, input }): Promise<Array<TimeSeriesPoint>> => {
+    .query(async ({ ctx, input }) => {
       const today = startOfDay(new Date());
       let startDate: Date;
       const endDate: Date = new Date(); // Include today fully
@@ -123,7 +123,7 @@ export const metricsRouter = {
           return getTimeSeriesWithFilledMonths(ctx.userId, startDate, endDate);
 
         default:
-          return [];
+          input.period satisfies never;
       }
     }),
 

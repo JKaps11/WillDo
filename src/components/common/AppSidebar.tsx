@@ -1,8 +1,6 @@
 import {
-  // CalendarDays, // DISABLED: Calendar feature
   CheckSquare,
   HelpCircle,
-  // Inbox,
   LayoutDashboard,
   Settings,
   Target,
@@ -27,19 +25,17 @@ import {
 } from '@/components/ui/sidebar';
 
 const navItems: Array<{
-  title: string;
+  title: PageTitle;
   to: string;
   icon: ForwardRefExoticComponent<
     Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
   >;
 }> = [
   { title: 'Dashboard', to: '/app/dashboard', icon: LayoutDashboard },
-  { title: 'Skills Hub', to: '/app/skills', icon: Target },
-  // { title: 'Unassigned Tasks', to: '/app/unassigned', icon: Inbox },
+  { title: 'Skill Hub', to: '/app/skills', icon: Target },
   { title: 'Todo List', to: '/app/todolist', icon: CheckSquare },
   { title: 'Settings', to: '/app/settings', icon: Settings },
   { title: 'Help', to: '/app/help', icon: HelpCircle },
-  // { title: 'Calendar', to: '/app/calendar', icon: CalendarDays }, // DISABLED: Calendar feature
 ];
 
 export function AppSidebar(): React.ReactElement {
@@ -92,26 +88,6 @@ export function AppSidebar(): React.ReactElement {
 
       <SidebarFooter>
         <SidebarMenu>
-          {/* <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              isActive={isSettingsActive}
-              tooltip="Settings"
-            >
-              <Link to="/app/settings">
-                <Settings />
-                <span>Settings</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem> */}
-          {/* <SidebarMenuItem>
-            <SignOutButton>
-              <SidebarMenuButton tooltip="Sign out">
-                <LogOut />
-                <span>Sign out</span>
-              </SidebarMenuButton>
-            </SignOutButton>
-          </SidebarMenuItem> */}
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"

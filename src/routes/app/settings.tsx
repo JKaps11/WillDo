@@ -3,8 +3,6 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 
 import type {
-  // CalendarView,
-  // DefaultHomePage,
   TodoListSortBy,
   TodoListTimeSpan,
   User,
@@ -12,16 +10,11 @@ import type {
 import type { UIStoreSettingsTab } from '@/lib/store';
 import {
   SettingsAppearanceTab,
-  // SettingsCalendarTab, // DISABLED: Calendar feature
-  // SettingsGeneralTab, // DISABLED: General settings
-  // SettingsIntegrationsTab, // DISABLED: Not implemented
-  // SettingsTasksTab,
   SettingsTodoListTab,
 } from '@/components/settings';
 import { useTRPC } from '@/integrations/trpc/react';
 import { useTheme } from '@/lib/theme';
 import { uiStore } from '@/lib/store';
-// import { Settings } from 'lucide-react';
 
 export const Route = createFileRoute('/app/settings')({
   loader: async ({ context }) => {
@@ -44,11 +37,8 @@ function RouteComponent(): React.ReactNode {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  // const generalSettings = user.settings.general;
   const todoListSettings = user.settings.todoList;
-  // const calendarSettings = user.settings.calendar;
 
-  // Mutation with optimistic updates
   const patchMutation = useMutation(
     trpc.user.patchSettings.mutationOptions({
       onMutate: async (patch) => {
@@ -89,14 +79,6 @@ function RouteComponent(): React.ReactNode {
     }),
   );
 
-  // const handleDefaultHomePageChange = (
-  //   defaultHomePage: DefaultHomePage,
-  // ): void => {
-  //   patchMutation.mutate({
-  //     general: { ...generalSettings, defaultHomePage },
-  //   });
-  // };
-
   const handleSortByChange = (sortBy: TodoListSortBy): void => {
     patchMutation.mutate({
       todoList: { ...todoListSettings, sortBy },
@@ -115,43 +97,7 @@ function RouteComponent(): React.ReactNode {
     });
   };
 
-  // const handleStartOfWeekChange = (startOfWeek: 0 | 1 | 6): void => {
-  //   patchMutation.mutate({
-  //     calendar: { ...calendarSettings, startOfWeek },
-  //   });
-  // };
-
-  // const handleDefaultEventDurationChange = (
-  //   defaultEventDuration: 30 | 60 | 90 | 120,
-  // ): void => {
-  //   patchMutation.mutate({
-  //     calendar: { ...calendarSettings, defaultEventDuration },
-  //   });
-  // };
-
-  // const handleDefaultViewChange = (defaultView: CalendarView): void => {
-  //   patchMutation.mutate({
-  //     calendar: { ...calendarSettings, defaultView },
-  //   });
-  // };
-
-  // const handleGoogleCalendarSyncChange = (
-  //   googleCalendarSync: boolean,
-  // ): void => {
-  //   patchMutation.mutate({
-  //     calendar: { ...calendarSettings, googleCalendarSync },
-  //   });
-  // };
-
   switch (currentTab) {
-    // DISABLED: General settings
-    // case 'general':
-    //   return (
-    //     <SettingsGeneralTab
-    //       defaultHomePage={generalSettings.defaultHomePage}
-    //       onDefaultHomePageChange={handleDefaultHomePageChange}
-    //     />
-    //   );
     case 'appearance':
       return <SettingsAppearanceTab theme={theme} onThemeChange={setTheme} />;
     case 'todo-list':
@@ -165,25 +111,7 @@ function RouteComponent(): React.ReactNode {
           onShowCompletedChange={handleShowCompletedChange}
         />
       );
-    // case 'tasks':
-    //   return <SettingsTasksTab />;
-    // return <SettingsTasksTab />;
-    // DISABLED: Calendar feature
-    // case 'calendar':
-    //   return (
-    //     <SettingsCalendarTab
-    //       startOfWeek={calendarSettings.startOfWeek}
-    //       defaultEventDuration={calendarSettings.defaultEventDuration}
-    //       defaultView={calendarSettings.defaultView}
-    //       googleCalendarSync={calendarSettings.googleCalendarSync}
-    //       onStartOfWeekChange={handleStartOfWeekChange}
-    //       onDefaultEventDurationChange={handleDefaultEventDurationChange}
-    //       onDefaultViewChange={handleDefaultViewChange}
-    //       onGoogleCalendarSyncChange={handleGoogleCalendarSyncChange}
-    //     />
-    //   );
-    // DISABLED: Not implemented
-    // case 'integrations':
-    //   return <SettingsIntegrationsTab />;
+    default:
+      currentTab satisfies never;
   }
 }

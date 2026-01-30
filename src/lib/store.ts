@@ -1,15 +1,11 @@
 import { Store } from '@tanstack/store';
 import type { Task } from '@/db/schemas/task.schema';
 import type { TodoListTimeSpan } from '@/db/schemas/user.schema';
-import { addDays, startOfDay } from '@/utils/dates';
+import { addDays, startOfDay } from '@/lib/dates';
 
 export const UI_STORE_SETTINGS_TABS = [
   'appearance',
   'todo-list',
-  // 'tasks',
-  // 'general', // DISABLED: General settings
-  // 'calendar', // DISABLED: Calendar feature
-  // 'integrations', // DISABLED: Not implemented
 ] as const;
 
 export type UIStoreSettingsTab = (typeof UI_STORE_SETTINGS_TABS)[number];
@@ -51,7 +47,6 @@ export type UIStoreActions = {
     timeSpan: TodoListTimeSpan,
   ) => void;
   setCalendarBaseDate: (date: Date) => void;
-  // navigateCalendar: (direction: 'prev' | 'next', view: CalendarView) => void;
   toggleUnassignedSort: () => void;
   toggleShowArchivedSkills: () => void;
   setShowCreateSubSkillModal: (show: boolean) => void;
@@ -119,33 +114,6 @@ export const uiStoreActions: UIStoreActions = {
       calendarBaseDate: startOfDay(date),
     }));
   },
-  // navigateCalendar: (direction: 'prev' | 'next', view: CalendarView) => {
-  //   uiStore.setState((state) => {
-  //     const current = state.calendarBaseDate;
-  //     let newDate: Date;
-
-  //     switch (view) {
-  //       case 'month':
-  //         newDate = new Date(
-  //           current.getFullYear(),
-  //           current.getMonth() + (direction === 'prev' ? -1 : 1),
-  //           1,
-  //         );
-  //         break;
-  //       case 'week':
-  //         newDate = addDays(current, direction === 'prev' ? -7 : 7);
-  //         break;
-  //       case 'day':
-  //         newDate = addDays(current, direction === 'prev' ? -1 : 1);
-  //         break;
-  //     }
-
-  //     return {
-  //       ...state,
-  //       calendarBaseDate: newDate,
-  //     };
-  //   });
-  // },
   toggleUnassignedSort: () => {
     uiStore.setState((state) => ({
       ...state,

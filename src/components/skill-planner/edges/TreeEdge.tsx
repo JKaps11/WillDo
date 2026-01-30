@@ -13,7 +13,7 @@ export function TreeEdge({
   data,
   selected,
 }: EdgeProps<TreeEdgeType>): React.ReactElement {
-  const [edgePath]: [string] = getSmoothStepPath({
+  const path = getSmoothStepPath({
     sourceX,
     sourceY,
     sourcePosition,
@@ -28,7 +28,7 @@ export function TreeEdge({
   return (
     <BaseEdge
       id={id}
-      path={edgePath}
+      path={path[0]}
       style={{
         strokeWidth: selected ? 3 : 2,
         stroke: isActive ? 'var(--stage-complete)' : 'var(--stage-not-started)',

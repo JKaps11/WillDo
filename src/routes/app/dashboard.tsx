@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { Dashboard } from '@/components/dashboard';
-import { ensureUser } from '@/utils/auth';
+import { ensureUser } from '@/serverFunctions/auth';
 
 export const Route = createFileRoute('/app/dashboard')({
   loader: async ({ context }) => {

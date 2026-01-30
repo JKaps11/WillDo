@@ -8,7 +8,7 @@ interface RecurringBadgeProps {
   className?: string;
 }
 
-function formatRecurrence(rule: RecurrenceRule): string {
+function formatRecurrence(rule: RecurrenceRule) {
   const { frequency, interval } = rule;
 
   if (interval === 1) {
@@ -17,10 +17,8 @@ function formatRecurrence(rule: RecurrenceRule): string {
         return 'Daily';
       case 'weekly':
         return 'Weekly';
-      case 'monthly':
-        return 'Monthly';
       default:
-        return 'Recurring';
+        frequency satisfies never;
     }
   }
 
@@ -29,10 +27,8 @@ function formatRecurrence(rule: RecurrenceRule): string {
       return `Every ${interval} days`;
     case 'weekly':
       return `Every ${interval} weeks`;
-    case 'monthly':
-      return `Every ${interval} months`;
     default:
-      return 'Recurring';
+      frequency satisfies never;
   }
 }
 

@@ -76,14 +76,14 @@ export function SkillForm(): React.ReactElement {
     createSkillMutation.mutate(mutationInput);
   };
 
-  const canProceed = (): boolean => {
+  function canProceed() {
     switch (currentStep) {
       case 'basic':
         return basicInfo.name.trim().length > 0;
       case 'ai':
         return true; // Can skip AI planning or create with generated plan
       default:
-        return false;
+        currentStep satisfies never;
     }
   };
 

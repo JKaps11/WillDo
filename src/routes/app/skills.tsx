@@ -4,7 +4,7 @@ import { useStore } from '@tanstack/react-store';
 
 import { useTRPC } from '@/integrations/trpc/react';
 import { SkillsHub } from '@/components/skills-hub';
-import { ensureUser } from '@/utils/auth';
+import { ensureUser } from '@/serverFunctions/auth';
 import { uiStore } from '@/lib/store';
 
 export const Route = createFileRoute('/app/skills')({
