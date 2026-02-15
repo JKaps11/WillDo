@@ -36,6 +36,11 @@ export const createUserSchema = z.object({
 export const updateUserSchema = z.object({
   name: z.string().optional(),
   settings: userSettingsSchema.optional(),
+  activeSkillId: z.string().uuid().nullable().optional(),
+});
+
+export const setActiveSkillSchema = z.object({
+  skillId: z.string().uuid(),
 });
 
 /* ---------- Patch Settings Schema (Partial Updates) ---------- */

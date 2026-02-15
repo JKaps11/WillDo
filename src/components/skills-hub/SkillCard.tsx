@@ -1,5 +1,6 @@
 import {
   Archive,
+  Focus,
   GitBranch,
   MoreHorizontal,
   Pencil,
@@ -24,9 +25,13 @@ import { Button } from '@/components/ui/button';
 
 interface SkillCardProps {
   skill: Skill & { subSkills: Array<SubSkill> };
+  isActive: boolean;
 }
 
-export function SkillCard({ skill }: SkillCardProps): React.ReactElement {
+export function SkillCard({
+  skill,
+  isActive,
+}: SkillCardProps): React.ReactElement {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
@@ -38,12 +43,22 @@ export function SkillCard({ skill }: SkillCardProps): React.ReactElement {
     }),
   );
 
+  const setActiveMutation = useMutation(
+    trpc.user.setActiveSkill.mutationOptions({
+      onSuccess: () => {
+        void queryClient.invalidateQueries({ queryKey: [['user', 'get']] });
+      },
+    }),
+  );
+
   const stages = skill.subSkills.map((s) => s.stage);
   const completedCount = stages.filter((s) => s === 'complete').length;
   const totalCount = stages.length;
 
   return (
-    <Card className="group relative transition-shadow hover:shadow-md">
+    <Card
+      className={`group relative transition-shadow hover:shadow-md ${isActive ? 'ring-2 ring-primary' : ''}`}
+    >
       <div
         className="absolute left-0 top-0 h-full w-1 rounded-l-lg"
         style={{ backgroundColor: skill.color }}
@@ -89,6 +104,20 @@ export function SkillCard({ skill }: SkillCardProps): React.ReactElement {
                   View Planner
                 </Link>
               </Button>
+              {!isActive && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() =>
+                    setActiveMutation.mutate({ skillId: skill.id })
+                  }
+                  disabled={setActiveMutation.isPending}
+                >
+                  <Focus className="mr-2 size-4" />
+                  Set as Active
+                </Button>
+              )}
               <EditSkillModal
                 skill={skill}
                 trigger={

@@ -6,7 +6,13 @@ import { TaskCard } from './TaskCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTRPC } from '@/integrations/trpc/react';
 
-export function TodaysTasks(): React.ReactElement {
+interface TodaysTasksProps {
+  className?: string;
+}
+
+export function TodaysTasks({
+  className,
+}: TodaysTasksProps): React.ReactElement {
   const trpc = useTRPC();
 
   const { data: tasks } = useSuspenseQuery(
@@ -14,7 +20,7 @@ export function TodaysTasks(): React.ReactElement {
   );
 
   return (
-    <Card className="flex flex-col">
+    <Card className={`flex flex-col ${className ?? ''}`}>
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <ListTodo className="size-5 text-muted-foreground" />

@@ -1,17 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
 import { format, parseISO } from 'date-fns';
 
-import type {
-  TimeSeriesPeriod,
-} from '@/lib/zod-schemas/metrics';
+import type { TimeSeriesPeriod } from '@/lib/zod-schemas/metrics';
 import type { ChartConfig } from '@/components/ui/chart';
 import { useTRPC } from '@/integrations/trpc/react';
 import {

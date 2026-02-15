@@ -85,7 +85,7 @@ export function SkillForm(): React.ReactElement {
       default:
         currentStep satisfies never;
     }
-  };
+  }
 
   return (
     <div className="">

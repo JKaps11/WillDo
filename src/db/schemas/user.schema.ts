@@ -80,6 +80,7 @@ export const users = pgTable('user', {
     .$type<UserSettings>()
     .notNull()
     .default(DEFAULT_USER_SETTINGS),
+  activeSkillId: text('active_skill_id'),
 });
 
 /* ---------- Inferred Types ---------- */

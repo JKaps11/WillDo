@@ -7,6 +7,8 @@ export const Route = createFileRoute('/app/dashboard')({
   loader: async ({ context }) => {
     await ensureUser();
     await Promise.all([
+      // User data (needed for active skill)
+      context.queryClient.ensureQueryData(context.trpc.user.get.queryOptions()),
       // Existing queries
       context.queryClient.ensureQueryData(
         context.trpc.dashboard.getTodaysTasks.queryOptions(),

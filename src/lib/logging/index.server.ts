@@ -22,10 +22,6 @@ export {
   getRequestId,
 } from './wideEventStore.server';
 
-export {
-  shouldLog,
-  emitWideEvent,
-  finalizeAndEmit,
-} from './logger.server';
+export { shouldLog, emitWideEvent, finalizeAndEmit } from './logger.server';
 
 export { withLogging, withLoggingInput } from './serverFn.server';

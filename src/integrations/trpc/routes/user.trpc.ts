@@ -1,6 +1,10 @@
 import { TRPCError } from '@trpc/server';
 import { protectedProcedure } from '../init';
-import { patchUserSettingsSchema, updateUserSchema } from '@/lib/zod-schemas';
+import {
+  patchUserSettingsSchema,
+  setActiveSkillSchema,
+  updateUserSchema,
+} from '@/lib/zod-schemas';
 import { userRepository } from '@/db/repositories/user.repository';
 import { addWide } from '@/lib/logging/wideEventStore.server';
 
@@ -51,6 +55,26 @@ export const userRouter = {
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to patch user settings',
+          cause: err,
+        });
+      }
+    }),
+
+  setActiveSkill: protectedProcedure
+    .input(setActiveSkillSchema)
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.userId;
+      try {
+        const user = await userRepository.setActiveSkill(userId, input.skillId);
+        if (!user) {
+          throw new TRPCError({ code: 'NOT_FOUND' });
+        }
+        return user;
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to set active skill',
           cause: err,
         });
       }

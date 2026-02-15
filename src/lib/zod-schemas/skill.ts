@@ -144,7 +144,9 @@ export const aiSkillPlanOutputSchema = z.object({
               unit: z
                 .string()
                 .nullable()
-                .describe('Unit of measurement (e.g., "hours", "sessions"), or null if unitless'),
+                .describe(
+                  'Unit of measurement (e.g., "hours", "sessions"), or null if unitless',
+                ),
               targetValue: z
                 .number()
                 .int()
