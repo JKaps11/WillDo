@@ -17,6 +17,12 @@ bun run check            # Format with Prettier and lint with ESLint (with fixes
 bun run lint             # ESLint only
 bun run format           # Prettier only
 
+# Testing (Playwright E2E)
+bun run test             # Run all Playwright tests
+bun run test:ui          # Open Playwright UI mode
+bunx playwright test --project=chromium  # Run specific project
+bunx playwright show-report              # Open last HTML report
+
 # Database (Drizzle + Neon PostgreSQL)
 bun run db:generate      # Generate migrations from schema changes
 bun run db:migrate       # Run pending migrations
@@ -72,3 +78,22 @@ Derive types in this order of preference:
 ## React Patterns
 
 - **Group related state**: Combine related state values into a single `useState` object rather than separate calls. For example, form fields like `name` and `description` should be `useState({ name, description })` not two separate `useState` calls. This reduces re-renders and keeps related data together.
+
+## Testing (Playwright E2E)
+
+Tests use the **Page Object Model** pattern. All locators live in POM classes; specs only call POM methods.
+
+### Structure
+
+- `tests/fixtures/base.fixture.ts` — custom `test` with POM fixtures + Clerk token setup
+- `tests/pom/*.pom.ts` — one POM per feature area (sidebar, skills-hub, planner, etc.)
+- `tests/helpers/api.helpers.ts` — tRPC shortcuts via `page.request` for test data setup/teardown
+- `tests/helpers/dnd.helpers.ts` — drag-and-drop simulation for `@dnd-kit`
+- `tests/specs/*.spec.ts` — one spec per major workflow
+
+### Conventions
+
+- All specs import `test` and `expect` from `tests/fixtures/base.fixture.ts` (not `@playwright/test`)
+- Prefer role/label/text selectors. Use `data-testid` only when no semantic selector exists
+- Test data names are prefixed with `E2E_` for easy cleanup via `deleteAllTestSkills()`
+- Serial test suites use `beforeAll`/`afterAll` to create/delete test data via API helpers

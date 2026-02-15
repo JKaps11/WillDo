@@ -13,11 +13,9 @@ export function EmptySkillsState(): React.ReactElement {
         Start building your skill tree by creating your first skill. Define
         sub-skills and track your progress.
       </p>
-      <Button asChild>
-        <Link to="/app/skills/new">
+      <Button render={<Link to="/app/skills/new" />} nativeButton={false} data-testid="create-first-skill">
           <Plus className="mr-2 size-4" />
           Create Your First Skill
-        </Link>
       </Button>
     </div>
   );

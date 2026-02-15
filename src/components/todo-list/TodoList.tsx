@@ -176,13 +176,13 @@ function TodoListCard({ todoList, tasks }: TodoListCardProps): ReactNode {
 
   return (
     <TodoListDropZone date={listDate}>
-      <Card className="h-full overflow-hidden">
+      <Card className="h-full overflow-hidden" data-testid="todo-list-card">
         <CardHeader className="space-y-1 pb-3">
           <div className="flex items-center justify-between gap-3">
             <CardTitle className="text-base font-medium">
               {format(listDate, 'EEE, MMM d')}
             </CardTitle>
-            <Badge variant="secondary" className="shrink-0">
+            <Badge variant="secondary" className="shrink-0" data-testid="task-count-badge">
               {done}/{total}
             </Badge>
           </div>

@@ -92,7 +92,7 @@ export function CompletionChart({
   };
 
   return (
-    <Card className={className}>
+    <Card className={className} data-testid="completion-chart">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div>
           <CardTitle className="text-base">Completion Trends</CardTitle>
@@ -102,7 +102,7 @@ export function CompletionChart({
           value={period}
           onValueChange={(v) => setPeriod(v as TimeSeriesPeriod)}
         >
-          <TabsList className="h-8">
+          <TabsList className="h-8" data-testid="chart-period-selector">
             <TabsTrigger value="week" className="text-xs px-2">
               Week
             </TabsTrigger>

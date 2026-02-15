@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
@@ -132,15 +134,12 @@ function ChartTooltipContent({
     }
 
     const [item] = payload
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const key = `${labelKey || item?.dataKey || item?.name || "value"}`
     const itemConfig = getPayloadConfigFromPayload(config, item, key)
-    /* eslint-disable @typescript-eslint/no-unnecessary-condition */
     const value =
       !labelKey && typeof label === "string"
-        ? config[label]?.label || label
+        ? config[label as keyof typeof config]?.label || label
         : itemConfig?.label
-    /* eslint-enable @typescript-eslint/no-unnecessary-condition */
 
     if (labelFormatter) {
       return (
@@ -173,10 +172,7 @@ function ChartTooltipContent({
 
   return (
     <div
-      className={cn(
-        "border-border/50 bg-background grid min-w-[8rem] items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl",
-        className
-      )}
+      className={cn("border-border/50 bg-background gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl grid min-w-32 items-start", className)}
     >
       {!nestLabel ? tooltipLabel : null}
       <div className="grid gap-1.5">
@@ -195,7 +191,6 @@ function ChartTooltipContent({
                   indicator === "dot" && "items-center"
                 )}
               >
-                {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
                 {formatter && item?.value !== undefined && item.name ? (
                   formatter(item.value, item.name, item, index, item.payload)
                 ) : (
@@ -310,7 +305,6 @@ function ChartLegendContent({
   )
 }
 
-// Helper to extract item config from a payload.
 function getPayloadConfigFromPayload(
   config: ChartConfig,
   payload: unknown,
@@ -346,7 +340,7 @@ function getPayloadConfigFromPayload(
 
   return configLabelKey in config
     ? config[configLabelKey]
-    : config[key]
+    : config[key as keyof typeof config]
 }
 
 export {

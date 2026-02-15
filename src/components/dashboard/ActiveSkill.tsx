@@ -43,7 +43,7 @@ export function ActiveSkill(): React.ReactElement {
     : undefined;
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col" data-testid="active-skill">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <Focus className="size-5 text-muted-foreground" />
@@ -54,8 +54,8 @@ export function ActiveSkill(): React.ReactElement {
         {!activeSkillId ? (
           <div className="py-4 text-center text-sm text-muted-foreground">
             <p>No active skill selected.</p>
-            <Button size="sm" variant="link" asChild>
-              <Link to="/app/skills">Pick one from the Skill Hub</Link>
+            <Button size="sm" variant="link" render={<Link to="/app/skills" />} nativeButton={false}>
+              Pick one from the Skill Hub
             </Button>
           </div>
         ) : !skillSummary ? (

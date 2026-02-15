@@ -35,7 +35,7 @@ export function SubSkillStageDots({
       <div className={cn('flex items-center gap-1', className)}>
         {subSkills.map((subSkill) => (
           <Tooltip key={subSkill.id}>
-            <TooltipTrigger asChild>
+            <TooltipTrigger render={
               <div
                 className={cn(
                   dotSize,
@@ -43,7 +43,7 @@ export function SubSkillStageDots({
                   STAGE_BG_CLASSES[subSkill.stage],
                 )}
               />
-            </TooltipTrigger>
+            } />
             <TooltipContent side="top" className="text-xs">
               <p className="font-medium">{subSkill.name}</p>
               <p className="text-muted-foreground">

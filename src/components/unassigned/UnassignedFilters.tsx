@@ -26,11 +26,9 @@ export function UnassignedFilters({
 }: UnassignedFiltersProps): React.ReactElement {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+      <DropdownMenuTrigger render={<Button variant="outline" size="sm" className="gap-2" />}>
           <Filter className="size-4" />
           Filters
-        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuLabel>Stage</DropdownMenuLabel>

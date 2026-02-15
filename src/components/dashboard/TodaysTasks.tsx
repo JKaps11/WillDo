@@ -20,7 +20,7 @@ export function TodaysTasks({
   );
 
   return (
-    <Card className={`flex flex-col ${className ?? ''}`}>
+    <Card className={`flex flex-col ${className ?? ''}`} data-testid="todays-tasks">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <ListTodo className="size-5 text-muted-foreground" />

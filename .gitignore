@@ -11,3 +11,8 @@ dist-ssr
 
 # Logs
 logs/
+
+# Playwright
+tests/.auth/
+test-results/
+playwright-report/

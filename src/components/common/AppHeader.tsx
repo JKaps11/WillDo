@@ -198,11 +198,9 @@ export default function AppHeader(): React.ReactNode {
             <Archive className="mr-2 size-4" />
             {showArchivedSkills ? 'Showing Archived' : 'Show Archived'}
           </Button>,
-          <Button key="new-skill-button" asChild>
-            <Link to="/app/skills/new">
+          <Button key="new-skill-button" render={<Link to="/app/skills/new" />} nativeButton={false}>
               <Plus className="mr-2 size-4" />
               New Skill
-            </Link>
           </Button>,
         ];
         break;
@@ -210,6 +208,7 @@ export default function AppHeader(): React.ReactNode {
         options = [
           <Button
             key="create-subskill-button"
+            data-testid="create-subskill-btn"
             onClick={() => uiStoreActions.setShowCreateSubSkillModal(true)}
           >
             <Plus className="mr-2 size-4" />
@@ -220,23 +219,19 @@ export default function AppHeader(): React.ReactNode {
       case 'Help':
         options = [
           <DropdownMenu key="help-topic-dropdown">
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
+            <DropdownMenuTrigger render={<Button variant="outline" />}>
                 {HELP_TOPICS.find(
                   (t) => t.id === (search as { topic?: string }).topic,
                 )?.title ?? 'Getting Started'}
                 <ChevronDown className="ml-2 size-4" />
-              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {HELP_TOPICS.map((topic) => {
                 const Icon = topic.icon;
                 return (
-                  <DropdownMenuItem key={topic.id} asChild>
-                    <Link to="/app/help" search={{ topic: topic.id }}>
+                  <DropdownMenuItem key={topic.id} render={<Link to="/app/help" search={{ topic: topic.id }} />}>
                       <Icon className="mr-2 size-4" />
                       {topic.title}
-                    </Link>
                   </DropdownMenuItem>
                 );
               })}
@@ -268,6 +263,7 @@ export default function AppHeader(): React.ReactNode {
                 key={`settings-tab-button-${value}`}
                 variant="outline"
                 onClick={() => onSettingsSelected(value)}
+                data-testid={`settings-tab-${value}`}
               >
                 {displaySettingsTabValue(value)}
               </Button>

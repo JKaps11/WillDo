@@ -69,14 +69,12 @@ export function AppSidebar(): React.ReactElement {
                 return (
                   <SidebarMenuItem key={item.to}>
                     <SidebarMenuButton
-                      asChild
+                      render={<Link to={item.to} />}
                       isActive={isActive}
                       tooltip={item.title}
                     >
-                      <Link to={item.to}>
-                        <Icon />
-                        <span>{item.title}</span>
-                      </Link>
+                      <Icon />
+                      <span>{item.title}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
