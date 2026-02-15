@@ -24,7 +24,7 @@ export function MetricsTotals(): React.ReactNode {
   );
 
   return (
-    <Card>
+    <Card data-testid="metrics-totals">
       <CardHeader>
         <CardTitle className="text-base">Your Stats</CardTitle>
         <CardDescription>Lifetime achievements</CardDescription>

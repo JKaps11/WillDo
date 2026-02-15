@@ -43,7 +43,7 @@ export function SkillCard({ skill }: SkillCardProps): React.ReactElement {
   const totalCount = stages.length;
 
   return (
-    <Card className="group relative transition-shadow hover:shadow-md">
+    <Card className="group relative transition-shadow hover:shadow-md" data-testid="skill-card">
       <div
         className="absolute left-0 top-0 h-full w-1 rounded-l-lg"
         style={{ backgroundColor: skill.color }}
@@ -68,26 +68,26 @@ export function SkillCard({ skill }: SkillCardProps): React.ReactElement {
             </div>
           </div>
           <Popover>
-            <PopoverTrigger asChild>
+            <PopoverTrigger render={
               <Button
                 variant="ghost"
                 size="icon"
                 className="size-8 opacity-0 transition-opacity group-hover:opacity-100"
-              >
+                data-testid="skill-card-menu"
+              />
+            }>
                 <MoreHorizontal className="size-4" />
-              </Button>
             </PopoverTrigger>
             <PopoverContent align="end" className="w-40 p-1">
               <Button
                 variant="ghost"
                 size="sm"
                 className="w-full justify-start"
-                asChild
+                render={<Link to="/app/skills/$id/planner" params={{ id: skill.id }} />}
+                nativeButton={false}
               >
-                <Link to="/app/skills/$id/planner" params={{ id: skill.id }}>
                   <GitBranch className="mr-2 size-4" />
                   View Planner
-                </Link>
               </Button>
               <EditSkillModal
                 skill={skill}
@@ -137,10 +137,8 @@ export function SkillCard({ skill }: SkillCardProps): React.ReactElement {
               {completedCount}/{totalCount} complete
             </span>
           </div>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/app/skills/$id/planner" params={{ id: skill.id }}>
+          <Button variant="outline" size="sm" render={<Link to="/app/skills/$id/planner" params={{ id: skill.id }} />} nativeButton={false}>
               Open Planner
-            </Link>
           </Button>
         </div>
       </CardContent>

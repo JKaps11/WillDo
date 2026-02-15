@@ -3,10 +3,7 @@ import type { Task } from '@/db/schemas/task.schema';
 import type { TodoListTimeSpan } from '@/db/schemas/user.schema';
 import { addDays, startOfDay } from '@/lib/dates';
 
-export const UI_STORE_SETTINGS_TABS = [
-  'appearance',
-  'todo-list',
-] as const;
+export const UI_STORE_SETTINGS_TABS = ['appearance', 'todo-list'] as const;
 
 export type UIStoreSettingsTab = (typeof UI_STORE_SETTINGS_TABS)[number];
 

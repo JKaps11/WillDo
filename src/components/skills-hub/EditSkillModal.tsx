@@ -92,13 +92,16 @@ export function EditSkillModal({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <Button variant="ghost" size="icon">
-            <Pencil className="size-4" />
-          </Button>
-        )}
-      </DialogTrigger>
+      <DialogTrigger render={(props) =>
+        React.cloneElement(
+          trigger ?? (
+            <Button variant="ghost" size="icon">
+              <Pencil className="size-4" />
+            </Button>
+          ),
+          props,
+        )
+      } />
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Edit Skill</DialogTitle>

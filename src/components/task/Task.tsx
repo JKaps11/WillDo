@@ -154,11 +154,12 @@ export function Task({ task, className, dragSource }: TaskProps): ReactNode {
             variant="ghost"
             size="icon"
             className="task-edit-btn size-7 opacity-0 group-hover:opacity-100 transition-opacity"
+            data-testid="task-edit-btn"
             onClick={() => uiStoreActions.openRecurrenceModal(task as TaskType)}
           >
             <Pencil className="size-3.5" />
           </Button>
-          <div className="task-checkbox flex items-center justify-center">
+          <div className="task-checkbox flex items-center justify-center" data-testid="task-checkbox">
             <Checkbox
               className="cursor-pointer hover:border-ring hover:ring-[3px] hover:ring-ring/50"
               checked={task.completed}

@@ -24,12 +24,12 @@ export function SubSkillStageIndicator({
     <div className="flex items-center gap-1">
       {stages.map((stage, index) => (
         <Tooltip key={index}>
-          <TooltipTrigger asChild>
+          <TooltipTrigger render={
             <div
               className={`${dotSize} rounded-full`}
               style={{ backgroundColor: STAGE_COLORS[stage] }}
             />
-          </TooltipTrigger>
+          } />
           <TooltipContent side="top" className="text-xs">
             {STAGE_LABELS[stage]}
           </TooltipContent>

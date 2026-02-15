@@ -43,13 +43,16 @@ export function DeleteSkillModal({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <Button variant="ghost" size="icon" className="text-destructive">
-            <Trash2 className="size-4" />
-          </Button>
-        )}
-      </DialogTrigger>
+      <DialogTrigger render={(props) =>
+        React.cloneElement(
+          trigger ?? (
+            <Button variant="ghost" size="icon" className="text-destructive">
+              <Trash2 className="size-4" />
+            </Button>
+          ),
+          props,
+        )
+      } />
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete Skill</DialogTitle>

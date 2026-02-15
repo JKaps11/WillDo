@@ -103,10 +103,8 @@ export default function TodoListConfig(): ReactNode {
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline" size="icon">
+      <PopoverTrigger render={<Button variant="outline" size="icon" />}>
           <Settings2 />
-        </Button>
       </PopoverTrigger>
 
       <PopoverContent align="end" className="w-80 p-3">
@@ -135,7 +133,7 @@ export default function TodoListConfig(): ReactNode {
             value={todoListOptions.sortBy}
             onValueChange={onSortByValueChange}
           >
-            <SelectTrigger className="h-8 w-40">
+            <SelectTrigger className="h-8 w-40" data-testid="sort-by-select">
               <SelectValue placeholder="Date created" />
             </SelectTrigger>
             <SelectContent>
@@ -152,6 +150,7 @@ export default function TodoListConfig(): ReactNode {
           <Switch
             checked={todoListOptions.showCompleted}
             onCheckedChange={onShowCompletedChange}
+            data-testid="show-completed-switch"
           />
         </div>
       </PopoverContent>

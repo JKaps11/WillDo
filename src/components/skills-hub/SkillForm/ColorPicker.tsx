@@ -59,14 +59,12 @@ export function ColorPicker({
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline" className="w-full justify-start gap-2">
+      <PopoverTrigger render={<Button variant="outline" className="w-full justify-start gap-2" />}>
           <div
             className="size-5 rounded-full border border-border"
             style={{ backgroundColor: value }}
           />
           <span className="text-foreground">{value}</span>
-        </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-3" align="start">
         <div className="space-y-3">

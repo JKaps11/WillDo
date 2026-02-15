@@ -139,14 +139,14 @@ export function RecurringModal({
               Date
             </Label>
             <Popover>
-              <PopoverTrigger asChild>
+              <PopoverTrigger render={
                 <Button
                   variant="outline"
                   className="w-full justify-start text-left font-normal"
-                >
+                />
+              }>
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {format(selectedDate, 'EEEE, MMM d, yyyy')}
-                </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
@@ -177,6 +177,7 @@ export function RecurringModal({
               id="recurring-toggle"
               checked={isRecurring}
               onCheckedChange={setIsRecurring}
+              data-testid="recurring-toggle"
             />
           </div>
 

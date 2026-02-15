@@ -26,11 +26,9 @@ function RouteComponent(): React.ReactNode {
     <div className="flex h-full flex-col p-6">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/app/skills">
+          <Button variant="ghost" size="sm" render={<Link to="/app/skills" />} nativeButton={false}>
               <ArrowLeft className="mr-2 size-4" />
               Back
-            </Link>
           </Button>
 
           <div className="flex items-center gap-2">

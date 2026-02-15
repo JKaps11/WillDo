@@ -36,9 +36,7 @@ export function NotFoundPage() {
         </EmptyHeader>
 
         <EmptyContent className="flex justify-center">
-          <Button asChild size="lg">
-            <Link to={'/'}>Go Home</Link>
-          </Button>
+          <Button size="lg" render={<Link to={'/'} />} nativeButton={false}>Go Home</Button>
         </EmptyContent>
       </Empty>
     </div>

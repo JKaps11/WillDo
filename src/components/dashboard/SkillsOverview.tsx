@@ -33,7 +33,7 @@ export function SkillsOverview(): React.ReactElement {
   }));
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col" data-testid="skills-overview">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -41,10 +41,8 @@ export function SkillsOverview(): React.ReactElement {
             <CardTitle className="text-base">Skills Overview</CardTitle>
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="ghost" asChild>
-              <Link to="/app/skills/new">
+            <Button size="sm" variant="ghost" render={<Link to="/app/skills/new" />} nativeButton={false}>
                 <Plus className="size-4" />
-              </Link>
             </Button>
           </div>
         </div>

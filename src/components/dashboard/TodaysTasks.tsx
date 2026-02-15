@@ -14,7 +14,7 @@ export function TodaysTasks(): React.ReactElement {
   );
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col" data-testid="todays-tasks">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <ListTodo className="size-5 text-muted-foreground" />

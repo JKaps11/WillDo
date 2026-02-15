@@ -159,14 +159,14 @@ export function TaskForm({
           <Field>
             <FieldLabel>Date</FieldLabel>
             <Popover>
-              <PopoverTrigger asChild>
+              <PopoverTrigger render={
                 <Button
                   variant="outline"
                   className="w-full justify-start text-left font-normal"
-                >
+                />
+              }>
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {format(field.state.value, 'MM/dd/yyyy')}
-                </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
                 <Calendar
@@ -189,16 +189,16 @@ export function TaskForm({
           <Field>
             <FieldLabel>Due Date</FieldLabel>
             <Popover>
-              <PopoverTrigger asChild>
+              <PopoverTrigger render={
                 <Button
                   variant="outline"
                   className="w-full justify-start text-left font-normal"
-                >
+                />
+              }>
                   <Clock className="mr-2 h-4 w-4" />
                   {field.state.value
                     ? format(field.state.value, 'MM/dd/yyyy')
                     : 'No due date'}
-                </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
                 <Calendar

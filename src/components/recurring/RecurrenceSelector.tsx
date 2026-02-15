@@ -75,7 +75,7 @@ export function RecurrenceSelector({
           className="w-16"
         />
         <Select value={value.frequency} onValueChange={handleFrequencyChange}>
-          <SelectTrigger className="w-28">
+          <SelectTrigger className="w-28" data-testid="recurrence-frequency">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
