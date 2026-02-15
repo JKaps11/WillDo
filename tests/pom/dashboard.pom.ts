@@ -3,7 +3,7 @@ import type { Locator, Page } from '@playwright/test';
 export class DashboardPom {
   readonly page: Page;
   readonly todaysTasks: Locator;
-  readonly skillsOverview: Locator;
+  readonly activeSkill: Locator;
   readonly completionChart: Locator;
   readonly metricsTotals: Locator;
   readonly chartPeriodSelector: Locator;
@@ -11,7 +11,7 @@ export class DashboardPom {
   constructor(page: Page) {
     this.page = page;
     this.todaysTasks = page.locator('[data-testid="todays-tasks"]');
-    this.skillsOverview = page.locator('[data-testid="skills-overview"]');
+    this.activeSkill = page.locator('[data-testid="active-skill"]');
     this.completionChart = page.locator('[data-testid="completion-chart"]');
     this.metricsTotals = page.locator('[data-testid="metrics-totals"]');
     this.chartPeriodSelector = page.locator(
@@ -25,7 +25,7 @@ export class DashboardPom {
   }
 
   async isSectionVisible(
-    name: 'todaysTasks' | 'skillsOverview' | 'completionChart' | 'metricsTotals',
+    name: 'todaysTasks' | 'activeSkill' | 'completionChart' | 'metricsTotals',
   ): Promise<boolean> {
     return this[name].isVisible();
   }

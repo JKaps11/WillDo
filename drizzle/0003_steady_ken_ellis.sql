@@ -1,0 +1,1 @@
+ALTER TABLE "user" ADD COLUMN "active_skill_id" text;

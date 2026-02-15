@@ -13,6 +13,9 @@ export const Route = createFileRoute('/app/skills')({
     await context.queryClient.ensureQueryData(
       context.trpc.skill.list.queryOptions({ includeArchived: false }),
     );
+    await context.queryClient.ensureQueryData(
+      context.trpc.user.get.queryOptions(),
+    );
   },
   component: RouteComponent,
 });
@@ -24,6 +27,9 @@ function RouteComponent(): React.ReactNode {
   const { data: skills } = useSuspenseQuery(
     trpc.skill.list.queryOptions({ includeArchived: showArchivedSkills }),
   );
+  const { data: user } = useSuspenseQuery(trpc.user.get.queryOptions());
 
-  return <SkillsHub skills={skills} />;
+  return (
+    <SkillsHub skills={skills} activeSkillId={user.activeSkillId ?? null} />
+  );
 }

@@ -5,7 +5,7 @@ test.describe('Dashboard', () => {
     await dashboard.goto();
 
     await expect(dashboard.todaysTasks).toBeVisible();
-    await expect(dashboard.skillsOverview).toBeVisible();
+    await expect(dashboard.activeSkill).toBeVisible();
     await expect(dashboard.completionChart).toBeVisible();
     await expect(dashboard.metricsTotals).toBeVisible();
   });

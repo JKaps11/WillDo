@@ -61,6 +61,18 @@ export const userRepository = {
     return result[0] ?? null;
   },
 
+  setActiveSkill: async (
+    userId: string,
+    skillId: string,
+  ): Promise<User | null> => {
+    const result = await db
+      .update(users)
+      .set({ activeSkillId: skillId })
+      .where(eq(users.id, userId))
+      .returning();
+    return result[0] ?? null;
+  },
+
   patchSettings: async (
     id: string,
     patch: PatchUserSettings,

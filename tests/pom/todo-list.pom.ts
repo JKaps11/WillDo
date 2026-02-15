@@ -43,10 +43,14 @@ export class TodoListPom {
     // Only get task name spans inside card content areas
     const tasks = this.dayCards.locator('.truncate');
     const count = await tasks.count();
+    const seen = new Set<string>();
     const names: Array<string> = [];
     for (let i = 0; i < count; i++) {
       const text = await tasks.nth(i).textContent();
-      if (text) names.push(text.trim());
+      if (text && !seen.has(text.trim())) {
+        seen.add(text.trim());
+        names.push(text.trim());
+      }
     }
     return names;
   }
