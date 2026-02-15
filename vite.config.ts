@@ -47,6 +47,7 @@ function serverOnlyPlugin(): Plugin {
           export const finalizeAndEmit = () => {};
           export const withLogging = (_name, fn) => fn;
           export const withLoggingInput = (_name, fn) => fn;
+          export const generateSkillPlan = async () => ({ success: false, error: 'server-only' });
         `;
       }
       return null;
