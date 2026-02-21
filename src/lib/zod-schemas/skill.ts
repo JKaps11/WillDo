@@ -195,3 +195,38 @@ export const createSkillWithPlanSchema = z.object({
   goal: z.string().optional(),
   subSkills: z.array(subSkillPlanItemSchema),
 });
+
+/* ---------- Export/Import Schemas ---------- */
+
+export const exportedSkillMetricSchema = z.object({
+  name: z.string().min(1).max(255),
+  unit: z.string().nullable(),
+  targetValue: z.number().int().positive(),
+  currentValue: z.number().int().min(0),
+});
+
+export const exportedSubSkillSchema = z.object({
+  name: z.string().min(1).max(255),
+  description: z.string().nullable(),
+  stage: subSkillStageSchema,
+  sortOrder: z.number().int(),
+  parentIndex: z.number().int().nullable(),
+  metrics: z.array(exportedSkillMetricSchema),
+});
+
+export const importSkillSchema = z.object({
+  version: z.literal(1),
+  exportedAt: z.string(),
+  skill: z.object({
+    name: z.string().min(1).max(255),
+    description: z.string().nullable(),
+    color: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
+    icon: z.string().nullable(),
+    goal: z.string().nullable(),
+  }),
+  subSkills: z.array(exportedSubSkillSchema),
+});
+
+export const trackExportSchema = z.object({
+  skillId: z.string().uuid(),
+});

@@ -29,7 +29,9 @@ export function DefaultErrorPage({ error: _error }: ErrorComponentProps) {
         </EmptyHeader>
 
         <EmptyContent className="flex justify-center">
-          <Button size="lg" render={<Link to={'/'} />} nativeButton={false}>Go home</Button>
+          <Button size="lg" render={<Link to={'/'} />} nativeButton={false}>
+            Go home
+          </Button>
         </EmptyContent>
       </Empty>
     </div>

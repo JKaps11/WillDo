@@ -1,19 +1,26 @@
 import {
   Archive,
+  Download,
   Focus,
   GitBranch,
+  Loader2,
   MoreHorizontal,
   Pencil,
   Trash2,
 } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
+import { useState } from 'react';
 
 import { SubSkillStageIndicator } from './SubSkillStageIndicator';
 import { DeleteSkillModal } from './DeleteSkillModal';
 import { EditSkillModal } from './EditSkillModal';
 import type { SubSkill } from '@/db/schemas/sub_skill.schema';
 import type { Skill } from '@/db/schemas/skill.schema';
+import {
+  downloadSkillAsJson,
+  transformSkillForExport,
+} from '@/lib/utils/skill-export';
 import {
   Popover,
   PopoverContent,
@@ -34,6 +41,7 @@ export function SkillCard({
 }: SkillCardProps): React.ReactElement {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const [isExporting, setIsExporting] = useState(false);
 
   const archiveMutation = useMutation(
     trpc.skill.archive.mutationOptions({
@@ -50,6 +58,31 @@ export function SkillCard({
       },
     }),
   );
+
+  const trackExportMutation = useMutation(
+    trpc.skill.trackExport.mutationOptions(),
+  );
+
+  async function handleExport(): Promise<void> {
+    setIsExporting(true);
+    try {
+      // Fetch full skill data with metrics
+      const fullSkillData = await queryClient.fetchQuery(
+        trpc.skill.get.queryOptions({ id: skill.id }),
+      );
+
+      // Transform to export format
+      const exportData = transformSkillForExport(fullSkillData);
+
+      // Trigger download
+      downloadSkillAsJson(exportData, skill.name);
+
+      // Track export
+      trackExportMutation.mutate({ skillId: skill.id });
+    } finally {
+      setIsExporting(false);
+    }
+  }
 
   const stages = skill.subSkills.map((s) => s.stage);
   const completedCount = stages.filter((s) => s === 'complete').length;
@@ -83,26 +116,33 @@ export function SkillCard({
             </div>
           </div>
           <Popover>
-            <PopoverTrigger render={
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8 opacity-0 transition-opacity group-hover:opacity-100"
-                data-testid="skill-card-menu"
-              />
-            }>
-                <MoreHorizontal className="size-4" />
+            <PopoverTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8 opacity-0 transition-opacity group-hover:opacity-100"
+                  data-testid="skill-card-menu"
+                />
+              }
+            >
+              <MoreHorizontal className="size-4" />
             </PopoverTrigger>
             <PopoverContent align="end" className="w-40 p-1">
               <Button
                 variant="ghost"
                 size="sm"
                 className="w-full justify-start"
-                render={<Link to="/app/skills/$id/planner" params={{ id: skill.id }} />}
+                render={
+                  <Link
+                    to="/app/skills/$id/planner"
+                    params={{ id: skill.id }}
+                  />
+                }
                 nativeButton={false}
               >
-                  <GitBranch className="mr-2 size-4" />
-                  View Planner
+                <GitBranch className="mr-2 size-4" />
+                View Planner
               </Button>
               {!isActive && (
                 <Button
@@ -141,6 +181,20 @@ export function SkillCard({
                 <Archive className="mr-2 size-4" />
                 Archive
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start"
+                onClick={() => void handleExport()}
+                disabled={isExporting}
+              >
+                {isExporting ? (
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                ) : (
+                  <Download className="mr-2 size-4" />
+                )}
+                {isExporting ? 'Exporting...' : 'Export'}
+              </Button>
               <DeleteSkillModal
                 skill={skill}
                 trigger={
@@ -166,8 +220,15 @@ export function SkillCard({
               {completedCount}/{totalCount} complete
             </span>
           </div>
-          <Button variant="outline" size="sm" render={<Link to="/app/skills/$id/planner" params={{ id: skill.id }} />} nativeButton={false}>
-              Open Planner
+          <Button
+            variant="outline"
+            size="sm"
+            render={
+              <Link to="/app/skills/$id/planner" params={{ id: skill.id }} />
+            }
+            nativeButton={false}
+          >
+            Open Planner
           </Button>
         </div>
       </CardContent>

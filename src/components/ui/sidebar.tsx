@@ -539,11 +539,11 @@ function SidebarMenuButton({
 
   return (
     <Tooltip>
-      {render
-        ? <TooltipTrigger render={({ children: _, ...triggerProps }) =>
-            React.cloneElement(comp as React.ReactElement, triggerProps)
-          } />
-        : comp}
+      {render ? (
+        <TooltipTrigger render={comp as React.ReactElement} />
+      ) : (
+        comp
+      )}
       <TooltipContent
         side="right"
         align="center"

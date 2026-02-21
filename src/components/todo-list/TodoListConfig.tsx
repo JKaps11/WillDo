@@ -104,16 +104,19 @@ export default function TodoListConfig(): ReactNode {
   return (
     <Popover>
       <PopoverTrigger render={<Button variant="outline" size="icon" />}>
-          <Settings2 />
+        <Settings2 />
       </PopoverTrigger>
 
       <PopoverContent align="end" className="w-80 p-3">
         {/* Top segmented toggle (Date / Week) */}
         <ToggleGroup
-          type="single"
           className="w-full grid grid-cols-2 gap-2"
-          value={todoListOptions.timeSpan}
-          onValueChange={onTodoListTimeSpanChange}
+          value={[todoListOptions.timeSpan]}
+          onValueChange={(value) => {
+            if (value.length > 0) {
+              onTodoListTimeSpanChange(value[0]);
+            }
+          }}
         >
           <ToggleGroupItem value="day" variant="outline">
             Date

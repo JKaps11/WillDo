@@ -45,9 +45,13 @@ export function DashboardEmptyState({
       <p className="mb-4 text-sm text-muted-foreground">
         Create a skill to start tracking your learning journey
       </p>
-      <Button size="sm" render={<Link to="/app/skills/new" />} nativeButton={false}>
-          <Plus className="mr-1 size-4" />
-          Create Skill
+      <Button
+        size="sm"
+        render={<Link to="/app/skills/new" />}
+        nativeButton={false}
+      >
+        <Plus className="mr-1 size-4" />
+        Create Skill
       </Button>
     </div>
   );

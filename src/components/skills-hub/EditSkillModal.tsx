@@ -28,7 +28,7 @@ interface EditSkillFormData {
 
 interface EditSkillModalProps {
   skill: Skill;
-  trigger?: React.ReactNode;
+  trigger?: React.ReactElement;
 }
 
 export function EditSkillModal({
@@ -92,16 +92,13 @@ export function EditSkillModal({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={(props) =>
-        React.cloneElement(
-          trigger ?? (
-            <Button variant="ghost" size="icon">
-              <Pencil className="size-4" />
-            </Button>
-          ),
-          props,
-        )
-      } />
+      {trigger ? (
+        <DialogTrigger render={trigger} />
+      ) : (
+        <DialogTrigger render={<Button variant="ghost" size="icon" />}>
+          <Pencil className="size-4" />
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Edit Skill</DialogTitle>

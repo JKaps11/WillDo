@@ -8,6 +8,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools';
 
 import { ThemeProvider, themeInitScript } from '../lib/theme';
 import ClerkProvider from '../integrations/clerk/provider';
+import { TooltipProvider } from '../components/ui/tooltip';
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools';
 
@@ -58,19 +59,21 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         <ClerkProvider>
           <ThemeProvider>
-            {children}
-            <TanStackDevtools
-              config={{
-                position: 'bottom-right',
-              }}
-              plugins={[
-                {
-                  name: 'Tanstack Router',
-                  render: <TanStackRouterDevtoolsPanel />,
-                },
-                TanStackQueryDevtools,
-              ]}
-            />
+            <TooltipProvider>
+              {children}
+              <TanStackDevtools
+                config={{
+                  position: 'bottom-right',
+                }}
+                plugins={[
+                  {
+                    name: 'Tanstack Router',
+                    render: <TanStackRouterDevtoolsPanel />,
+                  },
+                  TanStackQueryDevtools,
+                ]}
+              />
+            </TooltipProvider>
           </ThemeProvider>
         </ClerkProvider>
         <Scripts />

@@ -15,6 +15,8 @@ export const userMetrics = pgTable('user_metrics', {
   subSkillsCompleted: integer('sub_skills_completed').default(0).notNull(),
   subSkillsCreated: integer('sub_skills_created').default(0).notNull(),
   skillsArchived: integer('skills_archived').default(0).notNull(),
+  skillsImported: integer('skills_imported').default(0).notNull(),
+  skillsExported: integer('skills_exported').default(0).notNull(),
 
   // Streaks
   currentStreak: integer('current_streak').default(0).notNull(),

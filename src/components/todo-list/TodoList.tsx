@@ -182,7 +182,11 @@ function TodoListCard({ todoList, tasks }: TodoListCardProps): ReactNode {
             <CardTitle className="text-base font-medium">
               {format(listDate, 'EEE, MMM d')}
             </CardTitle>
-            <Badge variant="secondary" className="shrink-0" data-testid="task-count-badge">
+            <Badge
+              variant="secondary"
+              className="shrink-0"
+              data-testid="task-count-badge"
+            >
               {done}/{total}
             </Badge>
           </div>

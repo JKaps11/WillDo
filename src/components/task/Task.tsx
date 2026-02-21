@@ -159,7 +159,10 @@ export function Task({ task, className, dragSource }: TaskProps): ReactNode {
           >
             <Pencil className="size-3.5" />
           </Button>
-          <div className="task-checkbox flex items-center justify-center" data-testid="task-checkbox">
+          <div
+            className="task-checkbox flex items-center justify-center"
+            data-testid="task-checkbox"
+          >
             <Checkbox
               className="cursor-pointer hover:border-ring hover:ring-[3px] hover:ring-ring/50"
               checked={task.completed}

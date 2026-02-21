@@ -139,14 +139,16 @@ export function RecurringModal({
               Date
             </Label>
             <Popover>
-              <PopoverTrigger render={
-                <Button
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal"
-                />
-              }>
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {format(selectedDate, 'EEEE, MMM d, yyyy')}
+              <PopoverTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                  />
+                }
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {format(selectedDate, 'EEEE, MMM d, yyyy')}
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar

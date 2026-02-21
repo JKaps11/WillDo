@@ -93,7 +93,6 @@ export function RecurrenceSelector({
         <div className="space-y-2">
           <Label>On days</Label>
           <ToggleGroup
-            type="multiple"
             value={value.daysOfWeek ?? []}
             onValueChange={handleDaysOfWeekChange}
             className="justify-start"

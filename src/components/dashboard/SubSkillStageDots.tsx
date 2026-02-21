@@ -31,19 +31,21 @@ export function SubSkillStageDots({
   const dotSize = size === 'sm' ? 'size-2' : 'size-2.5';
 
   return (
-    <TooltipProvider delayDuration={200}>
+    <TooltipProvider delay={200}>
       <div className={cn('flex items-center gap-1', className)}>
         {subSkills.map((subSkill) => (
           <Tooltip key={subSkill.id}>
-            <TooltipTrigger render={
-              <div
-                className={cn(
-                  dotSize,
-                  'shrink-0 rounded-full transition-colors',
-                  STAGE_BG_CLASSES[subSkill.stage],
-                )}
-              />
-            } />
+            <TooltipTrigger
+              render={
+                <div
+                  className={cn(
+                    dotSize,
+                    'shrink-0 rounded-full transition-colors',
+                    STAGE_BG_CLASSES[subSkill.stage],
+                  )}
+                />
+              }
+            />
             <TooltipContent side="top" className="text-xs">
               <p className="font-medium">{subSkill.name}</p>
               <p className="text-muted-foreground">

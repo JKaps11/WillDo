@@ -192,17 +192,19 @@ function ColorPicker({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger render={
-        <button
-          type="button"
-          className="flex h-9 w-9 items-center justify-center rounded-md border border-input transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          aria-label={label}
-        />
-      }>
-          <div
-            className="h-5 w-5 rounded-sm"
-            style={{ backgroundColor: value }}
+      <PopoverTrigger
+        render={
+          <button
+            type="button"
+            className="flex h-9 w-9 items-center justify-center rounded-md border border-input transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label={label}
           />
+        }
+      >
+        <div
+          className="h-5 w-5 rounded-sm"
+          style={{ backgroundColor: value }}
+        />
       </PopoverTrigger>
       <PopoverContent className="w-64" align="end">
         <div className="space-y-2">

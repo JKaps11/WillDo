@@ -16,3 +16,6 @@ logs/
 tests/.auth/
 test-results/
 playwright-report/
+
+# Claude Code
+.claude/plans/

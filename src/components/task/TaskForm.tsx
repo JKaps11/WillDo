@@ -159,14 +159,16 @@ export function TaskForm({
           <Field>
             <FieldLabel>Date</FieldLabel>
             <Popover>
-              <PopoverTrigger render={
-                <Button
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal"
-                />
-              }>
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {format(field.state.value, 'MM/dd/yyyy')}
+              <PopoverTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                  />
+                }
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {format(field.state.value, 'MM/dd/yyyy')}
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
                 <Calendar
@@ -189,16 +191,18 @@ export function TaskForm({
           <Field>
             <FieldLabel>Due Date</FieldLabel>
             <Popover>
-              <PopoverTrigger render={
-                <Button
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal"
-                />
-              }>
-                  <Clock className="mr-2 h-4 w-4" />
-                  {field.state.value
-                    ? format(field.state.value, 'MM/dd/yyyy')
-                    : 'No due date'}
+              <PopoverTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                  />
+                }
+              >
+                <Clock className="mr-2 h-4 w-4" />
+                {field.state.value
+                  ? format(field.state.value, 'MM/dd/yyyy')
+                  : 'No due date'}
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
                 <Calendar

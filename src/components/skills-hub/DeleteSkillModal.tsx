@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 
 interface DeleteSkillModalProps {
   skill: Skill;
-  trigger?: React.ReactNode;
+  trigger?: React.ReactElement;
 }
 
 export function DeleteSkillModal({
@@ -43,16 +43,17 @@ export function DeleteSkillModal({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={(props) =>
-        React.cloneElement(
-          trigger ?? (
-            <Button variant="ghost" size="icon" className="text-destructive">
-              <Trash2 className="size-4" />
-            </Button>
-          ),
-          props,
-        )
-      } />
+      {trigger ? (
+        <DialogTrigger render={trigger} />
+      ) : (
+        <DialogTrigger
+          render={
+            <Button variant="ghost" size="icon" className="text-destructive" />
+          }
+        >
+          <Trash2 className="size-4" />
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete Skill</DialogTitle>

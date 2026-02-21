@@ -5,7 +5,9 @@ import {
   createSkillWithPlanSchema,
   deleteSkillSchema,
   getSkillSchema,
+  importSkillSchema,
   listSkillsSchema,
+  trackExportSchema,
   updateSkillSchema,
 } from '@/lib/zod-schemas';
 import { subSkillRepository } from '@/db/repositories/sub_skill.repository';
@@ -311,5 +313,91 @@ export const skillRouter = {
       }
 
       return skill;
+    }),
+
+  import: protectedProcedure
+    .input(importSkillSchema)
+    .mutation(async ({ ctx, input }) => {
+      addWide({
+        skill_name: input.skill.name,
+        sub_skills_count: input.subSkills.length,
+        event: 'skill_imported',
+      });
+
+      // Create skill from input
+      const skill = await skillRepository.create({
+        ...input.skill,
+        userId: ctx.userId,
+      });
+
+      if (!skill) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to import skill',
+        });
+      }
+      addWide({ skill_id: skill.id });
+
+      // Track created subskill IDs for parent resolution
+      const createdSubSkillIds: Array<string> = [];
+
+      // Create subskills with resolved parent references
+      for (const ss of input.subSkills) {
+        const parentIndex = ss.parentIndex;
+        const parentSubSkillId =
+          parentIndex !== null && parentIndex >= 0
+            ? (createdSubSkillIds[parentIndex] ?? null)
+            : null;
+
+        const createdSubSkill = await subSkillRepository.create({
+          skillId: skill.id,
+          userId: ctx.userId,
+          name: ss.name,
+          description: ss.description,
+          stage: ss.stage,
+          sortOrder: ss.sortOrder,
+          parentSubSkillId,
+        });
+
+        if (!createdSubSkill) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: `Failed to import sub-skill: ${ss.name}`,
+          });
+        }
+
+        createdSubSkillIds.push(createdSubSkill.id);
+
+        // Track subskill creation metric
+        await userMetricsRepository.incrementSubSkillsCreated(ctx.userId);
+
+        // Create metrics for this subskill
+        await Promise.all(
+          ss.metrics.map((metric) =>
+            skillRepository.createMetric({
+              subSkillId: createdSubSkill.id,
+              userId: ctx.userId,
+              name: metric.name,
+              unit: metric.unit,
+              targetValue: metric.targetValue,
+              currentValue: metric.currentValue,
+            }),
+          ),
+        );
+      }
+
+      // Track import metric
+      await userMetricsRepository.incrementSkillsImported(ctx.userId);
+      addWide({ sub_skills_created: createdSubSkillIds.length });
+
+      return skill;
+    }),
+
+  trackExport: protectedProcedure
+    .input(trackExportSchema)
+    .mutation(async ({ ctx, input }) => {
+      await userMetricsRepository.incrementSkillsExported(ctx.userId);
+      addWide({ skill_id: input.skillId, event: 'skill_exported' });
+      return { success: true };
     }),
 };

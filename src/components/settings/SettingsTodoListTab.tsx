@@ -50,11 +50,10 @@ export function SettingsTodoListTab({
               description="Choose between daily or weekly view."
             >
               <ToggleGroup
-                type="single"
-                value={timeSpan}
+                value={[timeSpan]}
                 onValueChange={(value) => {
-                  if (value) {
-                    onTimeSpanChange(value as TodoListTimeSpan);
+                  if (value.length > 0) {
+                    onTimeSpanChange(value[0] as TodoListTimeSpan);
                   }
                 }}
                 variant="outline"

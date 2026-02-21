@@ -54,7 +54,12 @@ export function ActiveSkill(): React.ReactElement {
         {!activeSkillId ? (
           <div className="py-4 text-center text-sm text-muted-foreground">
             <p>No active skill selected.</p>
-            <Button size="sm" variant="link" render={<Link to="/app/skills" />} nativeButton={false}>
+            <Button
+              size="sm"
+              variant="link"
+              render={<Link to="/app/skills" />}
+              nativeButton={false}
+            >
               Pick one from the Skill Hub
             </Button>
           </div>

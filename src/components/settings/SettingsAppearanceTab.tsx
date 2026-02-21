@@ -30,11 +30,10 @@ export function SettingsAppearanceTab({
           description="Choose between light, dark, or system preference."
         >
           <ToggleGroup
-            type="single"
-            value={theme}
+            value={[theme]}
             onValueChange={(value) => {
-              if (value) {
-                onThemeChange(value as AppearanceTheme);
+              if (value.length > 0) {
+                onThemeChange(value[0] as AppearanceTheme);
               }
             }}
             variant="outline"

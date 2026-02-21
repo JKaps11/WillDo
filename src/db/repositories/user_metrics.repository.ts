@@ -167,6 +167,42 @@ export const userMetricsRepository = {
     });
   },
 
+  incrementSkillsImported: async (
+    userId: string,
+  ): Promise<UserMetrics | null> => {
+    return withDbError('userMetrics.incrementSkillsImported', async () => {
+      await ensureMetricsExist(userId);
+      const result = await db
+        .update(userMetrics)
+        .set({
+          skillsImported: sql`${userMetrics.skillsImported} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(userMetrics.userId, userId))
+        .returning();
+
+      return result[0] ?? null;
+    });
+  },
+
+  incrementSkillsExported: async (
+    userId: string,
+  ): Promise<UserMetrics | null> => {
+    return withDbError('userMetrics.incrementSkillsExported', async () => {
+      await ensureMetricsExist(userId);
+      const result = await db
+        .update(userMetrics)
+        .set({
+          skillsExported: sql`${userMetrics.skillsExported} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(userMetrics.userId, userId))
+        .returning();
+
+      return result[0] ?? null;
+    });
+  },
+
   incrementTasksCreated: async (
     userId: string,
   ): Promise<UserMetrics | null> => {

@@ -6,6 +6,7 @@ import {
   ChevronRight,
   ClipboardList,
   Plus,
+  Upload,
 } from 'lucide-react';
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
@@ -35,6 +36,7 @@ import type { UIStoreSettingsTab, UnassignedSortOption } from '@/lib/store';
 import { HELP_TOPICS } from '@/components/help';
 import { UI_STORE_SETTINGS_TABS, uiStore, uiStoreActions } from '@/lib/store';
 
+import { ImportSkillModal } from '@/components/skills-hub/ImportSkillModal';
 import TodoListConfig from '@/components/todo-list/TodoListConfig';
 import { useTRPC } from '@/integrations/trpc/react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -139,8 +141,10 @@ export default function AppHeader(): React.ReactNode {
     uiStore,
     (s) => s.showArchivedSkills,
   );
-  function onSettingsSelected(value: string): void {
-    uiStoreActions.setSettingsTab(value as UIStoreSettingsTab);
+  function onSettingsSelected(value: UIStoreSettingsTab | null): void {
+    if (value) {
+      uiStoreActions.setSettingsTab(value);
+    }
   }
   function displaySettingsTabValue(value: string): string {
     return (value.charAt(0).toUpperCase() + value.slice(1)).replaceAll(
@@ -198,9 +202,22 @@ export default function AppHeader(): React.ReactNode {
             <Archive className="mr-2 size-4" />
             {showArchivedSkills ? 'Showing Archived' : 'Show Archived'}
           </Button>,
-          <Button key="new-skill-button" render={<Link to="/app/skills/new" />} nativeButton={false}>
-              <Plus className="mr-2 size-4" />
-              New Skill
+          <ImportSkillModal
+            key="import-skill-modal"
+            trigger={
+              <Button nativeButton={false}>
+                <Upload className="mr-2 size-4" />
+                Import Skill
+              </Button>
+            }
+          />,
+          <Button
+            key="new-skill-button"
+            render={<Link to="/app/skills/new" />}
+            nativeButton={false}
+          >
+            <Plus className="mr-2 size-4" />
+            New Skill
           </Button>,
         ];
         break;
@@ -220,18 +237,23 @@ export default function AppHeader(): React.ReactNode {
         options = [
           <DropdownMenu key="help-topic-dropdown">
             <DropdownMenuTrigger render={<Button variant="outline" />}>
-                {HELP_TOPICS.find(
-                  (t) => t.id === (search as { topic?: string }).topic,
-                )?.title ?? 'Getting Started'}
-                <ChevronDown className="ml-2 size-4" />
+              {HELP_TOPICS.find(
+                (t) => t.id === (search as { topic?: string }).topic,
+              )?.title ?? 'Getting Started'}
+              <ChevronDown className="ml-2 size-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {HELP_TOPICS.map((topic) => {
                 const Icon = topic.icon;
                 return (
-                  <DropdownMenuItem key={topic.id} render={<Link to="/app/help" search={{ topic: topic.id }} />}>
-                      <Icon className="mr-2 size-4" />
-                      {topic.title}
+                  <DropdownMenuItem
+                    key={topic.id}
+                    render={
+                      <Link to="/app/help" search={{ topic: topic.id }} />
+                    }
+                  >
+                    <Icon className="mr-2 size-4" />
+                    {topic.title}
                   </DropdownMenuItem>
                 );
               })}
