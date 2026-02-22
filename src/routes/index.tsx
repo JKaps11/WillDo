@@ -14,6 +14,7 @@ import { Link, createFileRoute } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ScreenshotImage } from '@/components/common/ScreenshotImage';
 import { authStateFn } from '@/serverFunctions/auth';
 
 export const Route = createFileRoute('/')({
@@ -21,7 +22,7 @@ export const Route = createFileRoute('/')({
   component: LandingPage,
 });
 
-function ImagePlaceholder({
+function LandingScreenshot({
   id,
   caption,
   aspectRatio = 'video',
@@ -30,22 +31,14 @@ function ImagePlaceholder({
   caption: string;
   aspectRatio?: 'video' | 'square' | 'wide';
 }): ReactNode {
-  const aspectClasses = {
-    video: 'aspect-video',
-    square: 'aspect-square',
-    wide: 'aspect-[21/9]',
-  };
-
   return (
-    <div
-      className={`${aspectClasses[aspectRatio]} w-full rounded-xl border-2 border-dashed border-muted-foreground/25 bg-muted/50 flex items-center justify-center`}
-    >
-      <div className="text-center text-muted-foreground p-4">
-        <div className="text-4xl mb-2">🖼️</div>
-        <p className="text-sm font-medium">{caption}</p>
-        <p className="text-xs text-muted-foreground/70">Image ID: {id}</p>
-      </div>
-    </div>
+    <ScreenshotImage
+      src={`/images/screenshots/landing-${id}.png`}
+      caption={caption}
+      fallbackLabel={`Image ID: ${id}`}
+      aspectRatio={aspectRatio}
+      imgClassName="h-full object-cover"
+    />
   );
 }
 
@@ -120,7 +113,7 @@ export default function LandingPage(): ReactNode {
           <div className="relative">
             <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-primary/5 rounded-2xl blur-2xl" />
             <div className="relative">
-              <ImagePlaceholder
+              <LandingScreenshot
                 id="hero-dashboard"
                 caption="Dashboard showing today's tasks and skill progress overview"
               />
@@ -197,7 +190,7 @@ export default function LandingPage(): ReactNode {
               </FeatureListItem>
             </ul>
           </div>
-          <ImagePlaceholder
+          <LandingScreenshot
             id="feature-skill-planner"
             caption="Skill Planner showing visual flowchart of sub-skills with progress indicators"
           />
@@ -206,7 +199,7 @@ export default function LandingPage(): ReactNode {
         {/* Feature 2 */}
         <div className="grid lg:grid-cols-2 gap-12 items-center mb-24">
           <div className="order-2 lg:order-1">
-            <ImagePlaceholder
+            <LandingScreenshot
               id="feature-stages"
               caption="Sub-skill card showing Practice → Evaluate → Complete stages with progress bar"
             />
@@ -263,7 +256,7 @@ export default function LandingPage(): ReactNode {
               </FeatureListItem>
             </ul>
           </div>
-          <ImagePlaceholder
+          <LandingScreenshot
             id="feature-todolist"
             caption="Todo List weekly view showing tasks color-coded by skill with drag-and-drop"
           />

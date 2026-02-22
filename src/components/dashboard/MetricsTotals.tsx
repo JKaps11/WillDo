@@ -43,7 +43,7 @@ export function MetricsTotals(): React.ReactNode {
           />
           <MetricCard
             icon={<Award className="size-4 text-purple-500" />}
-            label="SubSkills Done"
+            label="Sub Skills Completed"
             value={metrics.subSkillsCompleted}
           />
           <MetricCard

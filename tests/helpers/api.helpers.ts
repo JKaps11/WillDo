@@ -1,8 +1,8 @@
 import superjson from 'superjson';
 import type { Page } from '@playwright/test';
 
-const BASE_URL = 'http://localhost:3000';
-const TRPC_URL = `${BASE_URL}/api/trpc`;
+export const BASE_URL: string = 'http://localhost:3000';
+export const TRPC_URL: string = `${BASE_URL}/api/trpc`;
 
 interface SkillResult {
   id: string;
@@ -19,7 +19,7 @@ interface TaskResult {
  * Call a tRPC mutation via the page's request context (carries auth cookies).
  * Uses SuperJSON to serialize input so Date objects are handled correctly.
  */
-async function trpcMutate<T>(
+export async function trpcMutate<T>(
   page: Page,
   procedure: string,
   input: unknown,
@@ -44,7 +44,7 @@ async function trpcMutate<T>(
   return data?.json ?? data ?? body;
 }
 
-async function trpcQuery<T>(
+export async function trpcQuery<T>(
   page: Page,
   procedure: string,
   input: unknown,
@@ -121,4 +121,36 @@ export async function deleteAllTestSkills(page: Page): Promise<void> {
       await trpcMutate(page, 'skill.delete', { id: skill.id });
     }
   }
+}
+
+/**
+ * Update a sub-skill's stage directly via API.
+ */
+export async function updateSubSkillStageViaAPI(
+  page: Page,
+  id: string,
+  stage: 'not_started' | 'practice' | 'evaluate' | 'complete',
+): Promise<{ id: string; stage: string }> {
+  return trpcMutate(page, 'subSkill.update', { id, stage });
+}
+
+/**
+ * Update a sub-skill metric's current value via API.
+ */
+export async function updateSubSkillMetricViaAPI(
+  page: Page,
+  metricId: string,
+  currentValue: number,
+): Promise<{ id: string; currentValue: number }> {
+  return trpcMutate(page, 'skillMetric.update', { id: metricId, currentValue });
+}
+
+/**
+ * Get all metrics for a sub-skill via API.
+ */
+export async function getSubSkillMetricsViaAPI(
+  page: Page,
+  subSkillId: string,
+): Promise<Array<{ id: string; name: string; currentValue: number; targetValue: number }>> {
+  return trpcQuery(page, 'skillMetric.listBySubSkill', { subSkillId });
 }

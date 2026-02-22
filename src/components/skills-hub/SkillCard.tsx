@@ -90,7 +90,8 @@ export function SkillCard({
 
   return (
     <Card
-      className={`group relative transition-shadow hover:shadow-md" data-testid="skill-card ${isActive ? 'ring-2 ring-primary' : ''}`}
+      data-testid="skill-card"
+      className={`group relative transition-shadow hover:shadow-md ${isActive ? 'ring-2 ring-primary' : ''}`}
     >
       <div
         className="absolute left-0 top-0 h-full w-1 rounded-l-lg"
