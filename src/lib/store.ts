@@ -24,6 +24,12 @@ export interface MoveRecurringModalState {
   targetDate: Date | null; // Where the task is being dropped
 }
 
+export interface EvaluationModalState {
+  isOpen: boolean;
+  task: Task | null;
+  occurrenceDate: Date | null;
+}
+
 export interface UIStoreState {
   settingsTab: UIStoreSettingsTab;
   todoListBaseDate: Date;
@@ -34,6 +40,7 @@ export interface UIStoreState {
   showAssignTasksSheet: boolean;
   recurrenceModal: RecurrenceModalState;
   moveRecurringModal: MoveRecurringModalState;
+  evaluationModal: EvaluationModalState;
 }
 
 export type UIStoreActions = {
@@ -56,6 +63,8 @@ export type UIStoreActions = {
     targetDate: Date,
   ) => void;
   closeMoveRecurringModal: () => void;
+  openEvaluationModal: (task: Task, occurrenceDate: Date) => void;
+  closeEvaluationModal: () => void;
 };
 
 const initialState: UIStoreState = {
@@ -76,6 +85,11 @@ const initialState: UIStoreState = {
     task: null,
     sourceDate: null,
     targetDate: null,
+  },
+  evaluationModal: {
+    isOpen: false,
+    task: null,
+    occurrenceDate: null,
   },
 };
 
@@ -175,6 +189,26 @@ export const uiStoreActions: UIStoreActions = {
         task: null,
         sourceDate: null,
         targetDate: null,
+      },
+    }));
+  },
+  openEvaluationModal: (task: Task, occurrenceDate: Date) => {
+    uiStore.setState((state) => ({
+      ...state,
+      evaluationModal: {
+        isOpen: true,
+        task,
+        occurrenceDate,
+      },
+    }));
+  },
+  closeEvaluationModal: () => {
+    uiStore.setState((state) => ({
+      ...state,
+      evaluationModal: {
+        isOpen: false,
+        task: null,
+        occurrenceDate: null,
       },
     }));
   },

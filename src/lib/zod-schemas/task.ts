@@ -79,4 +79,5 @@ export const listTasksBySubSkillSchema = z.object({
 export const completeTaskWithMetricUpdateSchema = z.object({
   id: z.uuid(),
   completed: z.boolean(),
+  occurrenceDate: z.date().optional(),
 });

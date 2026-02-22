@@ -83,6 +83,8 @@ function getPageTitle(pathname: string): PageTitle {
       if (pathname.endsWith('/new')) return 'New Skill';
       if (pathname.includes('/planner')) return 'Skill Planner';
       return 'Skill Hub';
+    case 'reflections':
+      return 'Reflections';
     case 'help':
       return 'Help';
     case 'settings':
@@ -291,6 +293,8 @@ export default function AppHeader(): React.ReactNode {
               </Button>
             ));
 
+        break;
+      case 'Reflections':
         break;
       case 'Dashboard':
         break;

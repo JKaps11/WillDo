@@ -4,5 +4,6 @@ type PageTitle =
   | 'Skill Hub'
   | 'New Skill'
   | 'Skill Planner'
+  | 'Reflections'
   | 'Help'
   | 'Settings';

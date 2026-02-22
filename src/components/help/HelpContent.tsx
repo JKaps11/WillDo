@@ -1,6 +1,8 @@
 import {
   BookOpen,
   CheckSquare,
+  ClipboardCheck,
+  FolderOpen,
   LayoutDashboard,
   Lightbulb,
   Sparkles,
@@ -28,6 +30,12 @@ export const HELP_TOPICS: Array<HelpTopic> = [
   { id: 'skills-hub', title: 'Skills Hub', icon: Target },
   { id: 'skill-planner', title: 'Skill Planner', icon: Lightbulb },
   { id: 'todo-list', title: 'Todo List', icon: CheckSquare },
+  {
+    id: 'practice-evaluation',
+    title: 'Practice Evaluation',
+    icon: ClipboardCheck,
+  },
+  { id: 'reflections', title: 'Reflections', icon: FolderOpen },
   { id: 'tips', title: 'Tips & Best Practices', icon: Sparkles },
 ];
 
@@ -603,6 +611,131 @@ const HELP_CONTENT: Record<
             tasks
           </li>
         </ul>
+      </>
+    ),
+  },
+  'practice-evaluation': {
+    title: 'Practice Evaluation',
+    content: (
+      <>
+        <p className="lead">
+          Practice evaluations help you reflect on each practice session,
+          building self-awareness and accelerating your learning.
+        </p>
+
+        <h2>Why Self-Reflection Matters</h2>
+        <p>
+          Research shows that deliberate reflection after practice significantly
+          improves learning outcomes. By taking a few moments to evaluate each
+          session, you identify patterns in your learning, recognize growth, and
+          set clear intentions for next time.
+        </p>
+
+        <h2>When It Appears</h2>
+        <p>
+          When you check off a task that is linked to a sub-skill, an evaluation
+          form appears instead of immediately completing the task. This gives
+          you a structured moment to reflect before moving on.
+        </p>
+        <p>
+          If you cancel or close the form, the task stays incomplete — ensuring
+          that every completed practice session has a reflection attached.
+        </p>
+
+        <h2>Evaluation Questions</h2>
+        <p>The form asks six guided questions:</p>
+        <ul>
+          <li>
+            <strong>What went well during practice?</strong> — Celebrate your
+            wins, no matter how small
+          </li>
+          <li>
+            <strong>What did you struggle with?</strong> — Honestly identify
+            areas of difficulty
+          </li>
+          <li>
+            <strong>What do you understand better now?</strong> — Capture new
+            insights and &quot;aha&quot; moments
+          </li>
+          <li>
+            <strong>What feelings did you experience?</strong> — Track your
+            emotional journey through learning
+          </li>
+          <li>
+            <strong>What will you focus on next time?</strong> — Set a clear
+            intention for your next session
+          </li>
+          <li>
+            <strong>Confidence level (1-5)</strong> — Rate how confident you
+            feel about the material
+          </li>
+        </ul>
+        <p>
+          Each question supports multiple answers — use the <strong>+</strong>{' '}
+          button to add additional entries per question.
+        </p>
+
+        <h2>Auto-Population</h2>
+        <p>
+          When you complete a task for a sub-skill that already has previous
+          evaluations, certain fields are pre-populated from your most recent
+          evaluation. This saves time and helps you track how your struggles and
+          focus areas evolve over time.
+        </p>
+
+        <h2>Recurring Tasks</h2>
+        <p>
+          Each occurrence of a recurring task gets its own separate evaluation.
+          This means you build a detailed log of your progress over time, even
+          for tasks you practice daily.
+        </p>
+      </>
+    ),
+  },
+  reflections: {
+    title: 'Reflections',
+    content: (
+      <>
+        <p className="lead">
+          The Reflections page lets you browse all your past practice
+          evaluations organized by skill and sub-skill, helping you see your
+          learning journey over time.
+        </p>
+
+        <h2>Folder Hierarchy</h2>
+        <p>
+          The left panel shows a tree of your skills and sub-skills, organized
+          as folders:
+        </p>
+        <ul>
+          <li>
+            <strong>Level 1: Skills</strong> — Top-level folders with your skill
+            color and a count of evaluations
+          </li>
+          <li>
+            <strong>Level 2: Sub-skills</strong> — Nested folders showing
+            evaluation counts per sub-skill
+          </li>
+          <li>
+            <strong>Level 3: Evaluations</strong> — Individual evaluation
+            entries showing the title and date
+          </li>
+        </ul>
+
+        <h2>Split-View Browsing</h2>
+        <p>
+          Click any evaluation in the folder tree to view its full contents in
+          the right panel. The viewer shows all your answers in a clean,
+          read-only format along with your confidence rating and the date of the
+          practice session.
+        </p>
+
+        <h2>Finding Evaluations</h2>
+        <p>
+          Expand skill and sub-skill folders to drill down to specific
+          evaluations. Each evaluation is titled with the sub-skill name and
+          date, making it easy to find the session you are looking for.
+        </p>
       </>
     ),
   },

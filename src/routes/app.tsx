@@ -6,6 +6,7 @@ import {
   GlobalRecurringModal,
   MoveRecurringModal,
 } from '@/components/recurring';
+import { PracticeEvaluationModal } from '@/components/practice-evaluation';
 import AppHeader from '@/components/common/AppHeader';
 
 export const Route = createFileRoute('/app')({
@@ -26,6 +27,7 @@ export function AppLayout() {
       </SidebarProvider>
       <GlobalRecurringModal />
       <MoveRecurringModal />
+      <PracticeEvaluationModal />
     </SignedIn>
   );
 }

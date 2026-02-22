@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RecurringBadge } from './RecurringBadge';
 import type { DashboardTask } from '@/integrations/trpc/routes/dashboard.trpc';
 import { TaskMetricBadge } from '@/components/task/TaskMetricBadge';
+import { uiStoreActions } from '@/lib/store';
 import { useTRPC } from '@/integrations/trpc/react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
@@ -47,10 +48,28 @@ export function TaskCard({ task }: TaskCardProps): React.ReactElement {
     if (checked === 'indeterminate') return;
 
     if (task.subSkillId) {
-      completeWithMetricMutation.mutate({
-        id: task.id,
-        completed: checked,
-      });
+      if (checked) {
+        // Completing: open evaluation modal instead of mutating directly
+        // Dashboard tasks are always today's tasks
+        const occurrenceDate = new Date();
+        uiStoreActions.openEvaluationModal(
+          {
+            id: task.id,
+            name: task.name,
+            subSkillId: task.subSkillId,
+            todoListDate: occurrenceDate,
+          } as Parameters<typeof uiStoreActions.openEvaluationModal>[0],
+          occurrenceDate,
+        );
+      } else {
+        // Uncompleting: dashboard tasks are today's tasks
+        const occurrenceDate = new Date();
+        completeWithMetricMutation.mutate({
+          id: task.id,
+          completed: false,
+          occurrenceDate,
+        });
+      }
     } else {
       updateMutation.mutate({
         id: task.id,

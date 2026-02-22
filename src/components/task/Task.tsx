@@ -102,10 +102,19 @@ export function Task({ task, className, dragSource }: TaskProps): ReactNode {
 
     // If task is linked to a sub-skill, use completeWithMetricUpdate
     if (task.subSkillId) {
-      completeWithMetricMutation.mutate({
-        id: task.id,
-        completed: checked,
-      });
+      if (checked) {
+        // Completing: open evaluation modal instead of mutating directly
+        const occurrenceDate = task.todoListDate ?? new Date();
+        uiStoreActions.openEvaluationModal(task as TaskType, occurrenceDate);
+      } else {
+        // Uncompleting: use existing mutation with occurrenceDate for cleanup
+        const occurrenceDate = task.todoListDate ?? undefined;
+        completeWithMetricMutation.mutate({
+          id: task.id,
+          completed: false,
+          occurrenceDate,
+        });
+      }
     } else {
       handleUpdate({ ...task, completed: checked } as TaskType);
     }
