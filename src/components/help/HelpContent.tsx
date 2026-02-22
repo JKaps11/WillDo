@@ -9,6 +9,7 @@ import {
 import type { LucideIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { ScreenshotImage } from '@/components/common/ScreenshotImage';
 
 interface HelpContentProps {
   topicId: string;
@@ -30,47 +31,24 @@ export const HELP_TOPICS: Array<HelpTopic> = [
   { id: 'tips', title: 'Tips & Best Practices', icon: Sparkles },
 ];
 
-function ScreenshotImage({
+function HelpScreenshot({
   slug,
   caption,
 }: {
   slug: string;
   caption: string;
 }): React.ReactElement {
-  const imagePath = slug.endsWith('.svg')
+  const src = slug.endsWith('.svg')
     ? `/images/screenshots/${slug}`
     : `/images/screenshots/${slug}.png`;
 
   return (
-    <div className="my-6 rounded-lg overflow-hidden bg-muted/50">
-      <img
-        src={imagePath}
-        alt={caption}
-        className="w-full h-auto"
-        loading="lazy"
-        onError={(e) => {
-          // Fallback to placeholder on error
-          const target = e.currentTarget;
-          target.style.display = 'none';
-          const parent = target.parentElement;
-          if (parent) {
-            parent.classList.add(
-              'border-2',
-              'border-dashed',
-              'border-muted-foreground/25',
-              'p-8',
-            );
-            parent.innerHTML = `
-              <div class="flex flex-col items-center justify-center text-center text-muted-foreground">
-                <div class="mb-2 text-4xl">🖼️</div>
-                <p class="text-sm font-medium">${caption}</p>
-                <p class="text-xs">Image: ${slug}</p>
-              </div>
-            `;
-          }
-        }}
-      />
-    </div>
+    <ScreenshotImage
+      src={src}
+      caption={caption}
+      fallbackLabel={`Image: ${slug}`}
+      className="my-6 rounded-lg"
+    />
   );
 }
 
@@ -88,7 +66,7 @@ const HELP_CONTENT: Record<
           running quickly.
         </p>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-dashboard-full"
           caption="Will Do Dashboard Overview"
         />
@@ -143,7 +121,7 @@ const HELP_CONTENT: Record<
           </li>
         </ul>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="landing-feature-stages"
           caption="Sub-skill stages visualization"
         />
@@ -180,7 +158,7 @@ const HELP_CONTENT: Record<
           </li>
         </ol>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-getting-started-workflow.svg"
           caption="Quick start workflow diagram"
         />
@@ -196,7 +174,7 @@ const HELP_CONTENT: Record<
           on today and track your overall skill progress at a glance.
         </p>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-dashboard-full"
           caption="Dashboard full view"
         />
@@ -228,7 +206,7 @@ const HELP_CONTENT: Record<
           </li>
         </ul>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-dashboard-task-card"
           caption="Task card anatomy"
         />
@@ -276,7 +254,7 @@ const HELP_CONTENT: Record<
           </li>
         </ul>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-dashboard-active-skill"
           caption="Active Skill card"
         />
@@ -292,7 +270,7 @@ const HELP_CONTENT: Record<
           skills. Think of it as your personal learning library.
         </p>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-skills-hub-overview"
           caption="Skills Hub overview"
         />
@@ -326,7 +304,7 @@ const HELP_CONTENT: Record<
           </li>
         </ul>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-skills-hub-basic-info"
           caption="Skill creation - Basic Info step"
         />
@@ -342,7 +320,7 @@ const HELP_CONTENT: Record<
           <li>Skip AI planning and add sub-skills manually later</li>
         </ul>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-skills-hub-ai-planning"
           caption="AI Planning interface"
         />
@@ -363,7 +341,7 @@ const HELP_CONTENT: Record<
           </li>
         </ul>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-skills-hub-card"
           caption="Skill card anatomy"
         />
@@ -406,7 +384,7 @@ const HELP_CONTENT: Record<
           journey, showing all sub-skills and how they connect.
         </p>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-planner-canvas"
           caption="Skill Planner canvas view"
         />
@@ -452,7 +430,7 @@ const HELP_CONTENT: Record<
           </li>
         </ul>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-planner-node"
           caption="Sub-skill node anatomy"
         />
@@ -478,7 +456,7 @@ const HELP_CONTENT: Record<
           <li>Evaluate → Complete</li>
         </ul>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-planner-edit-panel"
           caption="Sub-skill edit panel"
         />
@@ -501,7 +479,7 @@ const HELP_CONTENT: Record<
           <li>Metrics with target values</li>
         </ul>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-planner-create-modal"
           caption="Create sub-skill modal"
         />
@@ -517,7 +495,7 @@ const HELP_CONTENT: Record<
           what's scheduled, drag to reschedule, and track your completions.
         </p>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-todo-weekly"
           caption="Todo List weekly view"
         />
@@ -553,7 +531,7 @@ const HELP_CONTENT: Record<
           </li>
         </ul>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-todo-task-card"
           caption="Task card in todo list"
         />
@@ -567,7 +545,7 @@ const HELP_CONTENT: Record<
           and drop it onto any day to schedule it.
         </p>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-todo-assign-panel"
           caption="Assign Tasks panel"
         />
@@ -595,7 +573,7 @@ const HELP_CONTENT: Record<
           or on a specific date.
         </p>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-todo-schedule-modal"
           caption="Schedule modal with recurrence options"
         />
@@ -668,7 +646,7 @@ const HELP_CONTENT: Record<
           multi-hour sessions. Consistency beats intensity.
         </p>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-tips-recurring"
           caption="Example of recurring task setup"
         />
@@ -712,7 +690,7 @@ const HELP_CONTENT: Record<
           is a win worth celebrating.
         </p>
 
-        <ScreenshotImage
+        <HelpScreenshot
           slug="help-tips-celebration"
           caption="Completed skill celebration"
         />

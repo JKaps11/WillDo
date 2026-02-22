@@ -39,7 +39,7 @@ bunx playwright show-report
 
 ## Structure
 
-```
+```text
 tests/
 ├── fixtures/       # Custom test fixtures with POMs
 ├── helpers/        # API helpers for test data

@@ -36,4 +36,25 @@ export class DashboardPom {
       .getByRole('tab', { name: label })
       .click();
   }
+
+  /**
+   * Returns the first task card Locator that is not completed (no .line-through element).
+   * Falls back to the first task card if all are completed, or null if none exist.
+   */
+  async findFirstUncompletedTaskCard(): Promise<Locator | null> {
+    const taskCards = this.page.locator('[data-testid="task-card"]');
+    const count = await taskCards.count();
+    for (let i = 0; i < count; i++) {
+      const card = taskCards.nth(i);
+      const hasLineThrough = await card.locator('.line-through').count();
+      if (hasLineThrough === 0) {
+        return card;
+      }
+    }
+    // Fallback: return first card if all are completed
+    if (count > 0) {
+      return taskCards.first();
+    }
+    return null;
+  }
 }

@@ -11,6 +11,27 @@ const SCREENSHOTS_DIR = join(
   'screenshots',
 );
 
+// Helper to wait for animations to settle before taking a screenshot.
+// Uses a race between finishing animations and a timeout so infinite/looping
+// animations don't hang the test.
+async function waitForAnimations(page: Page): Promise<void> {
+  await page.waitForFunction(() => {
+    const animations = document.getAnimations();
+    if (animations.length === 0) return true;
+    // Race: either all finite animations finish, or 400ms elapses
+    return Promise.race([
+      Promise.all(
+        animations
+          .filter((a) => a.effect?.getComputedTiming().duration !== Infinity)
+          .map((a) => a.finished),
+      ).then(() => true),
+      new Promise((resolve) => setTimeout(() => resolve(true), 400)),
+    ]);
+  }, undefined, { timeout: 5000 }).catch(() => {
+    // If it still times out somehow, just continue
+  });
+}
+
 // Helper to save screenshot with consistent settings
 async function saveScreenshot(
   page: Page,
@@ -66,7 +87,7 @@ test.describe.serial('Screenshot Capture', () => {
   }) => {
     await dashboard.goto();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500); // Allow animations to complete
+    await waitForAnimations(page); // Allow animations to complete
     await saveScreenshot(page, 'landing-hero-dashboard');
   });
 
@@ -78,12 +99,12 @@ test.describe.serial('Screenshot Capture', () => {
     expect(skillId).toBeDefined();
     await planner.goto(skillId!);
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
     // Fit the view to show all nodes
     const fitButton = page.locator('[aria-label="fit view"]').first();
     if (await fitButton.isVisible()) {
       await fitButton.click();
-      await page.waitForTimeout(300);
+      await waitForAnimations(page);
     }
     await saveScreenshot(page, 'landing-feature-skill-planner');
   });
@@ -96,7 +117,7 @@ test.describe.serial('Screenshot Capture', () => {
     expect(skillId).toBeDefined();
     await planner.goto(skillId!);
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
 
     // Click on a sub-skill node to open edit panel
     const grammarNode = page
@@ -104,7 +125,7 @@ test.describe.serial('Screenshot Capture', () => {
       .filter({ hasText: 'Grammar Fundamentals' });
     if (await grammarNode.isVisible()) {
       await grammarNode.click();
-      await page.waitForTimeout(300);
+      await waitForAnimations(page);
     }
     await saveScreenshot(page, 'landing-feature-stages');
   });
@@ -115,7 +136,7 @@ test.describe.serial('Screenshot Capture', () => {
   }) => {
     await todoList.goto();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
     await saveScreenshot(page, 'landing-feature-todolist');
   });
 
@@ -134,7 +155,7 @@ test.describe.serial('Screenshot Capture', () => {
   }) => {
     await dashboard.goto();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
     await saveScreenshot(page, 'help-dashboard-full');
   });
 
@@ -144,35 +165,12 @@ test.describe.serial('Screenshot Capture', () => {
   }) => {
     await dashboard.goto();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
 
-    // Capture an uncompleted task card (second card, since first may be completed)
-    const taskCards = page.locator('[data-testid="task-card"]');
-    const count = await taskCards.count();
-    // Find the first non-completed card (no opacity-60 / line-through)
-    for (let i = 0; i < count; i++) {
-      const card = taskCards.nth(i);
-      const hasLineThrough = await card.locator('.line-through').count();
-      if (hasLineThrough === 0) {
-        const box = await card.boundingBox();
-        if (box) {
-          const padding = 20;
-          await saveScreenshot(page, 'help-dashboard-task-card', {
-            clip: {
-              x: Math.max(0, box.x - padding),
-              y: Math.max(0, box.y - padding),
-              width: box.width + padding * 2,
-              height: box.height + padding * 2,
-            },
-          });
-          return;
-        }
-      }
-    }
-    // Fallback: use first card regardless
-    const firstCard = taskCards.first();
-    if (await firstCard.isVisible()) {
-      const box = await firstCard.boundingBox();
+    // Capture an uncompleted task card via DashboardPom helper
+    const card = await dashboard.findFirstUncompletedTaskCard();
+    if (card && (await card.isVisible())) {
+      const box = await card.boundingBox();
       if (box) {
         const padding = 20;
         await saveScreenshot(page, 'help-dashboard-task-card', {
@@ -196,7 +194,7 @@ test.describe.serial('Screenshot Capture', () => {
   }) => {
     await dashboard.goto();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
 
     // Capture the ActiveSkill card
     const activeSkill = page.locator('[data-testid="active-skill"]').first();
@@ -226,7 +224,7 @@ test.describe.serial('Screenshot Capture', () => {
   }) => {
     await skillsHub.goto();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
     await saveScreenshot(page, 'help-skills-hub-overview');
   });
 
@@ -238,11 +236,11 @@ test.describe.serial('Screenshot Capture', () => {
     await skillsHub.goto();
     await page.waitForLoadState('networkidle');
     await skillsHub.newSkillButton.click();
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
     // Fill in some example data
     await skillForm.nameInput.fill('Learn Photography');
     await skillForm.goalInput.fill('Capture beautiful landscape photos');
-    await page.waitForTimeout(300);
+    await waitForAnimations(page);
     await saveScreenshot(page, 'help-skills-hub-basic-info');
     // Close the modal
     await page.keyboard.press('Escape');
@@ -256,7 +254,7 @@ test.describe.serial('Screenshot Capture', () => {
     await skillsHub.goto();
     await page.waitForLoadState('networkidle');
     await skillsHub.newSkillButton.click();
-    await page.waitForTimeout(300);
+    await waitForAnimations(page);
     // Fill in step 1
     await skillForm.nameInput.fill('Learn Photography');
     await skillForm.goalInput.fill('Capture beautiful landscape photos');
@@ -264,7 +262,7 @@ test.describe.serial('Screenshot Capture', () => {
     const nextButton = page.getByRole('button', { name: /next|continue/i });
     if (await nextButton.isVisible()) {
       await nextButton.click();
-      await page.waitForTimeout(500);
+      await waitForAnimations(page);
     }
     await saveScreenshot(page, 'help-skills-hub-ai-planning');
     // Close the modal
@@ -277,7 +275,7 @@ test.describe.serial('Screenshot Capture', () => {
   }) => {
     await skillsHub.goto();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
 
     // Try to capture a skill card
     const skillCard = page
@@ -311,11 +309,11 @@ test.describe.serial('Screenshot Capture', () => {
     expect(skillId).toBeDefined();
     await planner.goto(skillId!);
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
     const fitButton = page.locator('[aria-label="fit view"]').first();
     if (await fitButton.isVisible()) {
       await fitButton.click();
-      await page.waitForTimeout(300);
+      await waitForAnimations(page);
     }
     await saveScreenshot(page, 'help-planner-canvas');
   });
@@ -328,13 +326,13 @@ test.describe.serial('Screenshot Capture', () => {
     expect(skillId).toBeDefined();
     await planner.goto(skillId!);
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
 
     // Fit view first to ensure nodes are positioned in viewport
     const fitButton = page.locator('[aria-label="fit view"]').first();
     if (await fitButton.isVisible()) {
       await fitButton.click();
-      await page.waitForTimeout(1000); // Wait for fit-view animation to complete
+      await waitForAnimations(page); // Wait for fit-view animation to complete
     }
 
     // Try to capture a single node
@@ -367,7 +365,7 @@ test.describe.serial('Screenshot Capture', () => {
     expect(skillId).toBeDefined();
     await planner.goto(skillId!);
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
 
     // Click on a node to open edit panel
     const node = page
@@ -375,7 +373,7 @@ test.describe.serial('Screenshot Capture', () => {
       .filter({ hasText: 'Grammar Fundamentals' });
     if (await node.isVisible()) {
       await node.click();
-      await page.waitForTimeout(500);
+      await waitForAnimations(page);
     }
     await saveScreenshot(page, 'help-planner-edit-panel');
   });
@@ -388,14 +386,14 @@ test.describe.serial('Screenshot Capture', () => {
     expect(skillId).toBeDefined();
     await planner.goto(skillId!);
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
 
     // Open create sub-skill modal
     await planner.createSubSkillButton.click();
-    await page.waitForTimeout(300);
+    await waitForAnimations(page);
     // Fill in some example data
     await planner.subSkillNameInput.fill('Advanced Conversation');
-    await page.waitForTimeout(300);
+    await waitForAnimations(page);
     await saveScreenshot(page, 'help-planner-create-modal');
     // Close the modal
     await page.keyboard.press('Escape');
@@ -405,7 +403,7 @@ test.describe.serial('Screenshot Capture', () => {
   test('help-todo-weekly: Todo List weekly view', async ({ page, todoList }) => {
     await todoList.goto();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
     await saveScreenshot(page, 'help-todo-weekly');
   });
 
@@ -415,7 +413,7 @@ test.describe.serial('Screenshot Capture', () => {
   }) => {
     await todoList.goto();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
 
     // Capture today's day card which has the most tasks (mix of completed/uncompleted)
     const todayCard = page.locator('[data-testid="todo-list-card"]').filter({
@@ -463,13 +461,13 @@ test.describe.serial('Screenshot Capture', () => {
   }) => {
     await todoList.goto();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
 
     // Open the assign tasks sheet
     const assignButton = page.getByRole('button', { name: /assign/i });
     if (await assignButton.isVisible()) {
       await assignButton.click();
-      await page.waitForTimeout(500);
+      await waitForAnimations(page);
     }
     await saveScreenshot(page, 'help-todo-assign-panel');
   });
@@ -480,14 +478,16 @@ test.describe.serial('Screenshot Capture', () => {
   }) => {
     await todoList.goto();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
 
     // Click edit button on a recurring task to show its existing daily recurrence
     const editButton = page
       .locator('[data-testid="task-edit-btn"]')
       .first();
-    await editButton.click({ force: true });
-    await page.waitForTimeout(500);
+    await editButton.scrollIntoViewIfNeeded();
+    await expect(editButton).toBeVisible();
+    await editButton.click();
+    await waitForAnimations(page);
     await saveScreenshot(page, 'help-todo-schedule-modal');
     // Close the modal
     await page.keyboard.press('Escape');
@@ -500,7 +500,7 @@ test.describe.serial('Screenshot Capture', () => {
   }) => {
     await todoList.goto();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
 
     // Find a non-recurring task's edit button to show enabling recurrence
     // Target a task that is NOT already recurring (e.g., "Complete grammar exercises")
@@ -509,8 +509,10 @@ test.describe.serial('Screenshot Capture', () => {
       .filter({ hasText: 'Complete grammar exercises' })
       .locator('[data-testid="task-edit-btn"]')
       .first();
-    await nonRecurringTask.click({ force: true });
-    await page.waitForTimeout(500);
+    await nonRecurringTask.scrollIntoViewIfNeeded();
+    await expect(nonRecurringTask).toBeVisible();
+    await nonRecurringTask.click();
+    await waitForAnimations(page);
 
     // Toggle recurring on
     const recurringToggle = page.locator('[data-testid="recurring-toggle"]');
@@ -518,7 +520,7 @@ test.describe.serial('Screenshot Capture', () => {
       const isChecked = await recurringToggle.isChecked();
       if (!isChecked) {
         await recurringToggle.click();
-        await page.waitForTimeout(300);
+        await waitForAnimations(page);
       }
     }
 
@@ -526,12 +528,12 @@ test.describe.serial('Screenshot Capture', () => {
     const frequencyTrigger = page.locator('[data-testid="recurrence-frequency"]');
     if (await frequencyTrigger.isVisible()) {
       await frequencyTrigger.click();
-      await page.waitForTimeout(200);
+      await waitForAnimations(page);
       // Click the "weekly" option in the dropdown
       const weeklyOption = page.getByRole('option', { name: /week/i });
       if (await weeklyOption.isVisible()) {
         await weeklyOption.click();
-        await page.waitForTimeout(300);
+        await waitForAnimations(page);
       }
     }
 
@@ -549,11 +551,11 @@ test.describe.serial('Screenshot Capture', () => {
     expect(skillId).toBeDefined();
     await planner.goto(skillId!);
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500);
+    await waitForAnimations(page);
     const fitButton = page.locator('[aria-label="fit view"]').first();
     if (await fitButton.isVisible()) {
       await fitButton.click();
-      await page.waitForTimeout(300);
+      await waitForAnimations(page);
     }
     // Click the completed "Basic Vocabulary" node to show its green Complete state
     const completedNode = page
@@ -561,7 +563,7 @@ test.describe.serial('Screenshot Capture', () => {
       .filter({ hasText: 'Basic Vocabulary' });
     if (await completedNode.isVisible()) {
       await completedNode.click();
-      await page.waitForTimeout(500);
+      await waitForAnimations(page);
     }
     await saveScreenshot(page, 'help-tips-celebration');
   });

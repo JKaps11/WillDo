@@ -1,8 +1,5 @@
 import type { Page } from '@playwright/test';
-import superjson from 'superjson';
-
-const BASE_URL = 'http://localhost:3000';
-const TRPC_URL = `${BASE_URL}/api/trpc`;
+import { trpcMutate, trpcQuery } from '../helpers/api.helpers';
 
 /** Known screenshot skill names for cleanup of leftover data from previous runs */
 const SCREENSHOT_SKILL_NAMES = ['Learn Spanish', 'Learn Guitar'];
@@ -35,54 +32,6 @@ interface ScreenshotData {
   skills: Array<SkillResult>;
   subSkills: Array<SubSkillResult>;
   tasks: Array<TaskResult>;
-}
-
-async function trpcMutate<T>(
-  page: Page,
-  procedure: string,
-  input: unknown,
-): Promise<T> {
-  const serialized = superjson.serialize(input);
-  const res = await page.request.post(`${TRPC_URL}/${procedure}`, {
-    data: serialized,
-    headers: { 'Content-Type': 'application/json' },
-  });
-
-  if (!res.ok()) {
-    const text = await res.text();
-    throw new Error(`tRPC ${procedure} failed (${res.status()}): ${text}`);
-  }
-
-  const body = await res.json();
-  const data = body.result?.data;
-  if (data && data.meta) {
-    return superjson.deserialize(data) as T;
-  }
-  return data?.json ?? data ?? body;
-}
-
-async function trpcQuery<T>(
-  page: Page,
-  procedure: string,
-  input: unknown,
-): Promise<T> {
-  const serialized = superjson.serialize(input);
-  const encodedInput = encodeURIComponent(JSON.stringify(serialized));
-  const res = await page.request.get(
-    `${TRPC_URL}/${procedure}?input=${encodedInput}`,
-  );
-
-  if (!res.ok()) {
-    const text = await res.text();
-    throw new Error(`tRPC ${procedure} failed (${res.status()}): ${text}`);
-  }
-
-  const body = await res.json();
-  const data = body.result?.data;
-  if (data && data.meta) {
-    return superjson.deserialize(data) as T;
-  }
-  return data?.json ?? data ?? body;
 }
 
 /**
