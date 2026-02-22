@@ -28,6 +28,16 @@ export default defineConfig({
       },
       dependencies: ['setup'],
     },
+    {
+      name: 'screenshots',
+      testDir: './tests/screenshots',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'tests/.auth/user.json',
+        colorScheme: 'dark',
+      },
+      dependencies: ['setup'],
+    },
   ],
 
   globalSetup: './tests/global.setup.ts',

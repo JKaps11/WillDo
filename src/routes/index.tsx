@@ -21,7 +21,7 @@ export const Route = createFileRoute('/')({
   component: LandingPage,
 });
 
-function ImagePlaceholder({
+function ScreenshotImage({
   id,
   caption,
   aspectRatio = 'video',
@@ -36,15 +36,41 @@ function ImagePlaceholder({
     wide: 'aspect-[21/9]',
   };
 
+  const imagePath = `/images/screenshots/landing-${id}.png`;
+
   return (
     <div
-      className={`${aspectClasses[aspectRatio]} w-full rounded-xl border-2 border-dashed border-muted-foreground/25 bg-muted/50 flex items-center justify-center`}
+      className={`${aspectClasses[aspectRatio]} w-full rounded-xl overflow-hidden bg-muted/50`}
     >
-      <div className="text-center text-muted-foreground p-4">
-        <div className="text-4xl mb-2">🖼️</div>
-        <p className="text-sm font-medium">{caption}</p>
-        <p className="text-xs text-muted-foreground/70">Image ID: {id}</p>
-      </div>
+      <img
+        src={imagePath}
+        alt={caption}
+        className="w-full h-full object-cover"
+        loading="lazy"
+        onError={(e) => {
+          // Fallback to placeholder on error
+          const target = e.currentTarget;
+          target.style.display = 'none';
+          const parent = target.parentElement;
+          if (parent) {
+            parent.classList.add(
+              'border-2',
+              'border-dashed',
+              'border-muted-foreground/25',
+              'flex',
+              'items-center',
+              'justify-center',
+            );
+            parent.innerHTML = `
+              <div class="text-center text-muted-foreground p-4">
+                <div class="text-4xl mb-2">🖼️</div>
+                <p class="text-sm font-medium">${caption}</p>
+                <p class="text-xs text-muted-foreground/70">Image ID: ${id}</p>
+              </div>
+            `;
+          }
+        }}
+      />
     </div>
   );
 }
@@ -120,7 +146,7 @@ export default function LandingPage(): ReactNode {
           <div className="relative">
             <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-primary/5 rounded-2xl blur-2xl" />
             <div className="relative">
-              <ImagePlaceholder
+              <ScreenshotImage
                 id="hero-dashboard"
                 caption="Dashboard showing today's tasks and skill progress overview"
               />
@@ -197,7 +223,7 @@ export default function LandingPage(): ReactNode {
               </FeatureListItem>
             </ul>
           </div>
-          <ImagePlaceholder
+          <ScreenshotImage
             id="feature-skill-planner"
             caption="Skill Planner showing visual flowchart of sub-skills with progress indicators"
           />
@@ -206,7 +232,7 @@ export default function LandingPage(): ReactNode {
         {/* Feature 2 */}
         <div className="grid lg:grid-cols-2 gap-12 items-center mb-24">
           <div className="order-2 lg:order-1">
-            <ImagePlaceholder
+            <ScreenshotImage
               id="feature-stages"
               caption="Sub-skill card showing Practice → Evaluate → Complete stages with progress bar"
             />
@@ -263,7 +289,7 @@ export default function LandingPage(): ReactNode {
               </FeatureListItem>
             </ul>
           </div>
-          <ImagePlaceholder
+          <ScreenshotImage
             id="feature-todolist"
             caption="Todo List weekly view showing tasks color-coded by skill with drag-and-drop"
           />

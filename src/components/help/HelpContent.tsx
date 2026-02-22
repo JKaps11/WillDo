@@ -30,18 +30,46 @@ export const HELP_TOPICS: Array<HelpTopic> = [
   { id: 'tips', title: 'Tips & Best Practices', icon: Sparkles },
 ];
 
-function ImagePlaceholder({
+function ScreenshotImage({
+  slug,
   caption,
 }: {
+  slug: string;
   caption: string;
 }): React.ReactElement {
+  const imagePath = slug.endsWith('.svg')
+    ? `/images/screenshots/${slug}`
+    : `/images/screenshots/${slug}.png`;
+
   return (
-    <div className="my-6 rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 p-8">
-      <div className="flex flex-col items-center justify-center text-center text-muted-foreground">
-        <div className="mb-2 text-4xl">🖼️</div>
-        <p className="text-sm font-medium">{caption}</p>
-        <p className="text-xs">Image placeholder</p>
-      </div>
+    <div className="my-6 rounded-lg overflow-hidden bg-muted/50">
+      <img
+        src={imagePath}
+        alt={caption}
+        className="w-full h-auto"
+        loading="lazy"
+        onError={(e) => {
+          // Fallback to placeholder on error
+          const target = e.currentTarget;
+          target.style.display = 'none';
+          const parent = target.parentElement;
+          if (parent) {
+            parent.classList.add(
+              'border-2',
+              'border-dashed',
+              'border-muted-foreground/25',
+              'p-8',
+            );
+            parent.innerHTML = `
+              <div class="flex flex-col items-center justify-center text-center text-muted-foreground">
+                <div class="mb-2 text-4xl">🖼️</div>
+                <p class="text-sm font-medium">${caption}</p>
+                <p class="text-xs">Image: ${slug}</p>
+              </div>
+            `;
+          }
+        }}
+      />
     </div>
   );
 }
@@ -60,7 +88,10 @@ const HELP_CONTENT: Record<
           running quickly.
         </p>
 
-        <ImagePlaceholder caption="Will Do Dashboard Overview" />
+        <ScreenshotImage
+          slug="help-dashboard-full"
+          caption="Will Do Dashboard Overview"
+        />
 
         <h2>What is Will Do?</h2>
         <p>
@@ -112,7 +143,10 @@ const HELP_CONTENT: Record<
           </li>
         </ul>
 
-        <ImagePlaceholder caption="Sub-skill stages visualization" />
+        <ScreenshotImage
+          slug="landing-feature-stages"
+          caption="Sub-skill stages visualization"
+        />
 
         <h3>📋 Tasks</h3>
         <p>
@@ -146,7 +180,10 @@ const HELP_CONTENT: Record<
           </li>
         </ol>
 
-        <ImagePlaceholder caption="Quick start workflow diagram" />
+        <ScreenshotImage
+          slug="help-getting-started-workflow.svg"
+          caption="Quick start workflow diagram"
+        />
       </>
     ),
   },
@@ -159,7 +196,10 @@ const HELP_CONTENT: Record<
           on today and track your overall skill progress at a glance.
         </p>
 
-        <ImagePlaceholder caption="Dashboard full view" />
+        <ScreenshotImage
+          slug="help-dashboard-full"
+          caption="Dashboard full view"
+        />
 
         <h2>Today's Tasks</h2>
         <p>
@@ -188,7 +228,10 @@ const HELP_CONTENT: Record<
           </li>
         </ul>
 
-        <ImagePlaceholder caption="Task card anatomy" />
+        <ScreenshotImage
+          slug="help-dashboard-task-card"
+          caption="Task card anatomy"
+        />
 
         <h2>Completing Tasks</h2>
         <p>
@@ -205,27 +248,38 @@ const HELP_CONTENT: Record<
           next stage from the Skill Planner.
         </p>
 
-        <h2>Skills Overview</h2>
+        <h2>Dashboard Layout</h2>
         <p>
-          The right side shows your active skills with quick progress
-          indicators:
+          The dashboard gives you a complete view of your skill-building
+          progress:
         </p>
         <ul>
           <li>
-            <strong>Stage dots</strong> — Each dot represents a sub-skill,
-            colored by its current stage
+            <strong>Welcome block</strong> — Shows your current streak, weekly
+            progress, and level
           </li>
           <li>
-            <strong>Progress percentage</strong> — Overall completion of the
-            skill
+            <strong>Active Skill</strong> — The skill you're currently focused
+            on, with quick access to its planner
           </li>
           <li>
-            <strong>Quick links</strong> — Click to jump to the Skill Planner or
-            create new skills
+            <strong>Today's Tasks</strong> — Tasks scheduled for today across
+            all your skills
+          </li>
+          <li>
+            <strong>Metrics Totals</strong> — Overall stats summarizing your
+            progress
+          </li>
+          <li>
+            <strong>Completion Chart</strong> — Visual graph of your progress
+            over time
           </li>
         </ul>
 
-        <ImagePlaceholder caption="Skills overview panel" />
+        <ScreenshotImage
+          slug="help-dashboard-active-skill"
+          caption="Active Skill card"
+        />
       </>
     ),
   },
@@ -238,7 +292,10 @@ const HELP_CONTENT: Record<
           skills. Think of it as your personal learning library.
         </p>
 
-        <ImagePlaceholder caption="Skills Hub overview" />
+        <ScreenshotImage
+          slug="help-skills-hub-overview"
+          caption="Skills Hub overview"
+        />
 
         <h2>Creating a New Skill</h2>
         <p>
@@ -269,7 +326,10 @@ const HELP_CONTENT: Record<
           </li>
         </ul>
 
-        <ImagePlaceholder caption="Skill creation - Basic Info step" />
+        <ScreenshotImage
+          slug="help-skills-hub-basic-info"
+          caption="Skill creation - Basic Info step"
+        />
 
         <h3>Step 2: AI Planning (Optional)</h3>
         <p>
@@ -282,13 +342,10 @@ const HELP_CONTENT: Record<
           <li>Skip AI planning and add sub-skills manually later</li>
         </ul>
 
-        <ImagePlaceholder caption="AI Planning interface" />
-
-        <h3>Step 3: Review & Create</h3>
-        <p>
-          Review your skill setup and make any final adjustments before
-          creating.
-        </p>
+        <ScreenshotImage
+          slug="help-skills-hub-ai-planning"
+          caption="AI Planning interface"
+        />
 
         <h2>Skill Cards</h2>
         <p>Each skill in the hub is displayed as a card showing:</p>
@@ -306,7 +363,10 @@ const HELP_CONTENT: Record<
           </li>
         </ul>
 
-        <ImagePlaceholder caption="Skill card anatomy" />
+        <ScreenshotImage
+          slug="help-skills-hub-card"
+          caption="Skill card anatomy"
+        />
 
         <h2>Skill Actions</h2>
         <p>
@@ -346,7 +406,10 @@ const HELP_CONTENT: Record<
           journey, showing all sub-skills and how they connect.
         </p>
 
-        <ImagePlaceholder caption="Skill Planner canvas view" />
+        <ScreenshotImage
+          slug="help-planner-canvas"
+          caption="Skill Planner canvas view"
+        />
 
         <h2>Canvas Navigation</h2>
         <p>The planner uses an interactive canvas. Here's how to navigate:</p>
@@ -389,7 +452,10 @@ const HELP_CONTENT: Record<
           </li>
         </ul>
 
-        <ImagePlaceholder caption="Sub-skill node anatomy" />
+        <ScreenshotImage
+          slug="help-planner-node"
+          caption="Sub-skill node anatomy"
+        />
 
         <h2>The Edit Panel</h2>
         <p>Click any sub-skill node to open the edit panel where you can:</p>
@@ -412,7 +478,10 @@ const HELP_CONTENT: Record<
           <li>Evaluate → Complete</li>
         </ul>
 
-        <ImagePlaceholder caption="Sub-skill edit panel" />
+        <ScreenshotImage
+          slug="help-planner-edit-panel"
+          caption="Sub-skill edit panel"
+        />
 
         <h3>Create Tasks</h3>
         <p>
@@ -432,7 +501,10 @@ const HELP_CONTENT: Record<
           <li>Metrics with target values</li>
         </ul>
 
-        <ImagePlaceholder caption="Create sub-skill modal" />
+        <ScreenshotImage
+          slug="help-planner-create-modal"
+          caption="Create sub-skill modal"
+        />
       </>
     ),
   },
@@ -445,7 +517,10 @@ const HELP_CONTENT: Record<
           what's scheduled, drag to reschedule, and track your completions.
         </p>
 
-        <ImagePlaceholder caption="Todo List weekly view" />
+        <ScreenshotImage
+          slug="help-todo-weekly"
+          caption="Todo List weekly view"
+        />
 
         <h2>Views</h2>
         <p>Switch between two view modes using the settings:</p>
@@ -473,14 +548,15 @@ const HELP_CONTENT: Record<
             <strong>Task name</strong>
           </li>
           <li>
-            <strong>Priority badge</strong> — Shows task priority level
-          </li>
-          <li>
-            <strong>Edit button</strong> — Opens the schedule modal
+            <strong>Edit button</strong> — Opens the schedule modal (appears on
+            hover)
           </li>
         </ul>
 
-        <ImagePlaceholder caption="Task card in todo list" />
+        <ScreenshotImage
+          slug="help-todo-task-card"
+          caption="Task card in todo list"
+        />
 
         <h2>Scheduling Tasks</h2>
 
@@ -491,21 +567,18 @@ const HELP_CONTENT: Record<
           and drop it onto any day to schedule it.
         </p>
 
-        <ImagePlaceholder caption="Assign Tasks panel" />
+        <ScreenshotImage
+          slug="help-todo-assign-panel"
+          caption="Assign Tasks panel"
+        />
 
         <h3>Rescheduling Tasks</h3>
         <p>
-          Drag any task from one day to another to reschedule it. When you drop
-          a task, a schedule modal appears where you can:
+          Drag any task from one day to another to reschedule it instantly. You
+          can also click the edit button (pencil icon) on any task to open the
+          schedule modal, where you can pick a specific date or set up
+          recurrence.
         </p>
-        <ul>
-          <li>
-            <strong>Change the date</strong> — Pick a different date if needed
-          </li>
-          <li>
-            <strong>Set up recurrence</strong> — Make this a recurring task
-          </li>
-        </ul>
 
         <h3>Recurring Tasks</h3>
         <p>Set tasks to repeat on a schedule. Options include:</p>
@@ -522,7 +595,10 @@ const HELP_CONTENT: Record<
           or on a specific date.
         </p>
 
-        <ImagePlaceholder caption="Schedule modal with recurrence options" />
+        <ScreenshotImage
+          slug="help-todo-schedule-modal"
+          caption="Schedule modal with recurrence options"
+        />
 
         <h2>Navigation</h2>
         <p>Use the arrow buttons in the header to navigate:</p>
@@ -592,7 +668,10 @@ const HELP_CONTENT: Record<
           multi-hour sessions. Consistency beats intensity.
         </p>
 
-        <ImagePlaceholder caption="Example of recurring task setup" />
+        <ScreenshotImage
+          slug="help-tips-recurring"
+          caption="Example of recurring task setup"
+        />
 
         <h2>🧩 Break It Down</h2>
         <p>
@@ -633,7 +712,10 @@ const HELP_CONTENT: Record<
           is a win worth celebrating.
         </p>
 
-        <ImagePlaceholder caption="Completed skill celebration" />
+        <ScreenshotImage
+          slug="help-tips-celebration"
+          caption="Completed skill celebration"
+        />
 
         <h2>💡 Pro Tips</h2>
         <ul>

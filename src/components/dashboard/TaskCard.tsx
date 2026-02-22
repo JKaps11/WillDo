@@ -61,6 +61,7 @@ export function TaskCard({ task }: TaskCardProps): React.ReactElement {
 
   return (
     <div
+      data-testid="task-card"
       className={cn(
         'relative flex items-start gap-3 rounded-lg border bg-card p-3 transition-colors',
         task.completed && 'opacity-60',

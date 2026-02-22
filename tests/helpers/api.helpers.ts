@@ -122,3 +122,35 @@ export async function deleteAllTestSkills(page: Page): Promise<void> {
     }
   }
 }
+
+/**
+ * Update a sub-skill's stage directly via API.
+ */
+export async function updateSubSkillStageViaAPI(
+  page: Page,
+  id: string,
+  stage: 'not_started' | 'practice' | 'evaluate' | 'complete',
+): Promise<{ id: string; stage: string }> {
+  return trpcMutate(page, 'subSkill.update', { id, stage });
+}
+
+/**
+ * Update a sub-skill metric's current value via API.
+ */
+export async function updateSubSkillMetricViaAPI(
+  page: Page,
+  metricId: string,
+  currentValue: number,
+): Promise<{ id: string; currentValue: number }> {
+  return trpcMutate(page, 'skillMetric.update', { id: metricId, currentValue });
+}
+
+/**
+ * Get all metrics for a sub-skill via API.
+ */
+export async function getSubSkillMetricsViaAPI(
+  page: Page,
+  subSkillId: string,
+): Promise<Array<{ id: string; name: string; currentValue: number; targetValue: number }>> {
+  return trpcQuery(page, 'skillMetric.listBySubSkill', { subSkillId });
+}
