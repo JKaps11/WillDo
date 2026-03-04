@@ -1,5 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import { protectedProcedure } from '../init';
+import { db } from '@/db/index';
 import {
   createSkillSchema,
   createSkillWithPlanSchema,
@@ -147,65 +148,76 @@ export const skillRouter = {
         used_default_subskills: subSkillsInput.length === 0,
       });
 
-      const skill = await skillRepository.create({
-        ...skillData,
-        userId: ctx.userId,
-      });
+      return db.transaction(async (tx) => {
+        const skill = await skillRepository.create(
+          {
+            ...skillData,
+            userId: ctx.userId,
+          },
+          tx,
+        );
 
-      if (!skill) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to create skill',
-        });
-      }
-      addWide({ skill_id: skill.id });
-
-      const createdSubSkillIds: Array<string> = [];
-
-      for (const [index, ss] of subSkillsToCreate.entries()) {
-        const parentIndex: number | null = ss.parentIndex ?? null;
-        const parentSubSkillId: string | null =
-          parentIndex !== null && parentIndex >= 0
-            ? (createdSubSkillIds[parentIndex] ?? null)
-            : null;
-
-        const createdSubSkill = await subSkillRepository.create({
-          skillId: skill.id,
-          userId: ctx.userId,
-          name: ss.name,
-          description: ss.description,
-          sortOrder: index,
-          parentSubSkillId,
-        });
-
-        if (!createdSubSkill) {
+        if (!skill) {
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
-            message: `Failed to create sub-skill: ${ss.name}`,
+            message: 'Failed to create skill',
           });
         }
+        addWide({ skill_id: skill.id });
 
-        createdSubSkillIds.push(createdSubSkill.id);
+        const createdSubSkillIds: Array<string> = [];
 
-        // Track subskill creation metric
-        await userMetricsRepository.incrementSubSkillsCreated(ctx.userId);
+        for (const [index, ss] of subSkillsToCreate.entries()) {
+          const parentIndex: number | null = ss.parentIndex ?? null;
+          const parentSubSkillId: string | null =
+            parentIndex !== null && parentIndex >= 0
+              ? (createdSubSkillIds[parentIndex] ?? null)
+              : null;
 
-        await Promise.all(
-          ss.metrics.map((metric) =>
-            skillRepository.createMetric({
-              subSkillId: createdSubSkill.id,
+          const createdSubSkill = await subSkillRepository.create(
+            {
+              skillId: skill.id,
               userId: ctx.userId,
-              name: metric.name,
-              unit: metric.unit,
-              targetValue: metric.targetValue,
-              currentValue: 0,
-            }),
-          ),
-        );
-      }
-      addWide({ sub_skills_created: createdSubSkillIds.length });
+              name: ss.name,
+              description: ss.description,
+              sortOrder: index,
+              parentSubSkillId,
+            },
+            tx,
+          );
 
-      return skill;
+          if (!createdSubSkill) {
+            throw new TRPCError({
+              code: 'INTERNAL_SERVER_ERROR',
+              message: `Failed to create sub-skill: ${ss.name}`,
+            });
+          }
+
+          createdSubSkillIds.push(createdSubSkill.id);
+
+          // Track subskill creation metric
+          await userMetricsRepository.incrementSubSkillsCreated(ctx.userId, tx);
+
+          await Promise.all(
+            ss.metrics.map((metric) =>
+              skillRepository.createMetric(
+                {
+                  subSkillId: createdSubSkill.id,
+                  userId: ctx.userId,
+                  name: metric.name,
+                  unit: metric.unit,
+                  targetValue: metric.targetValue,
+                  currentValue: 0,
+                },
+                tx,
+              ),
+            ),
+          );
+        }
+        addWide({ sub_skills_created: createdSubSkillIds.length });
+
+        return skill;
+      });
     }),
 
   update: protectedProcedure
@@ -252,30 +264,35 @@ export const skillRouter = {
       );
       const wasArchived = existingSkill?.archived ?? false;
 
-      const skill = await skillRepository.archive(input.id, ctx.userId);
+      return db.transaction(async (tx) => {
+        const skill = await skillRepository.archive(input.id, ctx.userId, tx);
 
-      if (!skill) {
-        throw new TRPCError({ code: 'NOT_FOUND' });
-      }
+        if (!skill) {
+          throw new TRPCError({ code: 'NOT_FOUND' });
+        }
 
-      // Track skill archive (only if not already archived)
-      if (!wasArchived) {
-        await completionEventRepository.create({
-          userId: ctx.userId,
-          eventType: 'skill_archived',
-          entityId: skill.id,
-          skillId: skill.id,
-        });
-        await userMetricsRepository.incrementSkillsArchived(ctx.userId);
-        await userMetricsRepository.updateStreak(ctx.userId);
-        await userMetricsRepository.addXp(ctx.userId, XP_SKILL_ARCHIVE);
-        addWide({
-          completion_event_created: true,
-          xp_added: XP_SKILL_ARCHIVE,
-        });
-      }
+        // Track skill archive (only if not already archived)
+        if (!wasArchived) {
+          await completionEventRepository.create(
+            {
+              userId: ctx.userId,
+              eventType: 'skill_archived',
+              entityId: skill.id,
+              skillId: skill.id,
+            },
+            tx,
+          );
+          await userMetricsRepository.incrementSkillsArchived(ctx.userId, tx);
+          await userMetricsRepository.updateStreak(ctx.userId, tx);
+          await userMetricsRepository.addXp(ctx.userId, XP_SKILL_ARCHIVE, tx);
+          addWide({
+            completion_event_created: true,
+            xp_added: XP_SKILL_ARCHIVE,
+          });
+        }
 
-      return skill;
+        return skill;
+      });
     }),
 
   unarchive: protectedProcedure
@@ -290,29 +307,36 @@ export const skillRouter = {
       );
       const wasArchived = existingSkill?.archived ?? false;
 
-      const skill = await skillRepository.unarchive(input.id, ctx.userId);
+      return db.transaction(async (tx) => {
+        const skill = await skillRepository.unarchive(input.id, ctx.userId, tx);
 
-      if (!skill) {
-        throw new TRPCError({ code: 'NOT_FOUND' });
-      }
+        if (!skill) {
+          throw new TRPCError({ code: 'NOT_FOUND' });
+        }
 
-      // Undo archive tracking (only if was archived)
-      if (wasArchived) {
-        await completionEventRepository.delete(
-          ctx.userId,
-          skill.id,
-          'skill_archived',
-        );
-        await userMetricsRepository.decrementSkillsArchived(ctx.userId);
-        await userMetricsRepository.recalculateStreak(ctx.userId);
-        await userMetricsRepository.removeXp(ctx.userId, XP_SKILL_ARCHIVE);
-        addWide({
-          completion_event_deleted: true,
-          xp_removed: XP_SKILL_ARCHIVE,
-        });
-      }
+        // Undo archive tracking (only if was archived)
+        if (wasArchived) {
+          await completionEventRepository.delete(
+            ctx.userId,
+            skill.id,
+            'skill_archived',
+            tx,
+          );
+          await userMetricsRepository.decrementSkillsArchived(ctx.userId, tx);
+          await userMetricsRepository.recalculateStreak(ctx.userId, tx);
+          await userMetricsRepository.removeXp(
+            ctx.userId,
+            XP_SKILL_ARCHIVE,
+            tx,
+          );
+          addWide({
+            completion_event_deleted: true,
+            xp_removed: XP_SKILL_ARCHIVE,
+          });
+        }
 
-      return skill;
+        return skill;
+      });
     }),
 
   import: protectedProcedure
@@ -324,73 +348,84 @@ export const skillRouter = {
         event: 'skill_imported',
       });
 
-      // Create skill from input
-      const skill = await skillRepository.create({
-        ...input.skill,
-        userId: ctx.userId,
-      });
+      return db.transaction(async (tx) => {
+        // Create skill from input
+        const skill = await skillRepository.create(
+          {
+            ...input.skill,
+            userId: ctx.userId,
+          },
+          tx,
+        );
 
-      if (!skill) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to import skill',
-        });
-      }
-      addWide({ skill_id: skill.id });
-
-      // Track created subskill IDs for parent resolution
-      const createdSubSkillIds: Array<string> = [];
-
-      // Create subskills with resolved parent references
-      for (const ss of input.subSkills) {
-        const parentIndex = ss.parentIndex;
-        const parentSubSkillId =
-          parentIndex !== null && parentIndex >= 0
-            ? (createdSubSkillIds[parentIndex] ?? null)
-            : null;
-
-        const createdSubSkill = await subSkillRepository.create({
-          skillId: skill.id,
-          userId: ctx.userId,
-          name: ss.name,
-          description: ss.description,
-          stage: ss.stage,
-          sortOrder: ss.sortOrder,
-          parentSubSkillId,
-        });
-
-        if (!createdSubSkill) {
+        if (!skill) {
           throw new TRPCError({
             code: 'INTERNAL_SERVER_ERROR',
-            message: `Failed to import sub-skill: ${ss.name}`,
+            message: 'Failed to import skill',
           });
         }
+        addWide({ skill_id: skill.id });
 
-        createdSubSkillIds.push(createdSubSkill.id);
+        // Track created subskill IDs for parent resolution
+        const createdSubSkillIds: Array<string> = [];
 
-        // Track subskill creation metric
-        await userMetricsRepository.incrementSubSkillsCreated(ctx.userId);
+        // Create subskills with resolved parent references
+        for (const ss of input.subSkills) {
+          const parentIndex = ss.parentIndex;
+          const parentSubSkillId =
+            parentIndex !== null && parentIndex >= 0
+              ? (createdSubSkillIds[parentIndex] ?? null)
+              : null;
 
-        // Create metrics for this subskill
-        await Promise.all(
-          ss.metrics.map((metric) =>
-            skillRepository.createMetric({
-              subSkillId: createdSubSkill.id,
+          const createdSubSkill = await subSkillRepository.create(
+            {
+              skillId: skill.id,
               userId: ctx.userId,
-              name: metric.name,
-              unit: metric.unit,
-              targetValue: metric.targetValue,
-              currentValue: metric.currentValue,
-            }),
-          ),
-        );
-      }
+              name: ss.name,
+              description: ss.description,
+              stage: ss.stage,
+              sortOrder: ss.sortOrder,
+              parentSubSkillId,
+            },
+            tx,
+          );
 
-      // Track import metric
-      await userMetricsRepository.incrementSkillsImported(ctx.userId);
-      addWide({ sub_skills_created: createdSubSkillIds.length });
+          if (!createdSubSkill) {
+            throw new TRPCError({
+              code: 'INTERNAL_SERVER_ERROR',
+              message: `Failed to import sub-skill: ${ss.name}`,
+            });
+          }
 
-      return skill;
+          createdSubSkillIds.push(createdSubSkill.id);
+
+          // Track subskill creation metric
+          await userMetricsRepository.incrementSubSkillsCreated(ctx.userId, tx);
+
+          // Create metrics for this subskill
+          await Promise.all(
+            ss.metrics.map((metric) =>
+              skillRepository.createMetric(
+                {
+                  subSkillId: createdSubSkill.id,
+                  userId: ctx.userId,
+                  name: metric.name,
+                  unit: metric.unit,
+                  targetValue: metric.targetValue,
+                  currentValue: metric.currentValue,
+                },
+                tx,
+              ),
+            ),
+          );
+        }
+
+        // Track import metric
+        await userMetricsRepository.incrementSkillsImported(ctx.userId, tx);
+        addWide({ sub_skills_created: createdSubSkillIds.length });
+
+        return skill;
+      });
     }),
 
   trackExport: protectedProcedure

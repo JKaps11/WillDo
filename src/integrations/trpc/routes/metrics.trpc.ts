@@ -13,6 +13,7 @@ import type {
   TimeSeriesPoint,
   UserMetricsResponse,
 } from '@/lib/zod-schemas/metrics';
+import { db } from '@/db/index';
 import { addWide } from '@/lib/logging/wideEventStore.server';
 import { completionEventRepository } from '@/db/repositories/completion_event.repository';
 import { userMetricsRepository } from '@/db/repositories/user_metrics.repository';
@@ -32,8 +33,10 @@ export const metricsRouter = {
   getUserMetrics: protectedProcedure.query(
     async ({ ctx }): Promise<UserMetricsResponse> => {
       // Ensure metrics exist and reset weekly if needed
-      await userMetricsRepository.upsert(ctx.userId);
-      await userMetricsRepository.resetWeeklyIfNeeded(ctx.userId);
+      await db.transaction(async (tx) => {
+        await userMetricsRepository.upsert(ctx.userId, tx);
+        await userMetricsRepository.resetWeeklyIfNeeded(ctx.userId, tx);
+      });
 
       const metrics = await userMetricsRepository.findByUserId(ctx.userId);
 
@@ -142,13 +145,16 @@ export const metricsRouter = {
   updateWeeklyGoal: protectedProcedure
     .input(updateWeeklyGoalSchema)
     .mutation(async ({ ctx, input }) => {
-      await userMetricsRepository.upsert(ctx.userId);
-      const result = await userMetricsRepository.updateWeeklyGoal(
-        ctx.userId,
-        input.weeklyGoal,
-      );
-      addWide({ new_weekly_goal: input.weeklyGoal });
-      return result;
+      return db.transaction(async (tx) => {
+        await userMetricsRepository.upsert(ctx.userId, tx);
+        const result = await userMetricsRepository.updateWeeklyGoal(
+          ctx.userId,
+          input.weeklyGoal,
+          tx,
+        );
+        addWide({ new_weekly_goal: input.weeklyGoal });
+        return result;
+      });
     }),
 };
 

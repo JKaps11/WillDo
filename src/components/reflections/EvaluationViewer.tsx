@@ -4,6 +4,7 @@ import { FileText } from 'lucide-react';
 import { ConfidenceRating } from '@/components/practice-evaluation/ConfidenceRating';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTRPC } from '@/integrations/trpc/react';
+import { parseLocalDate } from '@/lib/utils';
 
 interface EvaluationViewerProps {
   evaluationId: string | null;
@@ -15,7 +16,7 @@ function AnswerList({ items }: { items: Array<string> }): React.ReactElement {
   }
   return (
     <ul className="list-disc pl-5 space-y-1">
-      {items.map((item, i) => (
+      {items.map((item: string, i: number) => (
         <li key={i} className="text-sm">
           {item}
         </li>
@@ -76,10 +77,9 @@ export function EvaluationViewer({
     );
   }
 
-  const dateStr =
-    evaluation.occurrenceDate instanceof Date
-      ? evaluation.occurrenceDate.toLocaleDateString()
-      : new Date(evaluation.occurrenceDate).toLocaleDateString();
+  const dateStr = parseLocalDate(
+    evaluation.occurrenceDate,
+  ).toLocaleDateString();
 
   return (
     <Card className="h-fit">

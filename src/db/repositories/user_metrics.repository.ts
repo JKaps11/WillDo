@@ -9,6 +9,7 @@ import {
 
 import { completionEventRepository } from './completion_event.repository';
 import type { UserMetrics } from '@/db/schemas/user_metrics.schema';
+import type { DbClient } from '@/db/index';
 import { db } from '@/db/index';
 import { userMetrics } from '@/db/schemas/user_metrics.schema';
 import { withDbError } from '@/db/withDbError';
@@ -31,9 +32,12 @@ export const userMetricsRepository = {
   /**
    * Create metrics row if it doesn't exist, return existing if it does.
    */
-  upsert: async (userId: string): Promise<UserMetrics> => {
+  upsert: async (
+    userId: string,
+    dbClient: DbClient = db,
+  ): Promise<UserMetrics> => {
     return withDbError('userMetrics.upsert', async () => {
-      const existing = await db
+      const existing = await dbClient
         .select()
         .from(userMetrics)
         .where(eq(userMetrics.userId, userId))
@@ -46,7 +50,7 @@ export const userMetricsRepository = {
       const today = startOfDay(new Date());
       const weekStart = startOfWeek(today, { weekStartsOn: 1 }); // Monday
 
-      const result = await db
+      const result = await dbClient
         .insert(userMetrics)
         .values({
           userId,
@@ -62,10 +66,11 @@ export const userMetricsRepository = {
 
   incrementTasksCompleted: async (
     userId: string,
+    dbClient: DbClient = db,
   ): Promise<UserMetrics | null> => {
     return withDbError('userMetrics.incrementTasksCompleted', async () => {
-      await ensureMetricsExist(userId);
-      const result = await db
+      await ensureMetricsExist(userId, dbClient);
+      const result = await dbClient
         .update(userMetrics)
         .set({
           tasksCompleted: sql`${userMetrics.tasksCompleted} + 1`,
@@ -81,9 +86,10 @@ export const userMetricsRepository = {
 
   decrementTasksCompleted: async (
     userId: string,
+    dbClient: DbClient = db,
   ): Promise<UserMetrics | null> => {
     return withDbError('userMetrics.decrementTasksCompleted', async () => {
-      const result = await db
+      const result = await dbClient
         .update(userMetrics)
         .set({
           tasksCompleted: sql`GREATEST(${userMetrics.tasksCompleted} - 1, 0)`,
@@ -99,10 +105,11 @@ export const userMetricsRepository = {
 
   incrementSubSkillsCompleted: async (
     userId: string,
+    dbClient: DbClient = db,
   ): Promise<UserMetrics | null> => {
     return withDbError('userMetrics.incrementSubSkillsCompleted', async () => {
-      await ensureMetricsExist(userId);
-      const result = await db
+      await ensureMetricsExist(userId, dbClient);
+      const result = await dbClient
         .update(userMetrics)
         .set({
           subSkillsCompleted: sql`${userMetrics.subSkillsCompleted} + 1`,
@@ -117,9 +124,10 @@ export const userMetricsRepository = {
 
   decrementSubSkillsCompleted: async (
     userId: string,
+    dbClient: DbClient = db,
   ): Promise<UserMetrics | null> => {
     return withDbError('userMetrics.decrementSubSkillsCompleted', async () => {
-      const result = await db
+      const result = await dbClient
         .update(userMetrics)
         .set({
           subSkillsCompleted: sql`GREATEST(${userMetrics.subSkillsCompleted} - 1, 0)`,
@@ -134,10 +142,11 @@ export const userMetricsRepository = {
 
   incrementSkillsArchived: async (
     userId: string,
+    dbClient: DbClient = db,
   ): Promise<UserMetrics | null> => {
     return withDbError('userMetrics.incrementSkillsArchived', async () => {
-      await ensureMetricsExist(userId);
-      const result = await db
+      await ensureMetricsExist(userId, dbClient);
+      const result = await dbClient
         .update(userMetrics)
         .set({
           skillsArchived: sql`${userMetrics.skillsArchived} + 1`,
@@ -152,9 +161,10 @@ export const userMetricsRepository = {
 
   decrementSkillsArchived: async (
     userId: string,
+    dbClient: DbClient = db,
   ): Promise<UserMetrics | null> => {
     return withDbError('userMetrics.decrementSkillsArchived', async () => {
-      const result = await db
+      const result = await dbClient
         .update(userMetrics)
         .set({
           skillsArchived: sql`GREATEST(${userMetrics.skillsArchived} - 1, 0)`,
@@ -169,10 +179,11 @@ export const userMetricsRepository = {
 
   incrementSkillsImported: async (
     userId: string,
+    dbClient: DbClient = db,
   ): Promise<UserMetrics | null> => {
     return withDbError('userMetrics.incrementSkillsImported', async () => {
-      await ensureMetricsExist(userId);
-      const result = await db
+      await ensureMetricsExist(userId, dbClient);
+      const result = await dbClient
         .update(userMetrics)
         .set({
           skillsImported: sql`${userMetrics.skillsImported} + 1`,
@@ -187,10 +198,11 @@ export const userMetricsRepository = {
 
   incrementSkillsExported: async (
     userId: string,
+    dbClient: DbClient = db,
   ): Promise<UserMetrics | null> => {
     return withDbError('userMetrics.incrementSkillsExported', async () => {
-      await ensureMetricsExist(userId);
-      const result = await db
+      await ensureMetricsExist(userId, dbClient);
+      const result = await dbClient
         .update(userMetrics)
         .set({
           skillsExported: sql`${userMetrics.skillsExported} + 1`,
@@ -205,10 +217,11 @@ export const userMetricsRepository = {
 
   incrementTasksCreated: async (
     userId: string,
+    dbClient: DbClient = db,
   ): Promise<UserMetrics | null> => {
     return withDbError('userMetrics.incrementTasksCreated', async () => {
-      await ensureMetricsExist(userId);
-      const result = await db
+      await ensureMetricsExist(userId, dbClient);
+      const result = await dbClient
         .update(userMetrics)
         .set({
           tasksCreated: sql`${userMetrics.tasksCreated} + 1`,
@@ -223,10 +236,11 @@ export const userMetricsRepository = {
 
   incrementSubSkillsCreated: async (
     userId: string,
+    dbClient: DbClient = db,
   ): Promise<UserMetrics | null> => {
     return withDbError('userMetrics.incrementSubSkillsCreated', async () => {
-      await ensureMetricsExist(userId);
-      const result = await db
+      await ensureMetricsExist(userId, dbClient);
+      const result = await dbClient
         .update(userMetrics)
         .set({
           subSkillsCreated: sql`${userMetrics.subSkillsCreated} + 1`,
@@ -244,7 +258,10 @@ export const userMetricsRepository = {
   /**
    * Update streak after a completion. Call this on every completion.
    */
-  updateStreak: async (userId: string): Promise<UserMetrics | null> => {
+  updateStreak: async (
+    userId: string,
+    dbClient: DbClient = db,
+  ): Promise<UserMetrics | null> => {
     return withDbError('userMetrics.updateStreak', async () => {
       const metrics = await userMetricsRepository.findByUserId(userId);
       if (!metrics) return null;
@@ -276,7 +293,7 @@ export const userMetricsRepository = {
 
       const newBestStreak = Math.max(newStreak, metrics.bestStreak);
 
-      const result = await db
+      const result = await dbClient
         .update(userMetrics)
         .set({
           currentStreak: newStreak,
@@ -294,7 +311,10 @@ export const userMetricsRepository = {
   /**
    * Recalculate streak after an uncomplete. This may break the streak.
    */
-  recalculateStreak: async (userId: string): Promise<UserMetrics | null> => {
+  recalculateStreak: async (
+    userId: string,
+    dbClient: DbClient = db,
+  ): Promise<UserMetrics | null> => {
     return withDbError('userMetrics.recalculateStreak', async () => {
       const today = startOfDay(new Date());
       const lookbackStart = subDays(today, 365); // Look back up to a year
@@ -308,7 +328,7 @@ export const userMetricsRepository = {
 
       if (activityDates.length === 0) {
         // No activity, reset everything
-        const result = await db
+        const result = await dbClient
           .update(userMetrics)
           .set({
             currentStreak: 0,
@@ -348,7 +368,7 @@ export const userMetricsRepository = {
 
       const lastActivityDate = activityDates[0];
 
-      const result = await db
+      const result = await dbClient
         .update(userMetrics)
         .set({
           currentStreak: streak,
@@ -367,9 +387,10 @@ export const userMetricsRepository = {
   addXp: async (
     userId: string,
     amount: number,
+    dbClient: DbClient = db,
   ): Promise<UserMetrics | null> => {
     return withDbError('userMetrics.addXp', async () => {
-      const result = await db
+      const result = await dbClient
         .update(userMetrics)
         .set({
           totalXp: sql`${userMetrics.totalXp} + ${amount}`,
@@ -385,9 +406,10 @@ export const userMetricsRepository = {
   removeXp: async (
     userId: string,
     amount: number,
+    dbClient: DbClient = db,
   ): Promise<UserMetrics | null> => {
     return withDbError('userMetrics.removeXp', async () => {
-      const result = await db
+      const result = await dbClient
         .update(userMetrics)
         .set({
           totalXp: sql`GREATEST(${userMetrics.totalXp} - ${amount}, 0)`,
@@ -405,7 +427,10 @@ export const userMetricsRepository = {
   /**
    * Reset weekly counter if we're in a new week.
    */
-  resetWeeklyIfNeeded: async (userId: string): Promise<UserMetrics | null> => {
+  resetWeeklyIfNeeded: async (
+    userId: string,
+    dbClient: DbClient = db,
+  ): Promise<UserMetrics | null> => {
     return withDbError('userMetrics.resetWeeklyIfNeeded', async () => {
       const metrics = await userMetricsRepository.findByUserId(userId);
       if (!metrics) return null;
@@ -419,7 +444,7 @@ export const userMetricsRepository = {
 
       // If stored week is before current week, reset
       if (!storedWeekStart || isBefore(storedWeekStart, currentWeekStart)) {
-        const result = await db
+        const result = await dbClient
           .update(userMetrics)
           .set({
             weeklyCompleted: 0,
@@ -439,9 +464,10 @@ export const userMetricsRepository = {
   updateWeeklyGoal: async (
     userId: string,
     weeklyGoal: number,
+    dbClient: DbClient = db,
   ): Promise<UserMetrics | null> => {
     return withDbError('userMetrics.updateWeeklyGoal', async () => {
-      const result = await db
+      const result = await dbClient
         .update(userMetrics)
         .set({
           weeklyGoal,
@@ -457,9 +483,12 @@ export const userMetricsRepository = {
 
 /* ---------- Helpers ---------- */
 
-async function ensureMetricsExist(userId: string): Promise<void> {
+async function ensureMetricsExist(
+  userId: string,
+  dbClient: DbClient = db,
+): Promise<void> {
   const existing = await userMetricsRepository.findByUserId(userId);
   if (!existing) {
-    await userMetricsRepository.upsert(userId);
+    await userMetricsRepository.upsert(userId, dbClient);
   }
 }

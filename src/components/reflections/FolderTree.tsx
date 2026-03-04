@@ -9,9 +9,13 @@ import {
 import { useState } from 'react';
 
 import type { PracticeEvaluation } from '@/db/schemas/practice_evaluation.schema';
+import type {
+  FolderHierarchySkill,
+  FolderHierarchySubSkill,
+} from '@/db/repositories/practice_evaluation.repository';
 import { Badge } from '@/components/ui/badge';
 import { useTRPC } from '@/integrations/trpc/react';
-import { cn } from '@/lib/utils';
+import { cn, parseLocalDate } from '@/lib/utils';
 
 interface FolderTreeProps {
   selectedEvaluationId: string | null;
@@ -68,10 +72,9 @@ function SubSkillFolder({
       {isOpen && evaluations && (
         <div className="ml-4">
           {evaluations.map((evaluation: PracticeEvaluation) => {
-            const dateStr =
-              evaluation.occurrenceDate instanceof Date
-                ? evaluation.occurrenceDate.toLocaleDateString()
-                : new Date(evaluation.occurrenceDate).toLocaleDateString();
+            const dateStr = parseLocalDate(
+              evaluation.occurrenceDate,
+            ).toLocaleDateString();
 
             return (
               <button
@@ -138,10 +141,11 @@ export function FolderTree({
 
   return (
     <div className="space-y-0.5 p-2">
-      {hierarchy.map((skill) => {
+      {hierarchy.map((skill: FolderHierarchySkill) => {
         const isOpen = openSkills.has(skill.skillId);
         const totalCount = skill.subSkills.reduce(
-          (sum, ss) => sum + ss.evaluationCount,
+          (sum: number, ss: FolderHierarchySubSkill) =>
+            sum + ss.evaluationCount,
           0,
         );
 
@@ -179,7 +183,7 @@ export function FolderTree({
             </button>
 
             {isOpen &&
-              skill.subSkills.map((subSkill) => (
+              skill.subSkills.map((subSkill: FolderHierarchySubSkill) => (
                 <SubSkillFolder
                   key={subSkill.subSkillId}
                   subSkillId={subSkill.subSkillId}

@@ -1,5 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import { protectedProcedure } from '../init';
+import { db } from '@/db/index';
 import {
   advanceSubSkillStageSchema,
   completeSubSkillSchema,
@@ -77,40 +78,48 @@ export const subSkillRouter = {
       }
 
       const { metrics, ...subSkillData } = input;
-      const subSkill = await subSkillRepository.create({
-        ...subSkillData,
-        userId: ctx.userId,
-      });
-
-      if (!subSkill) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to create sub-skill',
-        });
-      }
-      addWide({ sub_skill_id: subSkill.id });
-
-      // Track subskill creation metric
-      await userMetricsRepository.incrementSubSkillsCreated(ctx.userId);
-
-      // Create metrics if provided
-      if (metrics && metrics.length > 0) {
-        await Promise.all(
-          metrics.map((metric) =>
-            skillRepository.createMetric({
-              userId: ctx.userId,
-              subSkillId: subSkill.id,
-              name: metric.name,
-              unit: metric.unit,
-              targetValue: metric.targetValue,
-              currentValue: metric.currentValue,
-            }),
-          ),
+      return db.transaction(async (tx) => {
+        const subSkill = await subSkillRepository.create(
+          {
+            ...subSkillData,
+            userId: ctx.userId,
+          },
+          tx,
         );
-        addWide({ metrics_created: metrics.length });
-      }
 
-      return subSkill;
+        if (!subSkill) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Failed to create sub-skill',
+          });
+        }
+        addWide({ sub_skill_id: subSkill.id });
+
+        // Track subskill creation metric
+        await userMetricsRepository.incrementSubSkillsCreated(ctx.userId, tx);
+
+        // Create metrics if provided
+        if (metrics && metrics.length > 0) {
+          await Promise.all(
+            metrics.map((metric) =>
+              skillRepository.createMetric(
+                {
+                  userId: ctx.userId,
+                  subSkillId: subSkill.id,
+                  name: metric.name,
+                  unit: metric.unit,
+                  targetValue: metric.targetValue,
+                  currentValue: metric.currentValue,
+                },
+                tx,
+              ),
+            ),
+          );
+          addWide({ metrics_created: metrics.length });
+        }
+
+        return subSkill;
+      });
     }),
 
   update: protectedProcedure
@@ -160,48 +169,64 @@ export const subSkillRouter = {
       );
       const wasComplete = existingSubSkill?.stage === 'complete';
 
-      const subSkill = await subSkillRepository.advanceStage(
-        input.id,
-        ctx.userId,
-      );
+      return db.transaction(async (tx) => {
+        const subSkill = await subSkillRepository.advanceStage(
+          input.id,
+          ctx.userId,
+          tx,
+        );
 
-      if (!subSkill) {
-        throw new TRPCError({ code: 'NOT_FOUND' });
-      }
-      addWide({ new_stage: subSkill.stage });
+        if (!subSkill) {
+          throw new TRPCError({ code: 'NOT_FOUND' });
+        }
+        addWide({ new_stage: subSkill.stage });
 
-      // Create task when advancing to practice stage
-      if (subSkill.stage === 'practice') {
-        const task = await taskRepository.create({
-          userId: ctx.userId,
-          name: subSkill.name,
-          description: subSkill.description ?? undefined,
-          subSkillId: subSkill.id,
-        });
-        addWide({ created_task_id: task?.id });
+        // Create task when advancing to practice stage
+        if (subSkill.stage === 'practice') {
+          const task = await taskRepository.create(
+            {
+              userId: ctx.userId,
+              name: subSkill.name,
+              description: subSkill.description ?? undefined,
+              subSkillId: subSkill.id,
+            },
+            tx,
+          );
+          addWide({ created_task_id: task?.id });
 
-        // Track task creation
-        await userMetricsRepository.incrementTasksCreated(ctx.userId);
-      }
+          // Track task creation
+          await userMetricsRepository.incrementTasksCreated(ctx.userId, tx);
+        }
 
-      // Track subskill completion when advancing to complete stage
-      if (subSkill.stage === 'complete' && !wasComplete) {
-        await completionEventRepository.create({
-          userId: ctx.userId,
-          eventType: 'subskill_completed',
-          entityId: subSkill.id,
-          skillId: subSkill.skillId,
-        });
-        await userMetricsRepository.incrementSubSkillsCompleted(ctx.userId);
-        await userMetricsRepository.updateStreak(ctx.userId);
-        await userMetricsRepository.addXp(ctx.userId, XP_SUBSKILL_COMPLETE);
-        addWide({
-          completion_event_created: true,
-          xp_added: XP_SUBSKILL_COMPLETE,
-        });
-      }
+        // Track subskill completion when advancing to complete stage
+        if (subSkill.stage === 'complete' && !wasComplete) {
+          await completionEventRepository.create(
+            {
+              userId: ctx.userId,
+              eventType: 'subskill_completed',
+              entityId: subSkill.id,
+              skillId: subSkill.skillId,
+            },
+            tx,
+          );
+          await userMetricsRepository.incrementSubSkillsCompleted(
+            ctx.userId,
+            tx,
+          );
+          await userMetricsRepository.updateStreak(ctx.userId, tx);
+          await userMetricsRepository.addXp(
+            ctx.userId,
+            XP_SUBSKILL_COMPLETE,
+            tx,
+          );
+          addWide({
+            completion_event_created: true,
+            xp_added: XP_SUBSKILL_COMPLETE,
+          });
+        }
 
-      return subSkill;
+        return subSkill;
+      });
     }),
 
   complete: protectedProcedure
@@ -224,30 +249,46 @@ export const subSkillRouter = {
       );
       const wasComplete = existingSubSkill?.stage === 'complete';
 
-      const subSkill = await subSkillRepository.complete(input.id, ctx.userId);
+      return db.transaction(async (tx) => {
+        const subSkill = await subSkillRepository.complete(
+          input.id,
+          ctx.userId,
+          tx,
+        );
 
-      if (!subSkill) {
-        throw new TRPCError({ code: 'NOT_FOUND' });
-      }
+        if (!subSkill) {
+          throw new TRPCError({ code: 'NOT_FOUND' });
+        }
 
-      // Track subskill completion (only if not already complete)
-      if (!wasComplete) {
-        await completionEventRepository.create({
-          userId: ctx.userId,
-          eventType: 'subskill_completed',
-          entityId: subSkill.id,
-          skillId: subSkill.skillId,
-        });
-        await userMetricsRepository.incrementSubSkillsCompleted(ctx.userId);
-        await userMetricsRepository.updateStreak(ctx.userId);
-        await userMetricsRepository.addXp(ctx.userId, XP_SUBSKILL_COMPLETE);
-        addWide({
-          completion_event_created: true,
-          xp_added: XP_SUBSKILL_COMPLETE,
-        });
-      }
+        // Track subskill completion (only if not already complete)
+        if (!wasComplete) {
+          await completionEventRepository.create(
+            {
+              userId: ctx.userId,
+              eventType: 'subskill_completed',
+              entityId: subSkill.id,
+              skillId: subSkill.skillId,
+            },
+            tx,
+          );
+          await userMetricsRepository.incrementSubSkillsCompleted(
+            ctx.userId,
+            tx,
+          );
+          await userMetricsRepository.updateStreak(ctx.userId, tx);
+          await userMetricsRepository.addXp(
+            ctx.userId,
+            XP_SUBSKILL_COMPLETE,
+            tx,
+          );
+          addWide({
+            completion_event_created: true,
+            xp_added: XP_SUBSKILL_COMPLETE,
+          });
+        }
 
-      return subSkill;
+        return subSkill;
+      });
     }),
 
   setParent: protectedProcedure

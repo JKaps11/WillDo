@@ -207,7 +207,7 @@ export default function AppHeader(): React.ReactNode {
           <ImportSkillModal
             key="import-skill-modal"
             trigger={
-              <Button nativeButton={false}>
+              <Button>
                 <Upload className="mr-2 size-4" />
                 Import Skill
               </Button>

@@ -4,8 +4,8 @@ import type { NewPracticeEvaluation } from '@/db/schemas/practice_evaluation.sch
 
 /* ---------- Shared field schemas ---------- */
 
-const nonEmptyStringArray = z.array(z.string().min(1)).min(1);
-const confidenceLevelSchema = z.number().int().min(1).max(5);
+export const nonEmptyStringArray = z.array(z.string().min(1)).min(1);
+export const confidenceLevelSchema = z.number().int().min(1).max(5);
 
 /* ---------- Practice Evaluation Schemas ---------- */
 

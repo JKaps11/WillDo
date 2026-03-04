@@ -53,11 +53,13 @@ function MultiInputField({
     <Field>
       <FieldLabel>{label}</FieldLabel>
       <div className="space-y-2">
-        {values.map((value, index) => (
+        {values.map((value: string, index: number) => (
           <div key={index} className="flex items-start gap-2">
             <Textarea
               value={value}
-              onChange={(e) => handleValueChange(index, e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                handleValueChange(index, e.target.value)
+              }
               placeholder={placeholder}
               className="min-h-10 flex-1"
             />
@@ -125,7 +127,7 @@ export function PracticeEvaluationModal(): React.ReactNode {
   useEffect(() => {
     if (!isOpen || !task || !occurrenceDate) return;
 
-    const dateStr = occurrenceDate.toISOString().split('T')[0];
+    const dateStr = occurrenceDate.toLocaleDateString('en-CA');
     const defaultTitle = `${task.name} - ${dateStr}`;
 
     if (latestEvaluation) {

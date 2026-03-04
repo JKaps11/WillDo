@@ -4,6 +4,7 @@ import type {
   SubSkill,
   SubSkillStage,
 } from '@/db/schemas/sub_skill.schema';
+import type { DbClient } from '@/db/index';
 import { subSkills } from '@/db/schemas/sub_skill.schema';
 import { db } from '@/db/index';
 
@@ -38,8 +39,9 @@ export const subSkillRepository = {
 
   create: async (
     data: Omit<NewSubSkill, 'id' | 'createdAt' | 'updatedAt'>,
+    dbClient: DbClient = db,
   ): Promise<SubSkill | null> => {
-    const result = await db.insert(subSkills).values(data).returning();
+    const result = await dbClient.insert(subSkills).values(data).returning();
 
     return result[0] ?? null;
   },
@@ -50,8 +52,9 @@ export const subSkillRepository = {
     data: Partial<
       Omit<NewSubSkill, 'id' | 'userId' | 'skillId' | 'createdAt' | 'updatedAt'>
     >,
+    dbClient: DbClient = db,
   ): Promise<SubSkill | null> => {
-    const result = await db
+    const result = await dbClient
       .update(subSkills)
       .set({ ...data, updatedAt: new Date() })
       .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
@@ -60,8 +63,12 @@ export const subSkillRepository = {
     return result[0] ?? null;
   },
 
-  delete: async (id: string, userId: string): Promise<SubSkill | null> => {
-    const result = await db
+  delete: async (
+    id: string,
+    userId: string,
+    dbClient: DbClient = db,
+  ): Promise<SubSkill | null> => {
+    const result = await dbClient
       .delete(subSkills)
       .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
       .returning();
@@ -72,8 +79,9 @@ export const subSkillRepository = {
   advanceStage: async (
     id: string,
     userId: string,
+    dbClient: DbClient = db,
   ): Promise<SubSkill | null> => {
-    const subSkill = await db
+    const subSkill = await dbClient
       .select()
       .from(subSkills)
       .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
@@ -88,7 +96,7 @@ export const subSkillRepository = {
     }
 
     const nextStage = STAGE_ORDER[currentIndex + 1];
-    const result = await db
+    const result = await dbClient
       .update(subSkills)
       .set({ stage: nextStage, updatedAt: new Date() })
       .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
@@ -97,8 +105,12 @@ export const subSkillRepository = {
     return result[0] ?? null;
   },
 
-  complete: async (id: string, userId: string): Promise<SubSkill | null> => {
-    const result = await db
+  complete: async (
+    id: string,
+    userId: string,
+    dbClient: DbClient = db,
+  ): Promise<SubSkill | null> => {
+    const result = await dbClient
       .update(subSkills)
       .set({ stage: 'complete', updatedAt: new Date() })
       .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
@@ -155,8 +167,9 @@ export const subSkillRepository = {
     id: string,
     userId: string,
     parentSubSkillId: string | null,
+    dbClient: DbClient = db,
   ): Promise<SubSkill | null> => {
-    const result = await db
+    const result = await dbClient
       .update(subSkills)
       .set({ parentSubSkillId, updatedAt: new Date() })
       .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))

@@ -5,6 +5,7 @@ import type {
   CompletionEventType,
   NewCompletionEvent,
 } from '@/db/schemas/completion_event.schema';
+import type { DbClient } from '@/db/index';
 import { db } from '@/db/index';
 import { completionEvents } from '@/db/schemas/completion_event.schema';
 import { withDbError } from '@/db/withDbError';
@@ -23,9 +24,13 @@ export interface TimeSeriesPoint {
 export const completionEventRepository = {
   create: async (
     data: Omit<NewCompletionEvent, 'id' | 'createdAt' | 'updatedAt'>,
+    dbClient: DbClient = db,
   ): Promise<CompletionEvent | null> => {
     return withDbError('completionEvent.create', async () => {
-      const result = await db.insert(completionEvents).values(data).returning();
+      const result = await dbClient
+        .insert(completionEvents)
+        .values(data)
+        .returning();
 
       return result[0] ?? null;
     });
@@ -35,9 +40,10 @@ export const completionEventRepository = {
     userId: string,
     entityId: string,
     eventType: CompletionEventType,
+    dbClient: DbClient = db,
   ): Promise<CompletionEvent | null> => {
     return withDbError('completionEvent.delete', async () => {
-      const result = await db
+      const result = await dbClient
         .delete(completionEvents)
         .where(
           and(

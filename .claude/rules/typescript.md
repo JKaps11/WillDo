@@ -32,5 +32,5 @@ The DB schema (`src/db/schemas/`) is the **canonical source of truth** for all d
 ### What this means in practice
 
 - **Never** manually write `{ title: string; wentWell: Array<string>; ... }` if those fields exist on a DB schema type. Use `Pick`/`Omit` instead.
-- **Never** define a Zod `z.object({ field: z.string(), ... })` that re-declares fields from another Zod schema. Use `.pick()` / `.omit()` / `.extend()`.
+- **Never** define a Zod `z.object({ field: z.string(), ... })` that re-declares fields from another Zod schema. Use `.pick()`, `.omit()`, or `.extend()`.
 - **Repository return types** for joined queries (where field names differ from the schema, e.g., `skillName` instead of `name`) are the one exception — these are projection types and can be defined as local interfaces.

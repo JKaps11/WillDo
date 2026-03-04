@@ -1,6 +1,7 @@
 import { and, eq, gte, sql } from 'drizzle-orm';
 
 import type { AiUsage, NewAiUsage } from '@/db/schemas/ai_usage.schema';
+import type { DbClient } from '@/db/index';
 import { aiUsage } from '@/db/schemas/ai_usage.schema';
 import { db } from '@/db/index';
 import { withDbError } from '@/db/withDbError';
@@ -10,9 +11,10 @@ import { withDbError } from '@/db/withDbError';
 export const aiUsageRepository = {
   create: async (
     data: Omit<NewAiUsage, 'id' | 'createdAt' | 'updatedAt'>,
+    dbClient: DbClient = db,
   ): Promise<AiUsage | null> => {
     return withDbError('aiUsage.create', async () => {
-      const result = await db.insert(aiUsage).values(data).returning();
+      const result = await dbClient.insert(aiUsage).values(data).returning();
       return result[0] ?? null;
     });
   },

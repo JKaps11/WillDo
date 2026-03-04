@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import type { NewUser, User, UserSettings } from '@/db/schemas/user.schema';
 import type { PatchUserSettings } from '@/lib/zod-schemas';
+import type { DbClient } from '@/db/index';
 import { DEFAULT_USER_SETTINGS, users } from '@/db/schemas/user.schema';
 import { db } from '@/db/index';
 
@@ -38,8 +39,11 @@ export const userRepository = {
     };
   },
 
-  create: async (data: NewUser): Promise<User | null> => {
-    const result = await db
+  create: async (
+    data: NewUser,
+    dbClient: DbClient = db,
+  ): Promise<User | null> => {
+    const result = await dbClient
       .insert(users)
       .values(data)
       .onConflictDoNothing()
@@ -47,8 +51,12 @@ export const userRepository = {
     return result[0] ?? null;
   },
 
-  update: async (id: string, data: Partial<NewUser>): Promise<User | null> => {
-    const result = await db
+  update: async (
+    id: string,
+    data: Partial<NewUser>,
+    dbClient: DbClient = db,
+  ): Promise<User | null> => {
+    const result = await dbClient
       .update(users)
       .set(data)
       .where(eq(users.id, id))
@@ -56,16 +64,20 @@ export const userRepository = {
     return result[0] ?? null;
   },
 
-  delete: async (id: string): Promise<User | null> => {
-    const result = await db.delete(users).where(eq(users.id, id)).returning();
+  delete: async (id: string, dbClient: DbClient = db): Promise<User | null> => {
+    const result = await dbClient
+      .delete(users)
+      .where(eq(users.id, id))
+      .returning();
     return result[0] ?? null;
   },
 
   setActiveSkill: async (
     userId: string,
     skillId: string,
+    dbClient: DbClient = db,
   ): Promise<User | null> => {
-    const result = await db
+    const result = await dbClient
       .update(users)
       .set({ activeSkillId: skillId })
       .where(eq(users.id, userId))
@@ -76,6 +88,7 @@ export const userRepository = {
   patchSettings: async (
     id: string,
     patch: PatchUserSettings,
+    dbClient: DbClient = db,
   ): Promise<User | null> => {
     // Fetch current user to merge settings
     const currentUser = await userRepository.findById(id);
@@ -99,7 +112,7 @@ export const userRepository = {
       // },
     };
 
-    const result = await db
+    const result = await dbClient
       .update(users)
       .set({ settings: mergedSettings })
       .where(eq(users.id, id))

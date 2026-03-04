@@ -1,5 +1,6 @@
 import { and, eq, gte, isNotNull, isNull, lte, or } from 'drizzle-orm';
 import type { NewTask, Task } from '@/db/schemas/task.schema';
+import type { DbClient } from '@/db/index';
 import { tasks } from '@/db/schemas/task.schema';
 import { subSkills } from '@/db/schemas/sub_skill.schema';
 import { skills } from '@/db/schemas/skill.schema';
@@ -34,8 +35,9 @@ export const taskRepository = {
 
   create: async (
     data: Omit<NewTask, 'id' | 'createdAt' | 'updatedAt'>,
+    dbClient: DbClient = db,
   ): Promise<Task | null> => {
-    const result = await db.insert(tasks).values(data).returning();
+    const result = await dbClient.insert(tasks).values(data).returning();
 
     return result[0] ?? null;
   },
@@ -44,8 +46,9 @@ export const taskRepository = {
     id: string,
     userId: string,
     data: Partial<Omit<NewTask, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>,
+    dbClient: DbClient = db,
   ): Promise<Task | null> => {
-    const result = await db
+    const result = await dbClient
       .update(tasks)
       .set(data)
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
@@ -54,8 +57,12 @@ export const taskRepository = {
     return result[0] ?? null;
   },
 
-  delete: async (id: string, userId: string): Promise<Task | null> => {
-    const result = await db
+  delete: async (
+    id: string,
+    userId: string,
+    dbClient: DbClient = db,
+  ): Promise<Task | null> => {
+    const result = await dbClient
       .delete(tasks)
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
       .returning();

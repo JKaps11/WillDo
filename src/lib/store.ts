@@ -24,9 +24,11 @@ export interface MoveRecurringModalState {
   targetDate: Date | null; // Where the task is being dropped
 }
 
+export type EvaluationTask = Pick<Task, 'id' | 'name' | 'subSkillId'>;
+
 export interface EvaluationModalState {
   isOpen: boolean;
-  task: Task | null;
+  task: EvaluationTask | null;
   occurrenceDate: Date | null;
 }
 
@@ -63,7 +65,7 @@ export type UIStoreActions = {
     targetDate: Date,
   ) => void;
   closeMoveRecurringModal: () => void;
-  openEvaluationModal: (task: Task, occurrenceDate: Date) => void;
+  openEvaluationModal: (task: EvaluationTask, occurrenceDate: Date) => void;
   closeEvaluationModal: () => void;
 };
 
@@ -192,7 +194,7 @@ export const uiStoreActions: UIStoreActions = {
       },
     }));
   },
-  openEvaluationModal: (task: Task, occurrenceDate: Date) => {
+  openEvaluationModal: (task: EvaluationTask, occurrenceDate: Date): void => {
     uiStore.setState((state) => ({
       ...state,
       evaluationModal: {
@@ -202,7 +204,7 @@ export const uiStoreActions: UIStoreActions = {
       },
     }));
   },
-  closeEvaluationModal: () => {
+  closeEvaluationModal: (): void => {
     uiStore.setState((state) => ({
       ...state,
       evaluationModal: {

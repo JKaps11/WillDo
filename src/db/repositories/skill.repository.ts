@@ -4,6 +4,7 @@ import type {
   SkillMetric,
 } from '@/db/schemas/skill_metric.schema';
 import type { NewSkill, Skill } from '@/db/schemas/skill.schema';
+import type { DbClient } from '@/db/index';
 import { skillMetrics } from '@/db/schemas/skill_metric.schema';
 import { skills } from '@/db/schemas/skill.schema';
 import { withDbError } from '@/db/withDbError';
@@ -41,9 +42,10 @@ export const skillRepository = {
 
   create: async (
     data: Omit<NewSkill, 'id' | 'createdAt' | 'updatedAt'>,
+    dbClient: DbClient = db,
   ): Promise<Skill | null> => {
     const result = await withDbError('skill.create', () =>
-      db.insert(skills).values(data).returning(),
+      dbClient.insert(skills).values(data).returning(),
     );
 
     return result[0] ?? null;
@@ -53,9 +55,10 @@ export const skillRepository = {
     id: string,
     userId: string,
     data: Partial<Omit<NewSkill, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>,
+    dbClient: DbClient = db,
   ): Promise<Skill | null> => {
     const result = await withDbError('skill.update', () =>
-      db
+      dbClient
         .update(skills)
         .set({ ...data, updatedAt: new Date() })
         .where(and(eq(skills.id, id), eq(skills.userId, userId)))
@@ -65,9 +68,13 @@ export const skillRepository = {
     return result[0] ?? null;
   },
 
-  delete: async (id: string, userId: string): Promise<Skill | null> => {
+  delete: async (
+    id: string,
+    userId: string,
+    dbClient: DbClient = db,
+  ): Promise<Skill | null> => {
     const result = await withDbError('skill.delete', () =>
-      db
+      dbClient
         .delete(skills)
         .where(and(eq(skills.id, id), eq(skills.userId, userId)))
         .returning(),
@@ -76,9 +83,13 @@ export const skillRepository = {
     return result[0] ?? null;
   },
 
-  archive: async (id: string, userId: string): Promise<Skill | null> => {
+  archive: async (
+    id: string,
+    userId: string,
+    dbClient: DbClient = db,
+  ): Promise<Skill | null> => {
     const result = await withDbError('skill.archive', () =>
-      db
+      dbClient
         .update(skills)
         .set({ archived: true, archivedAt: new Date(), updatedAt: new Date() })
         .where(and(eq(skills.id, id), eq(skills.userId, userId)))
@@ -88,9 +99,13 @@ export const skillRepository = {
     return result[0] ?? null;
   },
 
-  unarchive: async (id: string, userId: string): Promise<Skill | null> => {
+  unarchive: async (
+    id: string,
+    userId: string,
+    dbClient: DbClient = db,
+  ): Promise<Skill | null> => {
     const result = await withDbError('skill.unarchive', () =>
-      db
+      dbClient
         .update(skills)
         .set({ archived: false, archivedAt: null, updatedAt: new Date() })
         .where(and(eq(skills.id, id), eq(skills.userId, userId)))
@@ -136,9 +151,10 @@ export const skillRepository = {
 
   createMetric: async (
     data: Omit<NewSkillMetric, 'id' | 'createdAt' | 'updatedAt'>,
+    dbClient: DbClient = db,
   ): Promise<SkillMetric | null> => {
     const result = await withDbError('skillMetric.create', () =>
-      db.insert(skillMetrics).values(data).returning(),
+      dbClient.insert(skillMetrics).values(data).returning(),
     );
 
     return result[0] ?? null;
@@ -153,9 +169,10 @@ export const skillRepository = {
         'id' | 'userId' | 'subSkillId' | 'createdAt' | 'updatedAt'
       >
     >,
+    dbClient: DbClient = db,
   ): Promise<SkillMetric | null> => {
     const result = await withDbError('skillMetric.update', () =>
-      db
+      dbClient
         .update(skillMetrics)
         .set({ ...data, updatedAt: new Date() })
         .where(and(eq(skillMetrics.id, id), eq(skillMetrics.userId, userId)))
@@ -169,9 +186,10 @@ export const skillRepository = {
     id: string,
     userId: string,
     amount = 1,
+    dbClient: DbClient = db,
   ): Promise<SkillMetric | null> => {
     const metric = await withDbError('skillMetric.findForIncrement', () =>
-      db
+      dbClient
         .select()
         .from(skillMetrics)
         .where(and(eq(skillMetrics.id, id), eq(skillMetrics.userId, userId)))
@@ -182,7 +200,7 @@ export const skillRepository = {
 
     const newValue = metric[0].currentValue + amount;
     const result = await withDbError('skillMetric.increment', () =>
-      db
+      dbClient
         .update(skillMetrics)
         .set({ currentValue: newValue, updatedAt: new Date() })
         .where(and(eq(skillMetrics.id, id), eq(skillMetrics.userId, userId)))
@@ -195,9 +213,10 @@ export const skillRepository = {
   deleteMetric: async (
     id: string,
     userId: string,
+    dbClient: DbClient = db,
   ): Promise<SkillMetric | null> => {
     const result = await withDbError('skillMetric.delete', () =>
-      db
+      dbClient
         .delete(skillMetrics)
         .where(and(eq(skillMetrics.id, id), eq(skillMetrics.userId, userId)))
         .returning(),

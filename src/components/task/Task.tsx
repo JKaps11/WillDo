@@ -105,7 +105,7 @@ export function Task({ task, className, dragSource }: TaskProps): ReactNode {
       if (checked) {
         // Completing: open evaluation modal instead of mutating directly
         const occurrenceDate = task.todoListDate ?? new Date();
-        uiStoreActions.openEvaluationModal(task as TaskType, occurrenceDate);
+        uiStoreActions.openEvaluationModal(task, occurrenceDate);
       } else {
         // Uncompleting: use existing mutation with occurrenceDate for cleanup
         const occurrenceDate = task.todoListDate ?? undefined;

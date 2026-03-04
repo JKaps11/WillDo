@@ -57,8 +57,7 @@ export function TaskCard({ task }: TaskCardProps): React.ReactElement {
             id: task.id,
             name: task.name,
             subSkillId: task.subSkillId,
-            todoListDate: occurrenceDate,
-          } as Parameters<typeof uiStoreActions.openEvaluationModal>[0],
+          },
           occurrenceDate,
         );
       } else {

@@ -1,12 +1,14 @@
 import { config } from 'dotenv';
 
-import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
+import { Pool } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-serverless';
 
 config({
   path: '.env.local',
 });
 
-const sql = neon(process.env.DATABASE_URL as string);
+const pool = new Pool({ connectionString: process.env.DATABASE_URL as string });
 
-export const db = drizzle(sql);
+export const db = drizzle(pool);
+
+export type DbClient = typeof db;

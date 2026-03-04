@@ -4,6 +4,7 @@ import type {
   NewPracticeEvaluation,
   PracticeEvaluation,
 } from '@/db/schemas/practice_evaluation.schema';
+import type { DbClient } from '@/db/index';
 import { practiceEvaluations } from '@/db/schemas/practice_evaluation.schema';
 import { subSkills } from '@/db/schemas/sub_skill.schema';
 import { skills } from '@/db/schemas/skill.schema';
@@ -27,9 +28,10 @@ export interface FolderHierarchySubSkill {
 export const practiceEvaluationRepository = {
   create: async (
     data: Omit<NewPracticeEvaluation, 'id' | 'createdAt' | 'updatedAt'>,
+    dbClient: DbClient = db,
   ): Promise<PracticeEvaluation | null> => {
     const result = await withDbError('practiceEvaluation.create', () =>
-      db.insert(practiceEvaluations).values(data).returning(),
+      dbClient.insert(practiceEvaluations).values(data).returning(),
     );
     return result[0] ?? null;
   },
@@ -76,11 +78,12 @@ export const practiceEvaluationRepository = {
     taskId: string,
     occurrenceDate: Date,
     userId: string,
+    dbClient: DbClient = db,
   ): Promise<PracticeEvaluation | null> => {
     const result = await withDbError(
       'practiceEvaluation.deleteByTaskAndDate',
       () =>
-        db
+        dbClient
           .delete(practiceEvaluations)
           .where(
             and(
@@ -89,6 +92,39 @@ export const practiceEvaluationRepository = {
               eq(practiceEvaluations.userId, userId),
             ),
           )
+          .returning(),
+    );
+    return result[0] ?? null;
+  },
+
+  deleteLatestByTaskId: async (
+    taskId: string,
+    userId: string,
+    dbClient: DbClient = db,
+  ): Promise<PracticeEvaluation | null> => {
+    const latest = await withDbError(
+      'practiceEvaluation.findLatestByTaskId',
+      () =>
+        db
+          .select()
+          .from(practiceEvaluations)
+          .where(
+            and(
+              eq(practiceEvaluations.taskId, taskId),
+              eq(practiceEvaluations.userId, userId),
+            ),
+          )
+          .orderBy(desc(practiceEvaluations.completedAt))
+          .limit(1),
+    );
+    if (!latest[0]) return null;
+
+    const result = await withDbError(
+      'practiceEvaluation.deleteLatestByTaskId',
+      () =>
+        dbClient
+          .delete(practiceEvaluations)
+          .where(eq(practiceEvaluations.id, latest[0].id))
           .returning(),
     );
     return result[0] ?? null;
