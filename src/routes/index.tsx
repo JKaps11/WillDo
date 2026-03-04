@@ -49,9 +49,13 @@ export default function LandingPage(): ReactNode {
       <nav className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="size-8 rounded-lg bg-primary flex items-center justify-center">
-              <Zap className="size-5 text-primary-foreground" />
-            </div>
+            <div className="size-8 rounded-lg flex items-center justify-center">
+              <img
+            src="/android-chrome-192x192.png"
+            alt="Will Do logo"
+            className="size-8 scale-125"
+          />
+              </div>
             <span className="font-bold text-xl">Will Do</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -74,10 +78,6 @@ export default function LandingPage(): ReactNode {
       <section className="mx-auto max-w-6xl px-6 pt-20 pb-24">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
-              <Sparkles className="size-4" />
-              AI-Powered Skill Planning
-            </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
               Master any skill with{' '}
               <span className="text-primary">structured practice</span>
@@ -90,7 +90,7 @@ export default function LandingPage(): ReactNode {
             <div className="flex flex-col sm:flex-row gap-4">
               <SignInButton forceRedirectUrl="/app/dashboard">
                 <Button size="lg" className="text-lg px-8">
-                  Start Free — No Credit Card
+                  Start Free
                   <ArrowRight className="ml-2 size-5" />
                 </Button>
               </SignInButton>
@@ -100,10 +100,7 @@ export default function LandingPage(): ReactNode {
                 <CheckCircle2 className="size-4 text-green-500" />
                 Free forever
               </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-green-500" />
-                No credit card
-              </div>
+              
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="size-4 text-green-500" />
                 Setup in 2 minutes
@@ -349,7 +346,7 @@ export default function LandingPage(): ReactNode {
                   variant="secondary"
                   className="text-lg px-8 mt-4"
                 >
-                  Start Free — No Credit Card
+                  Start Free
                   <ArrowRight className="ml-2 size-5" />
                 </Button>
               </SignInButton>
