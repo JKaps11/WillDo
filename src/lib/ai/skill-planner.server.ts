@@ -48,7 +48,6 @@ Current level: ${input.currentLevel || 'Not specified'}
 ${input.additionalContext ? `Additional context: ${input.additionalContext}` : ''}`;
 
   try {
-    console.log('Generating skill plan with prompt:', userPrompt);
     const result = await generateText({
       model: openai(MODEL),
       output: Output.object({ schema: aiSkillPlanOutputSchema }),
@@ -57,7 +56,6 @@ ${input.additionalContext ? `Additional context: ${input.additionalContext}` : '
     });
 
     const plan = result.output;
-    console.log('Generated skill plan:', plan);
     const inputTokens = result.usage.inputTokens ?? 0;
     const outputTokens = result.usage.outputTokens ?? 0;
     const cost = calculateCost(inputTokens, outputTokens);
@@ -91,8 +89,6 @@ ${input.additionalContext ? `Additional context: ${input.additionalContext}` : '
   } catch (error) {
     const err =
       error instanceof Error ? error : new Error('Unknown error occurred');
-
-    console.error('Error generating skill plan:', err);
 
     // Use captured wideEvent directly (AsyncLocalStorage context may be lost after external HTTP calls)
     if (wideEvent) {

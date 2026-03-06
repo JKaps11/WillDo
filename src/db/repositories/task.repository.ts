@@ -4,6 +4,7 @@ import type { DbClient } from '@/db/index';
 import { tasks } from '@/db/schemas/task.schema';
 import { subSkills } from '@/db/schemas/sub_skill.schema';
 import { skills } from '@/db/schemas/skill.schema';
+import { withDbError } from '@/db/withDbError';
 import { db } from '@/db/index';
 
 export interface TaskWithSkillInfo extends Task {
@@ -24,11 +25,13 @@ export interface TodoListDay {
 
 export const taskRepository = {
   findById: async (id: string, userId: string): Promise<Task | null> => {
-    const result = await db
-      .select()
-      .from(tasks)
-      .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
-      .limit(1);
+    const result = await withDbError('task.findById', () =>
+      db
+        .select()
+        .from(tasks)
+        .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
+        .limit(1),
+    );
 
     return result[0] ?? null;
   },
@@ -37,7 +40,9 @@ export const taskRepository = {
     data: Omit<NewTask, 'id' | 'createdAt' | 'updatedAt'>,
     dbClient: DbClient = db,
   ): Promise<Task | null> => {
-    const result = await dbClient.insert(tasks).values(data).returning();
+    const result = await withDbError('task.create', () =>
+      dbClient.insert(tasks).values(data).returning(),
+    );
 
     return result[0] ?? null;
   },
@@ -48,11 +53,13 @@ export const taskRepository = {
     data: Partial<Omit<NewTask, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>,
     dbClient: DbClient = db,
   ): Promise<Task | null> => {
-    const result = await dbClient
-      .update(tasks)
-      .set(data)
-      .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
-      .returning();
+    const result = await withDbError('task.update', () =>
+      dbClient
+        .update(tasks)
+        .set(data)
+        .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
+        .returning(),
+    );
 
     return result[0] ?? null;
   },
@@ -62,29 +69,35 @@ export const taskRepository = {
     userId: string,
     dbClient: DbClient = db,
   ): Promise<Task | null> => {
-    const result = await dbClient
-      .delete(tasks)
-      .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
-      .returning();
+    const result = await withDbError('task.delete', () =>
+      dbClient
+        .delete(tasks)
+        .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
+        .returning(),
+    );
 
     return result[0] ?? null;
   },
 
   findUnassigned: async (userId: string): Promise<Array<Task>> => {
-    return db
-      .select()
-      .from(tasks)
-      .where(and(eq(tasks.userId, userId), isNull(tasks.todoListDate)));
+    return withDbError('task.findUnassigned', () =>
+      db
+        .select()
+        .from(tasks)
+        .where(and(eq(tasks.userId, userId), isNull(tasks.todoListDate))),
+    );
   },
 
   findBySubSkillId: async (
     subSkillId: string,
     userId: string,
   ): Promise<Array<Task>> => {
-    return db
-      .select()
-      .from(tasks)
-      .where(and(eq(tasks.subSkillId, subSkillId), eq(tasks.userId, userId)));
+    return withDbError('task.findBySubSkillId', () =>
+      db
+        .select()
+        .from(tasks)
+        .where(and(eq(tasks.subSkillId, subSkillId), eq(tasks.userId, userId))),
+    );
   },
 
   findByDateRange: async (
@@ -92,17 +105,19 @@ export const taskRepository = {
     startDate: Date,
     endDate: Date,
   ): Promise<Array<Task>> => {
-    return db
-      .select()
-      .from(tasks)
-      .where(
-        and(
-          eq(tasks.userId, userId),
-          gte(tasks.todoListDate, startDate),
-          lte(tasks.todoListDate, endDate),
-        ),
-      )
-      .orderBy(tasks.todoListDate);
+    return withDbError('task.findByDateRange', () =>
+      db
+        .select()
+        .from(tasks)
+        .where(
+          and(
+            eq(tasks.userId, userId),
+            gte(tasks.todoListDate, startDate),
+            lte(tasks.todoListDate, endDate),
+          ),
+        )
+        .orderBy(tasks.todoListDate),
+    );
   },
 
   /**
@@ -116,27 +131,29 @@ export const taskRepository = {
     startDate: Date,
     endDate: Date,
   ): Promise<Array<Task>> => {
-    return db
-      .select()
-      .from(tasks)
-      .where(
-        and(
-          eq(tasks.userId, userId),
-          or(
-            // Non-recurring tasks in range
-            and(
-              gte(tasks.todoListDate, startDate),
-              lte(tasks.todoListDate, endDate),
-            ),
-            // Recurring tasks that start before or on endDate
-            and(
-              isNotNull(tasks.recurrenceRule),
-              lte(tasks.todoListDate, endDate),
+    return withDbError('task.findForTodoList', () =>
+      db
+        .select()
+        .from(tasks)
+        .where(
+          and(
+            eq(tasks.userId, userId),
+            or(
+              // Non-recurring tasks in range
+              and(
+                gte(tasks.todoListDate, startDate),
+                lte(tasks.todoListDate, endDate),
+              ),
+              // Recurring tasks that start before or on endDate
+              and(
+                isNotNull(tasks.recurrenceRule),
+                lte(tasks.todoListDate, endDate),
+              ),
             ),
           ),
-        ),
-      )
-      .orderBy(tasks.todoListDate);
+        )
+        .orderBy(tasks.todoListDate),
+    );
   },
 
   /**
@@ -148,43 +165,45 @@ export const taskRepository = {
     startDate: Date,
     endDate: Date,
   ): Promise<Array<TaskWithOptionalSkillInfo>> => {
-    const result = await db
-      .select({
-        id: tasks.id,
-        userId: tasks.userId,
-        todoListDate: tasks.todoListDate,
-        name: tasks.name,
-        description: tasks.description,
-        priority: tasks.priority,
-        dueDate: tasks.dueDate,
-        completed: tasks.completed,
-        subSkillId: tasks.subSkillId,
-        recurrenceRule: tasks.recurrenceRule,
-        createdAt: tasks.createdAt,
-        updatedAt: tasks.updatedAt,
-        skillColor: skills.color,
-      })
-      .from(tasks)
-      .leftJoin(subSkills, eq(tasks.subSkillId, subSkills.id))
-      .leftJoin(skills, eq(subSkills.skillId, skills.id))
-      .where(
-        and(
-          eq(tasks.userId, userId),
-          or(
-            // Non-recurring tasks in range
-            and(
-              gte(tasks.todoListDate, startDate),
-              lte(tasks.todoListDate, endDate),
-            ),
-            // Recurring tasks that start before or on endDate
-            and(
-              isNotNull(tasks.recurrenceRule),
-              lte(tasks.todoListDate, endDate),
+    const result = await withDbError('task.findForTodoListWithSkillInfo', () =>
+      db
+        .select({
+          id: tasks.id,
+          userId: tasks.userId,
+          todoListDate: tasks.todoListDate,
+          name: tasks.name,
+          description: tasks.description,
+          priority: tasks.priority,
+          dueDate: tasks.dueDate,
+          completed: tasks.completed,
+          subSkillId: tasks.subSkillId,
+          recurrenceRule: tasks.recurrenceRule,
+          createdAt: tasks.createdAt,
+          updatedAt: tasks.updatedAt,
+          skillColor: skills.color,
+        })
+        .from(tasks)
+        .leftJoin(subSkills, eq(tasks.subSkillId, subSkills.id))
+        .leftJoin(skills, eq(subSkills.skillId, skills.id))
+        .where(
+          and(
+            eq(tasks.userId, userId),
+            or(
+              // Non-recurring tasks in range
+              and(
+                gte(tasks.todoListDate, startDate),
+                lte(tasks.todoListDate, endDate),
+              ),
+              // Recurring tasks that start before or on endDate
+              and(
+                isNotNull(tasks.recurrenceRule),
+                lte(tasks.todoListDate, endDate),
+              ),
             ),
           ),
-        ),
-      )
-      .orderBy(tasks.todoListDate);
+        )
+        .orderBy(tasks.todoListDate),
+    );
 
     return result;
   },
@@ -192,35 +211,37 @@ export const taskRepository = {
   findUnassignedWithSkillInfo: async (
     userId: string,
   ): Promise<Array<TaskWithSkillInfo>> => {
-    const result = await db
-      .select({
-        id: tasks.id,
-        userId: tasks.userId,
-        todoListDate: tasks.todoListDate,
-        name: tasks.name,
-        description: tasks.description,
-        priority: tasks.priority,
-        dueDate: tasks.dueDate,
-        completed: tasks.completed,
-        subSkillId: tasks.subSkillId,
-        recurrenceRule: tasks.recurrenceRule,
-        createdAt: tasks.createdAt,
-        updatedAt: tasks.updatedAt,
-        subSkillName: subSkills.name,
-        skillId: skills.id,
-        skillName: skills.name,
-        skillColor: skills.color,
-      })
-      .from(tasks)
-      .innerJoin(subSkills, eq(tasks.subSkillId, subSkills.id))
-      .innerJoin(skills, eq(subSkills.skillId, skills.id))
-      .where(
-        and(
-          eq(tasks.userId, userId),
-          isNull(tasks.todoListDate),
-          eq(tasks.completed, false),
+    const result = await withDbError('task.findUnassignedWithSkillInfo', () =>
+      db
+        .select({
+          id: tasks.id,
+          userId: tasks.userId,
+          todoListDate: tasks.todoListDate,
+          name: tasks.name,
+          description: tasks.description,
+          priority: tasks.priority,
+          dueDate: tasks.dueDate,
+          completed: tasks.completed,
+          subSkillId: tasks.subSkillId,
+          recurrenceRule: tasks.recurrenceRule,
+          createdAt: tasks.createdAt,
+          updatedAt: tasks.updatedAt,
+          subSkillName: subSkills.name,
+          skillId: skills.id,
+          skillName: skills.name,
+          skillColor: skills.color,
+        })
+        .from(tasks)
+        .innerJoin(subSkills, eq(tasks.subSkillId, subSkills.id))
+        .innerJoin(skills, eq(subSkills.skillId, skills.id))
+        .where(
+          and(
+            eq(tasks.userId, userId),
+            isNull(tasks.todoListDate),
+            eq(tasks.completed, false),
+          ),
         ),
-      );
+    );
 
     return result;
   },

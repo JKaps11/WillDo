@@ -1,4 +1,5 @@
 import { format } from 'date-fns';
+import { useMemo } from 'react';
 import { TodoListContext, useTodoListContext } from './context';
 import { TodoListDropZone } from './TodoListDropZone';
 import { sortAndFilterTasks } from './utils';
@@ -17,7 +18,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Task } from '@/components/task';
-// import { Skeleton } from '@/components/ui/skeleton';
 
 /* ---------- Root ---------- */
 
@@ -28,8 +28,13 @@ interface RootProps {
 }
 
 function Root({ children, options, baseDate }: RootProps): ReactNode {
+  const contextValue = useMemo(
+    () => ({ options, baseDate }),
+    [options, baseDate],
+  );
+
   return (
-    <TodoListContext.Provider value={{ options, baseDate }}>
+    <TodoListContext.Provider value={contextValue}>
       <div className="mx-auto w-full px-4 py-6">{children}</div>
     </TodoListContext.Provider>
   );

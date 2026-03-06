@@ -45,12 +45,8 @@ export function sortAndFilterTasks(
     const c = Number(a.completed) - Number(b.completed);
     if (c !== 0) return c;
 
-    const at = a.dueDate
-      ? new Date(a.dueDate as unknown as Date).getTime()
-      : Number.POSITIVE_INFINITY;
-    const bt = b.dueDate
-      ? new Date(b.dueDate as unknown as Date).getTime()
-      : Number.POSITIVE_INFINITY;
+    const at = a.dueDate ? a.dueDate.getTime() : Number.POSITIVE_INFINITY;
+    const bt = b.dueDate ? b.dueDate.getTime() : Number.POSITIVE_INFINITY;
     return at - bt;
   });
 

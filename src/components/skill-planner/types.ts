@@ -1,16 +1,8 @@
-import type { SkillMetric } from '@/db/schemas/skill_metric.schema';
-import type { SubSkill } from '@/db/schemas/sub_skill.schema';
 import type { Skill } from '@/db/schemas/skill.schema';
+import type { EnrichedSubSkill } from '@/lib/types';
 import type { Edge } from '@xyflow/react';
 
-export type EnrichedSubSkill = SubSkill & {
-  metrics: Array<SkillMetric>;
-  isLocked: boolean;
-};
-
-export type SkillWithSubSkills = Skill & {
-  subSkills: Array<EnrichedSubSkill>;
-};
+export type { EnrichedSubSkill, SkillWithEnrichedSubSkills } from '@/lib/types';
 
 export interface LayoutNode {
   id: string;

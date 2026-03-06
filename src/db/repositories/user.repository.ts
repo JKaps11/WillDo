@@ -3,15 +3,14 @@ import type { NewUser, User, UserSettings } from '@/db/schemas/user.schema';
 import type { PatchUserSettings } from '@/lib/zod-schemas';
 import type { DbClient } from '@/db/index';
 import { DEFAULT_USER_SETTINGS, users } from '@/db/schemas/user.schema';
+import { withDbError } from '@/db/withDbError';
 import { db } from '@/db/index';
 
 export const userRepository = {
   findById: async (id: string): Promise<User | null> => {
-    const result = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, id))
-      .limit(1);
+    const result = await withDbError('user.findById', () =>
+      db.select().from(users).where(eq(users.id, id)).limit(1),
+    );
 
     if (result.length === 0) {
       return null;
@@ -31,10 +30,6 @@ export const userRepository = {
           ...DEFAULT_USER_SETTINGS.todoList,
           ...user.settings.todoList,
         },
-        // calendar: {
-        //   ...DEFAULT_USER_SETTINGS.calendar,
-        //   ...user.settings.calendar,
-        // },
       },
     };
   },
@@ -43,11 +38,9 @@ export const userRepository = {
     data: NewUser,
     dbClient: DbClient = db,
   ): Promise<User | null> => {
-    const result = await dbClient
-      .insert(users)
-      .values(data)
-      .onConflictDoNothing()
-      .returning();
+    const result = await withDbError('user.create', () =>
+      dbClient.insert(users).values(data).onConflictDoNothing().returning(),
+    );
     return result[0] ?? null;
   },
 
@@ -56,19 +49,16 @@ export const userRepository = {
     data: Partial<NewUser>,
     dbClient: DbClient = db,
   ): Promise<User | null> => {
-    const result = await dbClient
-      .update(users)
-      .set(data)
-      .where(eq(users.id, id))
-      .returning();
+    const result = await withDbError('user.update', () =>
+      dbClient.update(users).set(data).where(eq(users.id, id)).returning(),
+    );
     return result[0] ?? null;
   },
 
   delete: async (id: string, dbClient: DbClient = db): Promise<User | null> => {
-    const result = await dbClient
-      .delete(users)
-      .where(eq(users.id, id))
-      .returning();
+    const result = await withDbError('user.delete', () =>
+      dbClient.delete(users).where(eq(users.id, id)).returning(),
+    );
     return result[0] ?? null;
   },
 
@@ -77,11 +67,13 @@ export const userRepository = {
     skillId: string,
     dbClient: DbClient = db,
   ): Promise<User | null> => {
-    const result = await dbClient
-      .update(users)
-      .set({ activeSkillId: skillId })
-      .where(eq(users.id, userId))
-      .returning();
+    const result = await withDbError('user.setActiveSkill', () =>
+      dbClient
+        .update(users)
+        .set({ activeSkillId: skillId })
+        .where(eq(users.id, userId))
+        .returning(),
+    );
     return result[0] ?? null;
   },
 
@@ -106,17 +98,15 @@ export const userRepository = {
         ...currentUser.settings.todoList,
         ...patch.todoList,
       },
-      // calendar: {
-      //   ...currentUser.settings.calendar,
-      //   ...patch.calendar,
-      // },
     };
 
-    const result = await dbClient
-      .update(users)
-      .set({ settings: mergedSettings })
-      .where(eq(users.id, id))
-      .returning();
+    const result = await withDbError('user.patchSettings', () =>
+      dbClient
+        .update(users)
+        .set({ settings: mergedSettings })
+        .where(eq(users.id, id))
+        .returning(),
+    );
     return result[0] ?? null;
   },
 };

@@ -8,6 +8,7 @@ import { subSkills } from '@/db/schemas/sub_skill.schema';
 import { skills } from '@/db/schemas/skill.schema';
 import { skillMetrics } from '@/db/schemas/skill_metric.schema';
 import { addWide } from '@/lib/logging/wideEventStore.server';
+import { withDbError } from '@/db/withDbError';
 import { startOfDay } from '@/lib/dates';
 import { db } from '@/db/index';
 
@@ -64,38 +65,42 @@ export const dashboardRouter = {
         tomorrow.setDate(tomorrow.getDate() + 1);
 
         // Fetch tasks with skill and subSkill info
-        const taskRows = await db
-          .select({
-            id: tasks.id,
-            name: tasks.name,
-            description: tasks.description,
-            priority: tasks.priority,
-            completed: tasks.completed,
-            recurrenceRule: tasks.recurrenceRule,
-            subSkillId: tasks.subSkillId,
-            skillName: skills.name,
-            skillColor: skills.color,
-            subSkillName: subSkills.name,
-          })
-          .from(tasks)
-          .innerJoin(subSkills, eq(tasks.subSkillId, subSkills.id))
-          .innerJoin(skills, eq(subSkills.skillId, skills.id))
-          .where(
-            and(
-              eq(tasks.userId, ctx.userId),
-              gte(tasks.todoListDate, today),
-              lte(tasks.todoListDate, tomorrow),
+        const taskRows = await withDbError('dashboard.getTodaysTasks', () =>
+          db
+            .select({
+              id: tasks.id,
+              name: tasks.name,
+              description: tasks.description,
+              priority: tasks.priority,
+              completed: tasks.completed,
+              recurrenceRule: tasks.recurrenceRule,
+              subSkillId: tasks.subSkillId,
+              skillName: skills.name,
+              skillColor: skills.color,
+              subSkillName: subSkills.name,
+            })
+            .from(tasks)
+            .innerJoin(subSkills, eq(tasks.subSkillId, subSkills.id))
+            .innerJoin(skills, eq(subSkills.skillId, skills.id))
+            .where(
+              and(
+                eq(tasks.userId, ctx.userId),
+                gte(tasks.todoListDate, today),
+                lte(tasks.todoListDate, tomorrow),
+              ),
             ),
-          );
+        );
 
         // Fetch metrics for all subSkills in one query
         const subSkillIds = [...new Set(taskRows.map((t) => t.subSkillId))];
         const metricsRows =
           subSkillIds.length > 0
-            ? await db
-                .select()
-                .from(skillMetrics)
-                .where(eq(skillMetrics.userId, ctx.userId))
+            ? await withDbError('dashboard.getTodaysMetrics', () =>
+                db
+                  .select()
+                  .from(skillMetrics)
+                  .where(eq(skillMetrics.userId, ctx.userId)),
+              )
             : [];
 
         // Group metrics by subSkillId

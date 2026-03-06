@@ -1,9 +1,6 @@
 import { EmptySkillsState } from './EmptySkillsState';
 import { SkillCard } from './SkillCard';
-import type { SubSkill } from '@/db/schemas/sub_skill.schema';
-import type { Skill } from '@/db/schemas/skill.schema';
-
-type SkillWithSubSkills = Skill & { subSkills: Array<SubSkill> };
+import type { SkillWithSubSkills } from '@/lib/types';
 
 interface SkillsHubProps {
   skills: Array<SkillWithSubSkills>;

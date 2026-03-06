@@ -22,22 +22,30 @@ export const skillRouter = {
   list: protectedProcedure
     .input(listSkillsSchema)
     .query(async ({ ctx, input }) => {
-      addWide({ include_archived: input.includeArchived ?? false });
-      const skills = await skillRepository.findAll(
-        ctx.userId,
-        input.includeArchived ?? false,
-      );
-      addWide({ skills_count: skills.length });
+      try {
+        addWide({ include_archived: input.includeArchived ?? false });
+        const skills = await skillRepository.findAll(
+          ctx.userId,
+          input.includeArchived ?? false,
+        );
+        addWide({ skills_count: skills.length });
 
-      return Promise.all(
-        skills.map(async (skill) => {
-          const subSkills = await subSkillRepository.findBySkillId(
-            skill.id,
-            ctx.userId,
-          );
-          return { ...skill, subSkills };
-        }),
-      );
+        return Promise.all(
+          skills.map(async (skill) => {
+            const subSkills = await subSkillRepository.findBySkillId(
+              skill.id,
+              ctx.userId,
+            );
+            return { ...skill, subSkills };
+          }),
+        );
+      } catch (error) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to fetch skills list',
+          cause: error,
+        });
+      }
     }),
 
   get: protectedProcedure

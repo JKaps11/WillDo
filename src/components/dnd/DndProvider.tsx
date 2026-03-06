@@ -33,14 +33,20 @@ export function DndProvider({
 }: DndProviderProps): ReactNode {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const [activeTask, setActiveTask] = useState<Task | TaskWithSkillInfo | null>(
-    null,
-  );
   const [isMounted, setIsMounted] = useState(false);
-  const [showRecurringModal, setShowRecurringModal] = useState(false);
-  const [pendingDrop, setPendingDrop] = useState<PendingDrop | null>(null);
-  const [dragSource, setDragSource] = useState<string | null>(null);
-  const [shouldReopenAssignSheet, setShouldReopenAssignSheet] = useState(false);
+  const [dragState, setDragState] = useState<{
+    activeTask: Task | TaskWithSkillInfo | null;
+    dragSource: string | null;
+  }>({ activeTask: null, dragSource: null });
+  const [dropState, setDropState] = useState<{
+    pendingDrop: PendingDrop | null;
+    showRecurringModal: boolean;
+    shouldReopenAssignSheet: boolean;
+  }>({
+    pendingDrop: null,
+    showRecurringModal: false,
+    shouldReopenAssignSheet: false,
+  });
 
   // Only render DndContext on client to avoid SSR issues with dnd-kit accessing DOM
   useEffect(() => {
@@ -48,16 +54,16 @@ export function DndProvider({
   }, []);
 
   const clearReopenFlag = useCallback(() => {
-    setShouldReopenAssignSheet(false);
+    setDropState((prev) => ({ ...prev, shouldReopenAssignSheet: false }));
   }, []);
 
   const dndStateValue = useMemo<DndContextValue>(
     () => ({
-      isDragging: activeTask !== null,
-      shouldReopenAssignSheet,
+      isDragging: dragState.activeTask !== null,
+      shouldReopenAssignSheet: dropState.shouldReopenAssignSheet,
       clearReopenFlag,
     }),
-    [activeTask, shouldReopenAssignSheet, clearReopenFlag],
+    [dragState.activeTask, dropState.shouldReopenAssignSheet, clearReopenFlag],
   );
 
   const updateTaskMutation = useMutation(
@@ -86,8 +92,7 @@ export function DndProvider({
       | undefined;
     const source = event.active.data.current?.source as string | undefined;
     if (task) {
-      setActiveTask(task);
-      setDragSource(source ?? null);
+      setDragState({ activeTask: task, dragSource: source ?? null });
       onDragStartCallback?.();
     }
   }
@@ -132,7 +137,7 @@ export function DndProvider({
 
     // Use activeTask from state (saved during drag start) instead of event.active.data.current
     // because the source component may have unmounted (e.g., when AssignTasksSheet closes)
-    const task = activeTask;
+    const task = dragState.activeTask;
     const targetType = over?.data.current?.type as string | undefined;
 
     // Track if this was a valid drop to determine sheet behavior
@@ -178,39 +183,45 @@ export function DndProvider({
         } else {
           // Scenario: Moving a non-recurring task or assigning an unassigned task
           // Show the schedule modal to allow date editing and recurrence setup
-          setPendingDrop({ task, targetDate });
-          setShowRecurringModal(true);
+          setDropState((prev) => ({
+            ...prev,
+            pendingDrop: { task, targetDate },
+            showRecurringModal: true,
+          }));
         }
       }
     }
 
     // Only reopen sheet if drop was invalid and came from assign sheet
-    if (!wasValidDrop && dragSource === 'assign-sheet') {
-      setShouldReopenAssignSheet(true);
+    if (!wasValidDrop && dragState.dragSource === 'assign-sheet') {
+      setDropState((prev) => ({ ...prev, shouldReopenAssignSheet: true }));
     }
 
-    setActiveTask(null);
-    setDragSource(null);
+    setDragState({ activeTask: null, dragSource: null });
   }
 
   /** Handle recurring modal confirmation */
   const handleRecurringConfirm = useCallback(
     (options: RecurringOptions) => {
-      if (pendingDrop) {
-        executeMoveTask(pendingDrop.task as Task, options);
+      if (dropState.pendingDrop) {
+        executeMoveTask(dropState.pendingDrop.task as Task, options);
       }
-      setPendingDrop(null);
-      setShowRecurringModal(false);
+      setDropState((prev) => ({
+        ...prev,
+        pendingDrop: null,
+        showRecurringModal: false,
+      }));
     },
-    [pendingDrop, executeMoveTask],
+    [dropState.pendingDrop, executeMoveTask],
   );
 
   /** Handle recurring modal cancel */
   const handleRecurringModalChange = useCallback((open: boolean) => {
-    if (!open) {
-      setPendingDrop(null);
-    }
-    setShowRecurringModal(open);
+    setDropState((prev) => ({
+      ...prev,
+      pendingDrop: open ? prev.pendingDrop : null,
+      showRecurringModal: open,
+    }));
   }, []);
 
   // During SSR, render children without DndContext to avoid DOM access errors
@@ -231,21 +242,23 @@ export function DndProvider({
       >
         {children}
         <DragOverlay dropAnimation={null} className="z-[100]">
-          {activeTask && (
+          {dragState.activeTask && (
             <div className="relative flex items-center gap-3 rounded-md border bg-background px-3 py-2 shadow-lg">
-              {'skillColor' in activeTask && activeTask.skillColor && (
-                <div
-                  className="absolute left-0 top-0 h-full w-1 rounded-l-md"
-                  style={{ backgroundColor: activeTask.skillColor }}
-                />
-              )}
+              {'skillColor' in dragState.activeTask &&
+                dragState.activeTask.skillColor && (
+                  <div
+                    className="absolute left-0 top-0 h-full w-1 rounded-l-md"
+                    style={{ backgroundColor: dragState.activeTask.skillColor }}
+                  />
+                )}
               <span
                 className={cn(
                   'truncate',
-                  activeTask.completed && 'text-muted-foreground line-through',
+                  dragState.activeTask.completed &&
+                    'text-muted-foreground line-through',
                 )}
               >
-                {activeTask.name}
+                {dragState.activeTask.name}
               </span>
             </div>
           )}
@@ -256,12 +269,12 @@ export function DndProvider({
       </DndContext>
 
       {/* Recurring Modal for skill-linked tasks */}
-      {pendingDrop && (
+      {dropState.pendingDrop && (
         <RecurringModal
-          open={showRecurringModal}
+          open={dropState.showRecurringModal}
           onOpenChange={handleRecurringModalChange}
-          task={pendingDrop.task as Task}
-          targetDate={pendingDrop.targetDate}
+          task={dropState.pendingDrop.task as Task}
+          targetDate={dropState.pendingDrop.targetDate}
           onConfirm={handleRecurringConfirm}
         />
       )}
