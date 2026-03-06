@@ -1,4 +1,2 @@
-/**
- * Contact information for support
- */
-export const SUPPORT_EMAIL = 'support@example.com';
+// Re-export from shared package — single source of truth
+export { SUPPORT_EMAIL } from '@willdo/shared';
