@@ -125,6 +125,7 @@ export const bulkUpdateSkillMetricsSchema = z.object({
 export const generateSkillPlanSchema = z.object({
   skillName: z.string().min(1).max(255),
   goal: z.string().min(1),
+  currentLevel: z.string().optional(),
   additionalContext: z.string().optional(),
 });
 
@@ -165,7 +166,7 @@ export const aiSkillPlanOutputSchema = z.object({
           ),
       }),
     )
-    .describe('Array of 3-7 sub-skills in learning order'),
+    .describe('Array of 6-15 sub-skills in learning order'),
 });
 
 export const skillPlanResultSchema = aiSkillPlanOutputSchema.extend({

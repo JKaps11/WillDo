@@ -1,5 +1,6 @@
 import { Output, generateText } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
+import { MODEL, SYSTEM_PROMPT, calculateCost } from './prompts';
 import type { z } from 'zod';
 
 import type {
@@ -20,40 +21,6 @@ export type GeneratePlanResponse =
   | { success: true; plan: GeneratedPlan }
   | { success: false; error: string };
 
-/* ---------- Cost calculation ---------- */
-
-const MODEL = 'gpt-4.1-nano';
-const INPUT_COST_PER_1K = 0.0001;
-const OUTPUT_COST_PER_1K = 0.0004;
-
-function calculateCost(inputTokens: number, outputTokens: number): string {
-  const cost =
-    (inputTokens / 1000) * INPUT_COST_PER_1K +
-    (outputTokens / 1000) * OUTPUT_COST_PER_1K;
-  return cost.toFixed(6);
-}
-
-/* ---------- System prompt ---------- */
-
-const SYSTEM_PROMPT = `You are an expert learning path designer. Your job is to create structured, progressive learning plans for skills.
-
-Rules:
-1. Create 3-7 sub-skills that form a logical learning progression
-2. Each sub-skill should have 1-3 measurable metrics
-3. Sub-skills should build on each other - use parentIndex to show dependencies
-4. The first sub-skill(s) should have parentIndex: null (starting points)
-5. Later sub-skills should reference earlier ones as prerequisites
-6. Be specific to the skill domain - avoid generic placeholders
-7. Metrics should be concrete and achievable (e.g., "Complete 5 exercises" not "Master the concept")
-8. Descriptions should explain what the learner will achieve
-
-Example structure:
-- Sub-skill 0 (parentIndex: null): Foundation skill
-- Sub-skill 1 (parentIndex: 0): Builds on foundation
-- Sub-skill 2 (parentIndex: 1): Builds on skill 1
-- Sub-skill 3 (parentIndex: 1): Alternative path from skill 1
-- Sub-skill 4 (parentIndex: 2): Advanced, requires skill 2`;
-
 /* ---------- Main function ---------- */
 
 export async function generateSkillPlan(
@@ -67,6 +34,7 @@ export async function generateSkillPlan(
     ai_operation: 'generate_skill_plan',
     skill_name: input.skillName,
     goal_length: input.goal.length,
+    has_current_level: !!input.currentLevel,
     has_context: !!input.additionalContext,
   });
 
@@ -74,12 +42,10 @@ export async function generateSkillPlan(
     apiKey: process.env.OPENAI_API_KEY,
   });
 
-  const userPrompt = `Create a learning plan for the skill: "${input.skillName}"
-
+  const userPrompt = `Skill: "${input.skillName}"
 Goal: ${input.goal}
-${input.additionalContext ? `\nAdditional context: ${input.additionalContext}` : ''}
-
-Generate a structured plan with progressive sub-skills and measurable metrics.`;
+Current level: ${input.currentLevel || 'Not specified'}
+${input.additionalContext ? `Additional context: ${input.additionalContext}` : ''}`;
 
   try {
     const result = await generateText({

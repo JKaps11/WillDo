@@ -16,7 +16,9 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:pull": "drizzle-kit pull",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "test:ai": "bun run scripts/test-ai-plans.ts",
+    "view:ai": "bun run scripts/view-ai-plans.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.12",

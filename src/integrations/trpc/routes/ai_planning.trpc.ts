@@ -13,12 +13,12 @@ export const aiPlanningRouter = {
   generateSkillPlan: protectedProcedure
     .input(generateSkillPlanSchema)
     .mutation(async ({ ctx, input }): Promise<SkillPlanResult> => {
-      const { skillName, goal, additionalContext } = input;
+      const { skillName, goal, currentLevel, additionalContext } = input;
       addWide({ skill_name: skillName, goal_length: goal.length });
 
       // Try AI generation
       const result = await generateSkillPlan(
-        { skillName, goal, additionalContext },
+        { skillName, goal, currentLevel, additionalContext },
         ctx.userId,
       );
 
