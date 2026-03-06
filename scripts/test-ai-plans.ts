@@ -139,7 +139,8 @@ function buildUserPrompt(tc: TestCase): string {
   return `Skill: "${tc.skillName}"
 Goal: ${tc.goal}
 Current level: ${tc.currentLevel || 'Not specified'}
-${tc.additionalContext ? `Additional context: ${tc.additionalContext}` : ''}`;
+${tc.additionalContext ? `Additional context: ${tc.additionalContext}` : ''}
+Effort level: ${tc.effort}`;
 }
 
 function slugify(s: string): string {

@@ -1,6 +1,6 @@
 /* ---------- AI Model & Cost Config ---------- */
 
-export const MODEL = 'gpt-4.1-nano';
+export const MODEL = 'gpt-4.1';
 
 // per 1K tokens
 const MODEL_PRICING: Record<string, { input: number; output: number }> = {
@@ -38,9 +38,13 @@ Follow these steps in order:
 1. GOAL ANALYSIS: What does achieving this goal look like concretely? What can someone who reached this goal actually do?
 2. CURRENT STATE: What can the learner already do based on their stated level? What is the gap between where they are and the goal?
 3. MILESTONES: Identify 3-5 major milestones between the current state and the goal. These are the big checkpoints.
-4. DECOMPOSITION: Break each milestone into 1-3 sub-skills. Aim for 6-15 sub-skills total. Each should be something a learner can practice in days or weeks, not months.
-5. DEPENDENCIES: Wire parent→child relationships. Root nodes (parentIndex: null) are starting points. Every other node must reference a prerequisite by index.
-6. METRICS: Add 1-3 concrete, countable metrics per sub-skill. Use specific targets (e.g., "Complete 10 exercises", "Record 5 sessions") not vague ones ("Understand basics").
+4. DECOMPOSITION: Break each milestone into 1-3 sub-skills. Each should be something a learner can practice in days or weeks, not months. Scale sub-skill count to the detail provided in the input:
+   - Brief/vague inputs (just a skill name and short goal) → 6-8 sub-skills, keep scope tight to stated goal only
+   - Moderate inputs (some context or current level) → 8-11 sub-skills, include parallel tracks where natural
+   - Detailed inputs (rich context, specific current level, constraints) → 10-15 sub-skills, comprehensive coverage with rich branching
+   - If an explicit "Effort level" is provided, use that instead of inferring
+5. DEPENDENCIES: Wire parent→child relationships. Root nodes (parentIndex: null) are starting points. Every other node must reference a prerequisite by index. Prefer tree structures over linear chains. Real learning has parallel tracks — identify sub-skills that can be practiced concurrently and give them the same parent.
+6. METRICS: Add 1-3 concrete, countable metrics per sub-skill. Every metric MUST have a non-null unit. Targets should reflect realistic practice volumes (e.g., a beginner guitarist practices ~30 min/day). Avoid round-number padding — if 3 is the right target, don't say 5.
 
 ## Self-Verification (answer these before outputting)
 
@@ -64,8 +68,9 @@ Follow these steps in order:
 - Would a practitioner in this domain agree this is a reasonable learning path?
 
 ## Rules
-- 6-15 sub-skills total
+- Sub-skill count must match input detail level (brief: 6-8, moderate: 8-11, detailed: 10-15)
 - Each sub-skill: name, description, 1-3 metrics, parentIndex
 - parentIndex: null for root nodes (starting points), otherwise the 0-based index of the prerequisite sub-skill
 - Be domain-specific — no generic filler sub-skills
-- Metrics must be countable with clear numeric targets`;
+- Metrics must be countable with clear numeric targets and non-null units
+- If currentLevel is provided, the first sub-skill(s) must build directly on what the learner already knows — never repeat skills they've stated they have`;
