@@ -2,6 +2,7 @@
   "name": "will-do",
   "private": true,
   "type": "module",
+  "workspaces": ["packages/*", "mobile"],
   "scripts": {
     "dev": "NODE_OPTIONS='--import ./instrument.server.mjs' vite dev --port 3000",
     "build": "vite build && mkdir -p dist/server && cp instrument.server.mjs dist/server/",
@@ -27,6 +28,7 @@
     "@clerk/tanstack-react-start": "^0.27.11",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@neondatabase/serverless": "^1.0.0",
     "@netlify/vite-plugin-tanstack-start": "^1.2.4",
     "@sentry/tanstackstart-react": "^10.32.0",
