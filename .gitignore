@@ -17,5 +17,8 @@ tests/.auth/
 test-results/
 playwright-report/
 
+# AI plan test results
+scripts/ai-plan-results/
+
 # Claude Code
 .claude/plans/

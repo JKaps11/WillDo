@@ -31,6 +31,7 @@ export function AIPlanning({
   onPlanGenerated,
   existingPlan,
 }: AIPlanningProps): React.ReactElement {
+  const [currentLevel, setCurrentLevel] = useState('');
   const [additionalContext, setAdditionalContext] = useState('');
   const [aiError, setAiError] = useState<string | null>(null);
   const trpc = useTRPC();
@@ -56,6 +57,7 @@ export function AIPlanning({
     generateMutation.mutate({
       skillName: skillInfo.name,
       goal: skillInfo.goal || `Learn ${skillInfo.name}`,
+      currentLevel: currentLevel || undefined,
       additionalContext: additionalContext || undefined,
     });
   };
@@ -102,6 +104,18 @@ export function AIPlanning({
               <dd>{skillInfo.goal || 'Not set'}</dd>
             </div>
           </dl>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="currentLevel">Where are you now?</Label>
+          <textarea
+            id="currentLevel"
+            className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+            rows={3}
+            placeholder="e.g. I've been playing acoustic guitar for 6 months. I can play basic open chords (G, C, D, Em) and switch between them slowly, but I struggle with barre chords and strumming patterns..."
+            value={currentLevel}
+            onChange={(e) => setCurrentLevel(e.target.value)}
+          />
         </div>
 
         <div className="space-y-2">
