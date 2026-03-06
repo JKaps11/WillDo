@@ -1,5 +1,5 @@
 import { CalendarClock, CalendarIcon, Repeat } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { format } from 'date-fns';
 
 import { RecurrenceEndSelector } from './RecurrenceEndSelector';
@@ -51,28 +51,21 @@ const DEFAULT_RECURRENCE_RULE: RecurrenceRule = {
   endType: 'never',
 };
 
-export function RecurringModal({
-  open,
-  onOpenChange,
-  task,
-  targetDate,
-  onConfirm,
-}: RecurringModalProps): React.ReactElement {
-  const [isRecurring, setIsRecurring] = useState<boolean>(false);
-  const [selectedDate, setSelectedDate] = useState<Date>(targetDate);
-  const [recurrenceRule, setRecurrenceRule] = useState<RecurrenceRule>(
-    DEFAULT_RECURRENCE_RULE,
-  );
-  const [endType, setEndType] = useState<RecurrenceEndType>('never');
-  const [endValue, setEndValue] = useState<number | undefined>(undefined);
+interface RecurringFormState {
+  isRecurring: boolean;
+  selectedDate: Date;
+  recurrenceRule: RecurrenceRule;
+  endType: RecurrenceEndType;
+  endValue: number | undefined;
+}
 
-  // Pre-populate form when modal opens with existing recurrence rule
-  useEffect(() => {
-    if (open && task.recurrenceRule) {
-      const rule = task.recurrenceRule;
-      setIsRecurring(rule.isRecurring);
-      setSelectedDate(targetDate);
-      setRecurrenceRule({
+function buildInitialState(task: Task, targetDate: Date): RecurringFormState {
+  if (task.recurrenceRule) {
+    const rule = task.recurrenceRule;
+    return {
+      isRecurring: rule.isRecurring,
+      selectedDate: targetDate,
+      recurrenceRule: {
         isRecurring: rule.isRecurring,
         frequency: rule.frequency,
         interval: rule.interval,
@@ -80,41 +73,49 @@ export function RecurringModal({
         endType: rule.endType,
         endAfterCount: rule.endAfterCount,
         endOnDate: rule.endOnDate,
-      });
-      setEndType(rule.endType);
-      setEndValue(rule.endAfterCount);
-    } else if (open) {
-      // Reset to defaults when opening without existing rule
-      setIsRecurring(false);
-      setSelectedDate(targetDate);
-      setRecurrenceRule(DEFAULT_RECURRENCE_RULE);
-      setEndType('never');
-      setEndValue(undefined);
-    }
-  }, [open, task.recurrenceRule, targetDate]);
+      },
+      endType: rule.endType,
+      endValue: rule.endAfterCount,
+    };
+  }
+  return {
+    isRecurring: false,
+    selectedDate: targetDate,
+    recurrenceRule: DEFAULT_RECURRENCE_RULE,
+    endType: 'never',
+    endValue: undefined,
+  };
+}
+
+export function RecurringModal({
+  open,
+  onOpenChange,
+  task,
+  targetDate,
+  onConfirm,
+}: RecurringModalProps): React.ReactElement {
+  // Component unmounts when parent guard (pendingDrop &&) is falsy,
+  // so state reinitializes from props on each mount — no useEffect needed.
+  const [formState, setFormState] = useState<RecurringFormState>(() =>
+    buildInitialState(task, targetDate),
+  );
 
   const handleConfirm = (): void => {
-    if (isRecurring) {
+    if (formState.isRecurring) {
       onConfirm({
         isRecurring: true,
-        selectedDate,
-        recurrenceRule,
-        recurrenceEndType: endType,
-        recurrenceEndValue: endValue,
+        selectedDate: formState.selectedDate,
+        recurrenceRule: formState.recurrenceRule,
+        recurrenceEndType: formState.endType,
+        recurrenceEndValue: formState.endValue,
       });
     } else {
-      onConfirm({ isRecurring: false, selectedDate });
+      onConfirm({ isRecurring: false, selectedDate: formState.selectedDate });
     }
     onOpenChange(false);
   };
 
   const handleCancel = (): void => {
-    // Reset state
-    setIsRecurring(false);
-    setSelectedDate(targetDate);
-    setRecurrenceRule(DEFAULT_RECURRENCE_RULE);
-    setEndType('never');
-    setEndValue(undefined);
     onOpenChange(false);
   };
 
@@ -148,15 +149,15 @@ export function RecurringModal({
                 }
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {format(selectedDate, 'EEEE, MMM d, yyyy')}
+                {format(formState.selectedDate, 'EEEE, MMM d, yyyy')}
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={selectedDate}
+                  selected={formState.selectedDate}
                   onSelect={(date) => {
                     if (date) {
-                      setSelectedDate(date);
+                      setFormState((prev) => ({ ...prev, selectedDate: date }));
                     }
                   }}
                 />
@@ -177,25 +178,33 @@ export function RecurringModal({
             </Label>
             <Switch
               id="recurring-toggle"
-              checked={isRecurring}
-              onCheckedChange={setIsRecurring}
+              checked={formState.isRecurring}
+              onCheckedChange={(checked) =>
+                setFormState((prev) => ({ ...prev, isRecurring: checked }))
+              }
               data-testid="recurring-toggle"
             />
           </div>
 
-          {isRecurring && (
+          {formState.isRecurring && (
             <>
               <Separator />
               <RecurrenceSelector
-                value={recurrenceRule}
-                onChange={setRecurrenceRule}
+                value={formState.recurrenceRule}
+                onChange={(rule) =>
+                  setFormState((prev) => ({ ...prev, recurrenceRule: rule }))
+                }
               />
               <Separator />
               <RecurrenceEndSelector
-                endType={endType}
-                endValue={endValue}
-                onEndTypeChange={setEndType}
-                onEndValueChange={setEndValue}
+                endType={formState.endType}
+                endValue={formState.endValue}
+                onEndTypeChange={(endType) =>
+                  setFormState((prev) => ({ ...prev, endType }))
+                }
+                onEndValueChange={(endValue) =>
+                  setFormState((prev) => ({ ...prev, endValue }))
+                }
               />
             </>
           )}
@@ -206,7 +215,7 @@ export function RecurringModal({
             Cancel
           </Button>
           <Button onClick={handleConfirm}>
-            {isRecurring ? 'Schedule Recurring' : 'Save'}
+            {formState.isRecurring ? 'Schedule Recurring' : 'Save'}
           </Button>
         </DialogFooter>
       </DialogContent>

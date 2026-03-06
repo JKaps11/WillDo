@@ -22,28 +22,36 @@ export const subSkillRouter = {
   list: protectedProcedure
     .input(listSubSkillsSchema)
     .query(async ({ ctx, input }) => {
-      addWide({ skill_id: input.skillId });
-      const subSkills = await subSkillRepository.findBySkillId(
-        input.skillId,
-        ctx.userId,
-      );
-      addWide({ sub_skills_count: subSkills.length });
+      try {
+        addWide({ skill_id: input.skillId });
+        const subSkills = await subSkillRepository.findBySkillId(
+          input.skillId,
+          ctx.userId,
+        );
+        addWide({ sub_skills_count: subSkills.length });
 
-      const enriched = await Promise.all(
-        subSkills.map(async (subSkill) => {
-          const metrics = await skillRepository.findMetricsBySubSkillId(
-            subSkill.id,
-            ctx.userId,
-          );
-          const isLocked = await subSkillRepository.isLocked(
-            subSkill.id,
-            ctx.userId,
-          );
-          return { ...subSkill, metrics, isLocked };
-        }),
-      );
+        const enriched = await Promise.all(
+          subSkills.map(async (subSkill) => {
+            const metrics = await skillRepository.findMetricsBySubSkillId(
+              subSkill.id,
+              ctx.userId,
+            );
+            const isLocked = await subSkillRepository.isLocked(
+              subSkill.id,
+              ctx.userId,
+            );
+            return { ...subSkill, metrics, isLocked };
+          }),
+        );
 
-      return enriched;
+        return enriched;
+      } catch (error) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to fetch sub-skills list',
+          cause: error,
+        });
+      }
     }),
 
   get: protectedProcedure

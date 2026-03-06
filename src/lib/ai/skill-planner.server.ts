@@ -82,7 +82,6 @@ ${input.additionalContext ? `\nAdditional context: ${input.additionalContext}` :
 Generate a structured plan with progressive sub-skills and measurable metrics.`;
 
   try {
-    console.log('Generating skill plan with prompt:', userPrompt);
     const result = await generateText({
       model: openai(MODEL),
       output: Output.object({ schema: aiSkillPlanOutputSchema }),
@@ -91,7 +90,6 @@ Generate a structured plan with progressive sub-skills and measurable metrics.`;
     });
 
     const plan = result.output;
-    console.log('Generated skill plan:', plan);
     const inputTokens = result.usage.inputTokens ?? 0;
     const outputTokens = result.usage.outputTokens ?? 0;
     const cost = calculateCost(inputTokens, outputTokens);
@@ -125,8 +123,6 @@ Generate a structured plan with progressive sub-skills and measurable metrics.`;
   } catch (error) {
     const err =
       error instanceof Error ? error : new Error('Unknown error occurred');
-
-    console.error('Error generating skill plan:', err);
 
     // Use captured wideEvent directly (AsyncLocalStorage context may be lost after external HTTP calls)
     if (wideEvent) {

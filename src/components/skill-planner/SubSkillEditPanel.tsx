@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { StageAdvancer } from './StageAdvancer';
 import { STAGE_LABELS } from './constants';
-import type { EnrichedSubSkill, SkillWithSubSkills } from './types';
+import type { EnrichedSubSkill, SkillWithEnrichedSubSkills } from './types';
 import { MetricsSummary } from '@/components/skills-hub/MetricsSummary';
 import { Separator } from '@/components/ui/separator';
 import { useTRPC } from '@/integrations/trpc/react';
@@ -47,13 +47,14 @@ export function SubSkillEditPanel({
           queryKey: [['skill', 'get'], { input: { id: subSkill.skillId } }],
         });
 
-        const previousSkill = queryClient.getQueryData<SkillWithSubSkills>([
-          ['skill', 'get'],
-          { input: { id: subSkill.skillId }, type: 'query' },
-        ]);
+        const previousSkill =
+          queryClient.getQueryData<SkillWithEnrichedSubSkills>([
+            ['skill', 'get'],
+            { input: { id: subSkill.skillId }, type: 'query' },
+          ]);
 
         if (previousSkill) {
-          queryClient.setQueryData<SkillWithSubSkills>(
+          queryClient.setQueryData<SkillWithEnrichedSubSkills>(
             [
               ['skill', 'get'],
               { input: { id: subSkill.skillId }, type: 'query' },

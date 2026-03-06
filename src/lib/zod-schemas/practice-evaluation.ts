@@ -18,7 +18,7 @@ export const createPracticeEvaluationSchema = z.object({
   subSkillId: z.uuid(),
   skillId: z.uuid(),
   occurrenceDate: z.date(),
-  title: z.string().min(1),
+  title: z.string().min(1).max(200),
   wentWell: nonEmptyStringArray,
   struggled: nonEmptyStringArray,
   understandBetter: nonEmptyStringArray,

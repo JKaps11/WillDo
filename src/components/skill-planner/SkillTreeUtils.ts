@@ -2,15 +2,20 @@ import {
   HORIZONTAL_GAP,
   NODE_HEIGHT,
   NODE_WIDTH,
+  SUBSKILL_NODE_PREFIX,
   VERTICAL_GAP,
 } from './constants';
-import type { EnrichedSubSkill, LayoutNode, SkillWithSubSkills } from './types';
+import type {
+  EnrichedSubSkill,
+  LayoutNode,
+  SkillWithEnrichedSubSkills,
+} from './types';
 import type { Edge, Node } from '@xyflow/react';
 import type { SkillRootNodeData } from './nodes/SkillRootNode';
 import type { SubSkillNodeData } from './nodes/SubSkillNode';
 import type { Skill } from '@/db/schemas/skill.schema';
 
-function buildLayoutTree(skill: SkillWithSubSkills): LayoutNode {
+function buildLayoutTree(skill: SkillWithEnrichedSubSkills): LayoutNode {
   const childrenMap: Map<string | null, Array<EnrichedSubSkill>> = new Map();
 
   skill.subSkills.forEach((ss: EnrichedSubSkill) => {
@@ -27,7 +32,7 @@ function buildLayoutTree(skill: SkillWithSubSkills): LayoutNode {
     ).map((child: EnrichedSubSkill) => buildSubSkillNode(child));
 
     return {
-      id: `subskill-${subSkill.id}`,
+      id: `${SUBSKILL_NODE_PREFIX}${subSkill.id}`,
       type: 'subSkill',
       data: subSkill,
       children,
@@ -124,7 +129,7 @@ function createFlowNode(layoutNode: LayoutNode): Node {
 
 function flattenTree(
   node: LayoutNode,
-  skill: SkillWithSubSkills,
+  skill: SkillWithEnrichedSubSkills,
   parentId: string | null,
   nodes: Array<Node>,
   edges: Array<Edge>,
@@ -136,7 +141,8 @@ function flattenTree(
       parentId === 'root'
         ? undefined
         : skill.subSkills.find(
-            (ss: EnrichedSubSkill) => `subskill-${ss.id}` === parentId,
+            (ss: EnrichedSubSkill) =>
+              `${SUBSKILL_NODE_PREFIX}${ss.id}` === parentId,
           );
 
     const isActive: boolean =
@@ -156,7 +162,7 @@ function flattenTree(
   });
 }
 
-export function buildNodesAndEdges(skill: SkillWithSubSkills): {
+export function buildNodesAndEdges(skill: SkillWithEnrichedSubSkills): {
   nodes: Array<Node>;
   edges: Array<Edge>;
 } {

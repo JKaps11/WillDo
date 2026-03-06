@@ -3,7 +3,7 @@ import { useStore } from '@tanstack/react-store';
 import { useForm } from '@tanstack/react-form';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 
-import type { SkillWithSubSkills } from './types';
+import type { SkillWithEnrichedSubSkills } from './types';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import {
   Select,
@@ -27,7 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 interface CreateSubSkillModalProps {
-  skill: SkillWithSubSkills;
+  skill: SkillWithEnrichedSubSkills;
 }
 
 interface MetricFormValue {
@@ -51,10 +51,11 @@ export function CreateSubSkillModal({
           queryKey: [['skill', 'get'], { input: { id: skill.id } }],
         });
 
-        const previousSkill = queryClient.getQueryData<SkillWithSubSkills>([
-          ['skill', 'get'],
-          { input: { id: skill.id }, type: 'query' },
-        ]);
+        const previousSkill =
+          queryClient.getQueryData<SkillWithEnrichedSubSkills>([
+            ['skill', 'get'],
+            { input: { id: skill.id }, type: 'query' },
+          ]);
 
         if (previousSkill) {
           const optimisticSubSkill = {
@@ -73,7 +74,7 @@ export function CreateSubSkillModal({
             isLocked: false,
           };
 
-          queryClient.setQueryData<SkillWithSubSkills>(
+          queryClient.setQueryData<SkillWithEnrichedSubSkills>(
             [['skill', 'get'], { input: { id: skill.id }, type: 'query' }],
             {
               ...previousSkill,

@@ -1,6 +1,8 @@
 import type { SubSkillStage } from '@/db/schemas/sub_skill.schema';
 import { subSkillStageEnum } from '@/db/schemas/sub_skill.schema';
 
+export const SUBSKILL_NODE_PREFIX = 'subskill-';
+
 export const NODE_WIDTH = 200;
 export const NODE_HEIGHT = 120;
 export const HORIZONTAL_GAP = 60;
