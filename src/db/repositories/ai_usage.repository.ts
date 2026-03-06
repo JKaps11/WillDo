@@ -56,6 +56,19 @@ export const aiUsageRepository = {
   },
 
   /**
+   * Count how many AI requests a user has made since a given timestamp
+   */
+  countRecentUsage: async (userId: string, since: Date): Promise<number> => {
+    return withDbError('aiUsage.countRecentUsage', async () => {
+      const result = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(aiUsage)
+        .where(and(eq(aiUsage.userId, userId), gte(aiUsage.createdAt, since)));
+      return result[0]?.count ?? 0;
+    });
+  },
+
+  /**
    * Get usage for a specific time period
    */
   getUsageInPeriod: async (

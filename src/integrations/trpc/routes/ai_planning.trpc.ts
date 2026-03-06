@@ -1,3 +1,4 @@
+import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { protectedProcedure } from '../init';
 import {
@@ -6,6 +7,7 @@ import {
 } from '@/lib/zod-schemas';
 import { addWide } from '@/lib/logging/wideEventStore.server';
 import { generateSkillPlan } from '@/lib/ai/skill-planner.server';
+import { aiUsageRepository } from '@/db/repositories/ai_usage.repository';
 
 type SkillPlanResult = z.infer<typeof skillPlanResultSchema>;
 
@@ -13,6 +15,20 @@ export const aiPlanningRouter = {
   generateSkillPlan: protectedProcedure
     .input(generateSkillPlanSchema)
     .mutation(async ({ ctx, input }): Promise<SkillPlanResult> => {
+      const AI_RATE_LIMIT_PER_HOUR = 10;
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+      const recentCount = await aiUsageRepository.countRecentUsage(
+        ctx.userId,
+        oneHourAgo,
+      );
+
+      if (recentCount >= AI_RATE_LIMIT_PER_HOUR) {
+        throw new TRPCError({
+          code: 'TOO_MANY_REQUESTS',
+          message: 'AI generation limit reached. Please try again later.',
+        });
+      }
+
       const { skillName, goal, currentLevel, additionalContext } = input;
       addWide({ skill_name: skillName, goal_length: goal.length });
 

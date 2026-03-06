@@ -49,6 +49,13 @@ export function AIPlanning({
         setAiError(null);
         onPlanGenerated(data.subSkills);
       },
+      onError: (error) => {
+        if (error.data?.code === 'TOO_MANY_REQUESTS') {
+          setAiError(
+            "You've reached the AI generation limit (10/hour). Please try again later.",
+          );
+        }
+      },
     }),
   );
 
