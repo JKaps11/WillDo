@@ -51,11 +51,11 @@ export default function LandingPage(): ReactNode {
           <Link to="/" className="flex items-center gap-2">
             <div className="size-8 rounded-lg flex items-center justify-center">
               <img
-            src="/android-chrome-192x192.png"
-            alt="Will Do logo"
-            className="size-8 scale-125"
-          />
-              </div>
+                src="/android-chrome-192x192.png"
+                alt="Will Do logo"
+                className="size-8 scale-125"
+              />
+            </div>
             <span className="font-bold text-xl">Will Do</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -100,7 +100,7 @@ export default function LandingPage(): ReactNode {
                 <CheckCircle2 className="size-4 text-green-500" />
                 Free forever
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="size-4 text-green-500" />
                 Setup in 2 minutes

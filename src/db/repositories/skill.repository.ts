@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import type {
   NewSkillMetric,
   SkillMetric,
@@ -188,21 +188,13 @@ export const skillRepository = {
     amount = 1,
     dbClient: DbClient = db,
   ): Promise<SkillMetric | null> => {
-    const metric = await withDbError('skillMetric.findForIncrement', () =>
-      dbClient
-        .select()
-        .from(skillMetrics)
-        .where(and(eq(skillMetrics.id, id), eq(skillMetrics.userId, userId)))
-        .limit(1),
-    );
-
-    if (!metric[0]) return null;
-
-    const newValue = metric[0].currentValue + amount;
     const result = await withDbError('skillMetric.increment', () =>
       dbClient
         .update(skillMetrics)
-        .set({ currentValue: newValue, updatedAt: new Date() })
+        .set({
+          currentValue: sql`${skillMetrics.currentValue} + ${amount}`,
+          updatedAt: new Date(),
+        })
         .where(and(eq(skillMetrics.id, id), eq(skillMetrics.userId, userId)))
         .returning(),
     );

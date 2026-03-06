@@ -2,8 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { Pencil } from 'lucide-react';
+import { useOptimistic, useTransition } from 'react';
 
-// import PriorityBadge from './PriorityBadge';
 import type { Task as TaskType } from '@/db/schemas/task.schema';
 import type {
   TaskWithOptionalSkillInfo,
@@ -28,6 +28,11 @@ interface TaskProps {
 export function Task({ task, className, dragSource }: TaskProps): ReactNode {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const [, startTransition] = useTransition();
+  const [optimisticCompleted, setOptimisticCompleted] = useOptimistic(
+    task.completed,
+    (_current: boolean, next: boolean) => next,
+  );
 
   const updateMutation = useMutation(
     trpc.task.update.mutationOptions({
@@ -59,18 +64,6 @@ export function Task({ task, className, dragSource }: TaskProps): ReactNode {
       },
     }),
   );
-
-  function handleUpdate(updatedTask: TaskType): void {
-    updateMutation.mutate({
-      id: updatedTask.id,
-      name: updatedTask.name,
-      description: updatedTask.description,
-      priority: updatedTask.priority,
-      dueDate: updatedTask.dueDate ?? undefined,
-      completed: updatedTask.completed,
-      todoListDate: updatedTask.todoListDate,
-    });
-  }
 
   // Create unique draggable ID for recurring tasks (same task.id on multiple days)
   const draggableId = task.todoListDate
@@ -107,16 +100,31 @@ export function Task({ task, className, dragSource }: TaskProps): ReactNode {
         const occurrenceDate = task.todoListDate ?? new Date();
         uiStoreActions.openEvaluationModal(task, occurrenceDate);
       } else {
-        // Uncompleting: use existing mutation with occurrenceDate for cleanup
+        // Uncompleting: optimistic update + mutation
         const occurrenceDate = task.todoListDate ?? undefined;
-        completeWithMetricMutation.mutate({
-          id: task.id,
-          completed: false,
-          occurrenceDate,
+        startTransition(async () => {
+          setOptimisticCompleted(false);
+          await completeWithMetricMutation.mutateAsync({
+            id: task.id,
+            completed: false,
+            occurrenceDate,
+          });
         });
       }
     } else {
-      handleUpdate({ ...task, completed: checked } as TaskType);
+      // Simple task: optimistic update + mutation
+      startTransition(async () => {
+        setOptimisticCompleted(checked);
+        await updateMutation.mutateAsync({
+          id: task.id,
+          name: task.name,
+          description: task.description,
+          priority: task.priority,
+          dueDate: task.dueDate ?? undefined,
+          completed: checked,
+          todoListDate: task.todoListDate,
+        });
+      });
     }
   }
 
@@ -143,14 +151,10 @@ export function Task({ task, className, dragSource }: TaskProps): ReactNode {
         />
       )}
       <div className="flex min-w-0 flex-1 items-center gap-2">
-        {/* <div className="flex shrink-0 items-center justify-center gap-1">
-          <PriorityBadge priority={task.priority} />
-        </div> */}
-
         <span
           className={cn(
             'truncate',
-            task.completed && 'text-muted-foreground line-through',
+            optimisticCompleted && 'text-muted-foreground line-through',
           )}
         >
           {task.name}
@@ -174,7 +178,7 @@ export function Task({ task, className, dragSource }: TaskProps): ReactNode {
           >
             <Checkbox
               className="cursor-pointer hover:border-ring hover:ring-[3px] hover:ring-ring/50"
-              checked={task.completed}
+              checked={optimisticCompleted}
               onCheckedChange={handleCheckboxChange}
             />
           </div>

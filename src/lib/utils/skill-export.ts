@@ -1,29 +1,17 @@
 import type { z } from 'zod';
 
-import type { SkillMetric } from '@/db/schemas/skill_metric.schema';
-import type { SubSkill } from '@/db/schemas/sub_skill.schema';
-import type { Skill } from '@/db/schemas/skill.schema';
 import type {
   exportedSubSkillSchema,
   importSkillSchema,
 } from '@/lib/zod-schemas/skill';
+import type { SkillWithEnrichedSubSkills } from '@/lib/types';
 
 // Derive types from Zod schemas (single source of truth)
 type ExportedSubSkill = z.infer<typeof exportedSubSkillSchema>;
 export type ExportedSkill = z.infer<typeof importSkillSchema>;
 
-// Internal input types for transform function
-interface EnrichedSubSkill extends SubSkill {
-  metrics: Array<SkillMetric>;
-  isLocked: boolean;
-}
-
-interface SkillWithSubSkills extends Skill {
-  subSkills: Array<EnrichedSubSkill>;
-}
-
 export function transformSkillForExport(
-  skillData: SkillWithSubSkills,
+  skillData: SkillWithEnrichedSubSkills,
 ): ExportedSkill {
   // Build a map of subSkill IDs to their index in the array
   const idToIndex = new Map<string, number>();

@@ -3,17 +3,10 @@ import { useState } from 'react';
 
 import { SubSkillEditPanel } from './SubSkillEditPanel';
 import { PlannerCanvas } from './PlannerCanvas';
-import type { SkillMetric } from '@/db/schemas/skill_metric.schema';
-import type { SubSkill } from '@/db/schemas/sub_skill.schema';
-import type { Skill } from '@/db/schemas/skill.schema';
-
-type EnrichedSubSkill = SubSkill & {
-  metrics: Array<SkillMetric>;
-  isLocked: boolean;
-};
+import type { SkillWithEnrichedSubSkills } from '@/lib/types';
 
 interface SkillPlannerProps {
-  skill: Skill & { subSkills: Array<EnrichedSubSkill> };
+  skill: SkillWithEnrichedSubSkills;
 }
 
 export function SkillPlanner({ skill }: SkillPlannerProps): React.ReactElement {

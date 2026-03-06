@@ -11,12 +11,13 @@ import { SkillRootNode } from './nodes/SkillRootNode';
 import { SubSkillNode } from './nodes/SubSkillNode';
 import { PlannerControls } from './PlannerControls';
 import { buildNodesAndEdges } from './SkillTreeUtils';
-import type { SkillWithSubSkills } from './types';
+import { SUBSKILL_NODE_PREFIX } from './constants';
+import type { SkillWithEnrichedSubSkills } from './types';
 import type { Edge, Node } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 interface PlannerCanvasProps {
-  skill: SkillWithSubSkills;
+  skill: SkillWithEnrichedSubSkills;
   onNodeSelect: (nodeId: string | null) => void;
 }
 
@@ -50,8 +51,8 @@ export function PlannerCanvas({
 
   const handleNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
-      if (node.id.startsWith('subskill-')) {
-        const subSkillId: string = node.id.replace('subskill-', '');
+      if (node.id.startsWith(SUBSKILL_NODE_PREFIX)) {
+        const subSkillId: string = node.id.replace(SUBSKILL_NODE_PREFIX, '');
         onNodeSelect(subSkillId);
       } else {
         onNodeSelect(null);

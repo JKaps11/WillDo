@@ -6,6 +6,7 @@ import { ConfidenceRating } from './ConfidenceRating';
 import type { z } from 'zod';
 
 import type { evaluationFieldsSchema } from '@/lib/zod-schemas';
+import { filterNonEmpty } from '@/lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -192,12 +193,6 @@ export function PracticeEvaluationModal(): React.ReactNode {
     e.preventDefault();
 
     if (!task || !occurrenceDate) return;
-
-    // Filter out empty strings from arrays
-    const filterNonEmpty = (arr: Array<string>): Array<string> => {
-      const filtered = arr.filter((s) => s.trim().length > 0);
-      return filtered.length > 0 ? filtered : [''];
-    };
 
     const wentWell = filterNonEmpty(formState.wentWell);
     const struggled = filterNonEmpty(formState.struggled);

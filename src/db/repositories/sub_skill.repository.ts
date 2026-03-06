@@ -6,6 +6,7 @@ import type {
 } from '@/db/schemas/sub_skill.schema';
 import type { DbClient } from '@/db/index';
 import { subSkills } from '@/db/schemas/sub_skill.schema';
+import { withDbError } from '@/db/withDbError';
 import { db } from '@/db/index';
 
 const STAGE_ORDER: Array<SubSkillStage> = [
@@ -17,11 +18,13 @@ const STAGE_ORDER: Array<SubSkillStage> = [
 
 export const subSkillRepository = {
   findById: async (id: string, userId: string): Promise<SubSkill | null> => {
-    const result = await db
-      .select()
-      .from(subSkills)
-      .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
-      .limit(1);
+    const result = await withDbError('subSkill.findById', () =>
+      db
+        .select()
+        .from(subSkills)
+        .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
+        .limit(1),
+    );
 
     return result[0] ?? null;
   },
@@ -30,18 +33,24 @@ export const subSkillRepository = {
     skillId: string,
     userId: string,
   ): Promise<Array<SubSkill>> => {
-    return db
-      .select()
-      .from(subSkills)
-      .where(and(eq(subSkills.skillId, skillId), eq(subSkills.userId, userId)))
-      .orderBy(subSkills.sortOrder);
+    return withDbError('subSkill.findBySkillId', () =>
+      db
+        .select()
+        .from(subSkills)
+        .where(
+          and(eq(subSkills.skillId, skillId), eq(subSkills.userId, userId)),
+        )
+        .orderBy(subSkills.sortOrder),
+    );
   },
 
   create: async (
     data: Omit<NewSubSkill, 'id' | 'createdAt' | 'updatedAt'>,
     dbClient: DbClient = db,
   ): Promise<SubSkill | null> => {
-    const result = await dbClient.insert(subSkills).values(data).returning();
+    const result = await withDbError('subSkill.create', () =>
+      dbClient.insert(subSkills).values(data).returning(),
+    );
 
     return result[0] ?? null;
   },
@@ -54,11 +63,13 @@ export const subSkillRepository = {
     >,
     dbClient: DbClient = db,
   ): Promise<SubSkill | null> => {
-    const result = await dbClient
-      .update(subSkills)
-      .set({ ...data, updatedAt: new Date() })
-      .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
-      .returning();
+    const result = await withDbError('subSkill.update', () =>
+      dbClient
+        .update(subSkills)
+        .set({ ...data, updatedAt: new Date() })
+        .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
+        .returning(),
+    );
 
     return result[0] ?? null;
   },
@@ -68,10 +79,12 @@ export const subSkillRepository = {
     userId: string,
     dbClient: DbClient = db,
   ): Promise<SubSkill | null> => {
-    const result = await dbClient
-      .delete(subSkills)
-      .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
-      .returning();
+    const result = await withDbError('subSkill.delete', () =>
+      dbClient
+        .delete(subSkills)
+        .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
+        .returning(),
+    );
 
     return result[0] ?? null;
   },
@@ -81,11 +94,13 @@ export const subSkillRepository = {
     userId: string,
     dbClient: DbClient = db,
   ): Promise<SubSkill | null> => {
-    const subSkill = await dbClient
-      .select()
-      .from(subSkills)
-      .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
-      .limit(1);
+    const subSkill = await withDbError('subSkill.advanceStage.find', () =>
+      dbClient
+        .select()
+        .from(subSkills)
+        .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
+        .limit(1),
+    );
 
     if (!subSkill[0]) return null;
 
@@ -96,11 +111,13 @@ export const subSkillRepository = {
     }
 
     const nextStage = STAGE_ORDER[currentIndex + 1];
-    const result = await dbClient
-      .update(subSkills)
-      .set({ stage: nextStage, updatedAt: new Date() })
-      .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
-      .returning();
+    const result = await withDbError('subSkill.advanceStage.update', () =>
+      dbClient
+        .update(subSkills)
+        .set({ stage: nextStage, updatedAt: new Date() })
+        .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
+        .returning(),
+    );
 
     return result[0] ?? null;
   },
@@ -110,11 +127,13 @@ export const subSkillRepository = {
     userId: string,
     dbClient: DbClient = db,
   ): Promise<SubSkill | null> => {
-    const result = await dbClient
-      .update(subSkills)
-      .set({ stage: 'complete', updatedAt: new Date() })
-      .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
-      .returning();
+    const result = await withDbError('subSkill.complete', () =>
+      dbClient
+        .update(subSkills)
+        .set({ stage: 'complete', updatedAt: new Date() })
+        .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
+        .returning(),
+    );
 
     return result[0] ?? null;
   },
@@ -128,17 +147,19 @@ export const subSkillRepository = {
     skillId: string,
     userId: string,
   ): Promise<Array<SubSkill>> => {
-    return db
-      .select()
-      .from(subSkills)
-      .where(
-        and(
-          eq(subSkills.skillId, skillId),
-          eq(subSkills.userId, userId),
-          isNull(subSkills.parentSubSkillId),
-        ),
-      )
-      .orderBy(subSkills.sortOrder);
+    return withDbError('subSkill.findRootSubSkills', () =>
+      db
+        .select()
+        .from(subSkills)
+        .where(
+          and(
+            eq(subSkills.skillId, skillId),
+            eq(subSkills.userId, userId),
+            isNull(subSkills.parentSubSkillId),
+          ),
+        )
+        .orderBy(subSkills.sortOrder),
+    );
   },
 
   /**
@@ -148,16 +169,18 @@ export const subSkillRepository = {
     parentSubSkillId: string,
     userId: string,
   ): Promise<Array<SubSkill>> => {
-    return db
-      .select()
-      .from(subSkills)
-      .where(
-        and(
-          eq(subSkills.parentSubSkillId, parentSubSkillId),
-          eq(subSkills.userId, userId),
-        ),
-      )
-      .orderBy(subSkills.sortOrder);
+    return withDbError('subSkill.findChildren', () =>
+      db
+        .select()
+        .from(subSkills)
+        .where(
+          and(
+            eq(subSkills.parentSubSkillId, parentSubSkillId),
+            eq(subSkills.userId, userId),
+          ),
+        )
+        .orderBy(subSkills.sortOrder),
+    );
   },
 
   /**
@@ -169,11 +192,13 @@ export const subSkillRepository = {
     parentSubSkillId: string | null,
     dbClient: DbClient = db,
   ): Promise<SubSkill | null> => {
-    const result = await dbClient
-      .update(subSkills)
-      .set({ parentSubSkillId, updatedAt: new Date() })
-      .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
-      .returning();
+    const result = await withDbError('subSkill.setParent', () =>
+      dbClient
+        .update(subSkills)
+        .set({ parentSubSkillId, updatedAt: new Date() })
+        .where(and(eq(subSkills.id, id), eq(subSkills.userId, userId)))
+        .returning(),
+    );
 
     return result[0] ?? null;
   },
@@ -185,24 +210,27 @@ export const subSkillRepository = {
    * - All of its child subskills are in the "complete" stage
    */
   isLocked: async (subSkillId: string, userId: string): Promise<boolean> => {
-    const subSkill = await db
-      .select()
-      .from(subSkills)
-      .where(and(eq(subSkills.id, subSkillId), eq(subSkills.userId, userId)))
-      .limit(1);
+    const subSkill = await withDbError('subSkill.isLocked.find', () =>
+      db
+        .select()
+        .from(subSkills)
+        .where(and(eq(subSkills.id, subSkillId), eq(subSkills.userId, userId)))
+        .limit(1),
+    );
 
     if (!subSkill[0]) return false;
 
-    // Find all children of this subskill
-    const children = await db
-      .select()
-      .from(subSkills)
-      .where(
-        and(
-          eq(subSkills.parentSubSkillId, subSkillId),
-          eq(subSkills.userId, userId),
+    const children = await withDbError('subSkill.isLocked.findChildren', () =>
+      db
+        .select()
+        .from(subSkills)
+        .where(
+          and(
+            eq(subSkills.parentSubSkillId, subSkillId),
+            eq(subSkills.userId, userId),
+          ),
         ),
-      );
+    );
 
     // If no children (leaf node), it's unlocked
     if (children.length === 0) return false;
