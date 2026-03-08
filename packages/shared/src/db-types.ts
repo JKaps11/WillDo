@@ -54,8 +54,7 @@ export const TODO_LIST_SORT_BY_VALUES = [
 export type SubSkillStage = (typeof SUB_SKILL_STAGE_VALUES)[number];
 export type Priority = (typeof PRIORITY_VALUES)[number];
 export type RecurrenceEndType = (typeof RECURRENCE_END_TYPE_VALUES)[number];
-export type RecurrenceFrequency =
-  (typeof RECURRENCE_FREQUENCY_VALUES)[number];
+export type RecurrenceFrequency = (typeof RECURRENCE_FREQUENCY_VALUES)[number];
 export type DaysOfWeek = (typeof DAYS_OF_WEEK_VALUES)[number];
 export type AppearanceTheme = (typeof APPEARANCE_THEME_VALUES)[number];
 export type TodoListTimeSpan = (typeof TODO_LIST_TIME_SPAN_VALUES)[number];
@@ -93,6 +92,12 @@ export interface UserSettings {
     timeSpan: TodoListTimeSpan;
     showCompleted: boolean;
   };
+  notifications: {
+    streakWarnings: boolean;
+    nudges: boolean;
+    celebrations: boolean;
+    taskReminders: boolean;
+  };
 }
 
 export const DEFAULT_USER_SETTINGS: UserSettings = {
@@ -103,6 +108,12 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
     sortBy: 'priority',
     timeSpan: 'week',
     showCompleted: true,
+  },
+  notifications: {
+    streakWarnings: true,
+    nudges: true,
+    celebrations: true,
+    taskReminders: true,
   },
 };
 

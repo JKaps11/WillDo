@@ -8,7 +8,7 @@ export function withVerticalSeparators(
   if (nodes.length === 0) return nodes;
 
   return nodes
-    .flatMap((node) => {
+    .flatMap((node): Array<ReactNode> => {
       if (!isValidElement(node) || node.key == null) {
         // Contract violation: caller must pass keyed elements
         return [node];

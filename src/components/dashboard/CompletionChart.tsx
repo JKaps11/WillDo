@@ -169,9 +169,9 @@ export function CompletionChart({
           </LineChart>
         </ChartContainer>
         <div className="mt-4 flex items-center justify-center gap-6">
-          <LegendItem color={chartConfig.tasks.color} label="Tasks" />
-          <LegendItem color={chartConfig.subSkills.color} label="SubSkills" />
-          <LegendItem color={chartConfig.skills.color} label="Skills" />
+          <LegendItem color={chartConfig.tasks.color ?? ''} label="Tasks" />
+          <LegendItem color={chartConfig.subSkills.color ?? ''} label="SubSkills" />
+          <LegendItem color={chartConfig.skills.color ?? ''} label="Skills" />
         </div>
       </CardContent>
     </Card>

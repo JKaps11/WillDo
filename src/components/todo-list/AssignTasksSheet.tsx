@@ -103,8 +103,7 @@ export function AssignTasksSheet(): ReactNode {
             </div>
           ) : (
             <Accordion
-              type="multiple"
-              defaultValue={skillGroups.map((g) => g.skillId)}
+              defaultValue={skillGroups.map((_, i) => i)}
             >
               {skillGroups.map((group) => (
                 <AccordionItem key={group.skillId} value={group.skillId}>
