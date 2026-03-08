@@ -5,7 +5,6 @@ import {
   startOfDay,
   subDays,
   subMonths,
-  subYears,
 } from 'date-fns';
 
 import { protectedProcedure } from '../init';
@@ -72,6 +71,9 @@ export const metricsRouter = {
         skillsArchived: metrics.skillsArchived,
         currentStreak: metrics.currentStreak,
         bestStreak: metrics.bestStreak,
+        lastActivityDate: metrics.lastActivityDate
+          ? format(metrics.lastActivityDate, 'yyyy-MM-dd')
+          : null,
         weeklyGoal: metrics.weeklyGoal,
         weeklyCompleted: metrics.weeklyCompleted,
         totalXp: metrics.totalXp,
@@ -168,6 +170,7 @@ function getDefaultMetrics(): UserMetricsResponse {
     skillsArchived: 0,
     currentStreak: 0,
     bestStreak: 0,
+    lastActivityDate: null,
     weeklyGoal: 10,
     weeklyCompleted: 0,
     totalXp: 0,

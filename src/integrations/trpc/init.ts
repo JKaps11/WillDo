@@ -12,7 +12,7 @@ const t = initTRPC.context<TRPCContext>().create({
  * This runs for every tRPC call and adds RPC context to the canonical log.
  * Uses dynamic imports to prevent server code from being bundled into client.
  */
-const wideEventMiddleware = t.middleware(async ({ path, type, next }) => {
+const wideEventMiddleware = t.middleware(async ({ path, next }) => {
   // Dynamic import to prevent bundling into client
   const { addWideRpc, addWideError } =
     await import('@/lib/logging/wideEventStore.server');

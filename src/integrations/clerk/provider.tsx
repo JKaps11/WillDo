@@ -1,5 +1,9 @@
 import { ClerkProvider } from '@clerk/tanstack-react-start';
-import type { Appearance } from '@clerk/types';
+import type { ComponentProps } from 'react';
+
+type Appearance = NonNullable<
+  ComponentProps<typeof ClerkProvider>['appearance']
+>;
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 if (!PUBLISHABLE_KEY) {

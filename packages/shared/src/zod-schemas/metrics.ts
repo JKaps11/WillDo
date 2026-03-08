@@ -30,6 +30,7 @@ export const userMetricsResponseSchema = z.object({
   // Streaks
   currentStreak: z.number().int().min(0),
   bestStreak: z.number().int().min(0),
+  lastActivityDate: z.string().nullable(),
 
   // Weekly
   weeklyGoal: z.number().int().min(1),

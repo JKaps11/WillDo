@@ -33,7 +33,8 @@ export function RecurrenceSelector({
   value,
   onChange,
 }: RecurrenceSelectorProps): React.ReactElement {
-  const handleFrequencyChange = (frequency: 'daily' | 'weekly'): void => {
+  const handleFrequencyChange = (frequency: 'daily' | 'weekly' | null): void => {
+    if (!frequency) return;
     const newRule: RecurrenceRule = {
       ...value,
       frequency,

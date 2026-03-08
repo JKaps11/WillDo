@@ -11,4 +11,7 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL as string });
 
 export const db = drizzle(pool);
 
-export type DbClient = typeof db;
+/** The full drizzle instance or a transaction derived from it. */
+export type DbClient =
+  | typeof db
+  | Parameters<Parameters<(typeof db)['transaction']>[0]>[0];

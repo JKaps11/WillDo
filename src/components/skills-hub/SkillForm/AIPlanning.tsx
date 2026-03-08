@@ -11,13 +11,13 @@ import { SUPPORT_EMAIL } from '@/lib/constants/contact';
 
 export interface GeneratedSubSkill {
   name: string;
-  description?: string;
+  description: string;
   metrics: Array<{
     name: string;
-    unit?: string;
+    unit: string | null;
     targetValue: number;
   }>;
-  parentIndex?: number | null;
+  parentIndex: number | null;
 }
 
 interface AIPlanningProps {

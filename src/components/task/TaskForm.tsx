@@ -241,8 +241,8 @@ export function TaskForm({
                 <Checkbox
                   id={field.name}
                   checked={field.state.value}
-                  onCheckedChange={(checked) => {
-                    if (checked !== 'indeterminate') {
+                  onCheckedChange={(checked: boolean | 'indeterminate') => {
+                    if (typeof checked === 'boolean') {
                       field.handleChange(checked);
                     }
                   }}

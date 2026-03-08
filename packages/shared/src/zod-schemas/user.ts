@@ -12,6 +12,15 @@ export const appearanceThemeSchema = z.enum(APPEARANCE_THEME_VALUES);
 export const todoListSortBySchema = z.enum(TODO_LIST_SORT_BY_VALUES);
 export const todoListTimeSpanSchema = z.enum(TODO_LIST_TIME_SPAN_VALUES);
 
+/* ---------- Notification Settings Schema ---------- */
+
+export const notificationSettingsSchema = z.object({
+  streakWarnings: z.boolean(),
+  nudges: z.boolean(),
+  celebrations: z.boolean(),
+  taskReminders: z.boolean(),
+});
+
 /* ---------- User Settings Schema ---------- */
 
 export const userSettingsSchema: z.ZodType<UserSettings> = z.object({
@@ -23,6 +32,7 @@ export const userSettingsSchema: z.ZodType<UserSettings> = z.object({
     timeSpan: todoListTimeSpanSchema,
     showCompleted: z.boolean(),
   }),
+  notifications: notificationSettingsSchema,
 });
 
 /* ---------- User Input Schemas ---------- */
@@ -58,6 +68,7 @@ export const patchUserSettingsSchema = z.object({
       showCompleted: z.boolean(),
     })
     .optional(),
+  notifications: notificationSettingsSchema.optional(),
 });
 
 export type PatchUserSettings = z.infer<typeof patchUserSettingsSchema>;

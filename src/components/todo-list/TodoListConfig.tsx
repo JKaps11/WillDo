@@ -89,7 +89,8 @@ export default function TodoListConfig(): ReactNode {
     });
   }
 
-  function onSortByValueChange(value: string): void {
+  function onSortByValueChange(value: string | null): void {
+    if (!value) return;
     patchMutation.mutate({
       todoList: { ...todoListOptions, sortBy: value as TodoListSortBy },
     });

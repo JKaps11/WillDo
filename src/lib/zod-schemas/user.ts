@@ -3,6 +3,7 @@ export {
   appearanceThemeSchema,
   todoListSortBySchema,
   todoListTimeSpanSchema,
+  notificationSettingsSchema,
   userSettingsSchema,
   createUserSchema,
   updateUserSchema,

@@ -68,7 +68,7 @@ function esc(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function renderPlan(result: TestResult, filename: string): string {
+function renderPlan(result: TestResult, _filename: string): string {
   const { testInput: input, usage, subSkills } = result;
   const tree = buildTree(subSkills);
 
