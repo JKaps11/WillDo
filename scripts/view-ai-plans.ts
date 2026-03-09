@@ -1,7 +1,7 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-const RESULTS_ROOT = join(import.meta.dir, 'ai-plan-results');
+const RESULTS_ROOT = join(import.meta.dirname!, 'ai-plan-results');
 
 interface SubSkill {
   name: string;
@@ -68,7 +68,7 @@ function esc(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function renderPlan(result: TestResult, filename: string): string {
+function renderPlan(result: TestResult, _filename: string): string {
   const { testInput: input, usage, subSkills } = result;
   const tree = buildTree(subSkills);
 
