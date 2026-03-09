@@ -122,7 +122,7 @@ const TEST_CASES: TestCase[] = [
 
 /* ---------- Run ---------- */
 
-const RESULTS_ROOT = join(import.meta.dir, 'ai-plan-results');
+const RESULTS_ROOT = join(import.meta.dirname!, 'ai-plan-results');
 
 async function getNextTestDir(): Promise<string> {
   await mkdir(RESULTS_ROOT, { recursive: true });
@@ -139,7 +139,8 @@ function buildUserPrompt(tc: TestCase): string {
   return `Skill: "${tc.skillName}"
 Goal: ${tc.goal}
 Current level: ${tc.currentLevel || 'Not specified'}
-${tc.additionalContext ? `Additional context: ${tc.additionalContext}` : ''}`;
+${tc.additionalContext ? `Additional context: ${tc.additionalContext}` : ''}
+Effort level: ${tc.effort}`;
 }
 
 function slugify(s: string): string {
@@ -250,8 +251,10 @@ async function main(): Promise<void> {
   const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const summary: Array<{
     skill: string;
+    effort: string;
     subSkills: number;
     cost: string;
+    time: string;
     status: string;
   }> = [];
 

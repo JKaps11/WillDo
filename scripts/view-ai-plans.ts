@@ -1,7 +1,7 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-const RESULTS_ROOT = join(import.meta.dir, 'ai-plan-results');
+const RESULTS_ROOT = join(import.meta.dirname!, 'ai-plan-results');
 
 interface SubSkill {
   name: string;
