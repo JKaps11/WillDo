@@ -8,40 +8,40 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-import type { PracticeEvaluation } from '@/db/schemas/practice_evaluation.schema';
+import type { PracticeSession } from '@/db/schemas/practice_session.schema';
 import type {
   FolderHierarchySkill,
   FolderHierarchySubSkill,
-} from '@/db/repositories/practice_evaluation.repository';
+} from '@/db/repositories/practice_session.repository';
 import { Badge } from '@/components/ui/badge';
 import { useTRPC } from '@/integrations/trpc/react';
 import { cn, parseLocalDate } from '@/lib/utils';
 
 interface FolderTreeProps {
-  selectedEvaluationId: string | null;
-  onSelectEvaluation: (id: string) => void;
+  selectedSessionId: string | null;
+  onSelectSession: (id: string) => void;
 }
 
 interface SubSkillFolderProps {
   subSkillId: string;
   subSkillName: string;
-  evaluationCount: number;
-  selectedEvaluationId: string | null;
-  onSelectEvaluation: (id: string) => void;
+  sessionCount: number;
+  selectedSessionId: string | null;
+  onSelectSession: (id: string) => void;
 }
 
 function SubSkillFolder({
   subSkillId,
   subSkillName,
-  evaluationCount,
-  selectedEvaluationId,
-  onSelectEvaluation,
+  sessionCount,
+  selectedSessionId,
+  onSelectSession,
 }: SubSkillFolderProps): React.ReactElement {
   const [isOpen, setIsOpen] = useState(false);
   const trpc = useTRPC();
 
-  const { data: evaluations } = useQuery({
-    ...trpc.practiceEvaluation.listBySubSkill.queryOptions({ subSkillId }),
+  const { data: sessions } = useQuery({
+    ...trpc.practiceSession.listBySubSkill.queryOptions({ subSkillId }),
     enabled: isOpen,
   });
 
@@ -65,29 +65,29 @@ function SubSkillFolder({
         )}
         <span className="truncate">{subSkillName}</span>
         <Badge variant="secondary" className="ml-auto shrink-0 text-xs">
-          {evaluationCount}
+          {sessionCount}
         </Badge>
       </button>
 
-      {isOpen && evaluations && (
+      {isOpen && sessions && (
         <div className="ml-4">
-          {evaluations.map((evaluation: PracticeEvaluation) => {
+          {sessions.map((session: PracticeSession) => {
             const dateStr = parseLocalDate(
-              evaluation.occurrenceDate,
+              session.occurrenceDate,
             ).toLocaleDateString();
 
             return (
               <button
-                key={evaluation.id}
+                key={session.id}
                 type="button"
-                onClick={() => onSelectEvaluation(evaluation.id)}
+                onClick={() => onSelectSession(session.id)}
                 className={cn(
                   'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent/50 transition-colors',
-                  selectedEvaluationId === evaluation.id && 'bg-accent',
+                  selectedSessionId === session.id && 'bg-accent',
                 )}
               >
                 <FileText className="size-4 shrink-0 text-muted-foreground" />
-                <span className="truncate">{evaluation.title}</span>
+                <span className="truncate">{session.title}</span>
                 <span className="ml-auto shrink-0 text-xs text-muted-foreground">
                   {dateStr}
                 </span>
@@ -101,14 +101,14 @@ function SubSkillFolder({
 }
 
 export function FolderTree({
-  selectedEvaluationId,
-  onSelectEvaluation,
+  selectedSessionId,
+  onSelectSession,
 }: FolderTreeProps): React.ReactElement {
   const trpc = useTRPC();
   const [openSkills, setOpenSkills] = useState<Set<string>>(new Set());
 
   const { data: hierarchy, isLoading } = useQuery(
-    trpc.practiceEvaluation.getFolderHierarchy.queryOptions(),
+    trpc.practiceSession.getFolderHierarchy.queryOptions(),
   );
 
   function toggleSkill(skillId: string): void {
@@ -132,8 +132,8 @@ export function FolderTree({
       <div className="flex h-full flex-col items-center justify-center gap-2 p-4 text-muted-foreground">
         <Folder className="size-10 opacity-30" />
         <p className="text-sm text-center">
-          No evaluations yet. Complete a practice task to create your first
-          evaluation.
+          No sessions yet. Complete a practice task to create your first
+          session.
         </p>
       </div>
     );
@@ -144,8 +144,7 @@ export function FolderTree({
       {hierarchy.map((skill: FolderHierarchySkill) => {
         const isOpen = openSkills.has(skill.skillId);
         const totalCount = skill.subSkills.reduce(
-          (sum: number, ss: FolderHierarchySubSkill) =>
-            sum + ss.evaluationCount,
+          (sum: number, ss: FolderHierarchySubSkill) => sum + ss.sessionCount,
           0,
         );
 
@@ -188,9 +187,9 @@ export function FolderTree({
                   key={subSkill.subSkillId}
                   subSkillId={subSkill.subSkillId}
                   subSkillName={subSkill.subSkillName}
-                  evaluationCount={subSkill.evaluationCount}
-                  selectedEvaluationId={selectedEvaluationId}
-                  onSelectEvaluation={onSelectEvaluation}
+                  sessionCount={subSkill.sessionCount}
+                  selectedSessionId={selectedSessionId}
+                  onSelectSession={onSelectSession}
                 />
               ))}
           </div>
