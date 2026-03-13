@@ -24,12 +24,14 @@ export interface MoveRecurringModalState {
   targetDate: Date | null; // Where the task is being dropped
 }
 
-export type EvaluationTask = Pick<Task, 'id' | 'name' | 'subSkillId'>;
+export type SessionTask = Pick<Task, 'id' | 'name' | 'subSkillId'>;
+export type SessionStep = 'pre' | 'practicing' | 'post';
 
-export interface EvaluationModalState {
+export interface SessionModalState {
   isOpen: boolean;
-  task: EvaluationTask | null;
+  task: SessionTask | null;
   occurrenceDate: Date | null;
+  step: SessionStep;
 }
 
 export interface UIStoreState {
@@ -42,7 +44,7 @@ export interface UIStoreState {
   showAssignTasksSheet: boolean;
   recurrenceModal: RecurrenceModalState;
   moveRecurringModal: MoveRecurringModalState;
-  evaluationModal: EvaluationModalState;
+  sessionModal: SessionModalState;
 }
 
 export type UIStoreActions = {
@@ -65,8 +67,9 @@ export type UIStoreActions = {
     targetDate: Date,
   ) => void;
   closeMoveRecurringModal: () => void;
-  openEvaluationModal: (task: EvaluationTask, occurrenceDate: Date) => void;
-  closeEvaluationModal: () => void;
+  openSessionModal: (task: SessionTask, occurrenceDate: Date) => void;
+  closeSessionModal: () => void;
+  setSessionStep: (step: SessionStep) => void;
 };
 
 const initialState: UIStoreState = {
@@ -88,10 +91,11 @@ const initialState: UIStoreState = {
     sourceDate: null,
     targetDate: null,
   },
-  evaluationModal: {
+  sessionModal: {
     isOpen: false,
     task: null,
     occurrenceDate: null,
+    step: 'pre',
   },
 };
 
@@ -194,23 +198,34 @@ export const uiStoreActions: UIStoreActions = {
       },
     }));
   },
-  openEvaluationModal: (task: EvaluationTask, occurrenceDate: Date): void => {
+  openSessionModal: (task: SessionTask, occurrenceDate: Date): void => {
     uiStore.setState((state) => ({
       ...state,
-      evaluationModal: {
+      sessionModal: {
         isOpen: true,
         task,
         occurrenceDate,
+        step: 'pre',
       },
     }));
   },
-  closeEvaluationModal: (): void => {
+  closeSessionModal: (): void => {
     uiStore.setState((state) => ({
       ...state,
-      evaluationModal: {
+      sessionModal: {
         isOpen: false,
         task: null,
         occurrenceDate: null,
+        step: 'pre',
+      },
+    }));
+  },
+  setSessionStep: (step: SessionStep): void => {
+    uiStore.setState((state) => ({
+      ...state,
+      sessionModal: {
+        ...state.sessionModal,
+        step,
       },
     }));
   },

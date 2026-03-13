@@ -52,7 +52,7 @@ export function TaskCard({ task }: TaskCardProps): React.ReactElement {
         // Completing: open evaluation modal instead of mutating directly
         // Dashboard tasks are always today's tasks
         const occurrenceDate = new Date();
-        uiStoreActions.openEvaluationModal(
+        uiStoreActions.openSessionModal(
           {
             id: task.id,
             name: task.name,

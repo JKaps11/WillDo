@@ -6,3 +6,4 @@ export { Checkbox } from './Checkbox';
 export { ProgressBar } from './ProgressBar';
 export { EmptyState } from './EmptyState';
 export { ColorPicker } from './ColorPicker';
+export { Slider } from './Slider';

@@ -4,6 +4,6 @@ export * from './task';
 export * from './clerk';
 export * from './skill';
 export * from './metrics';
-export * from './practice-evaluation';
+export * from './practice-session';
 // export * from './tag'; // DISABLED: Tags feature removed
 // export * from './event'; // DISABLED: Calendar feature

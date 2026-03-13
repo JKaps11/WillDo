@@ -14,12 +14,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, Checkbox, PriorityBadge, EmptyState } from '@/components/ui';
 import { Plus, CheckSquare } from 'lucide-react-native';
 import { addDays, format, isSameDay, startOfWeek } from 'date-fns';
+import { usePracticeSession } from '@/components/practice-session';
 
 export default function TodoListScreen(): React.ReactElement {
   const router = useRouter();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState(() => new Date());
+  const { openSession } = usePracticeSession();
 
   // Generate dates for the horizontal date picker (current week)
   const weekDates = useMemo(() => {
@@ -120,12 +122,20 @@ export default function TodoListScreen(): React.ReactElement {
               <View className="flex-row items-start">
                 <Checkbox
                   checked={item.completed}
-                  onToggle={() =>
-                    completeMutation.mutate({
-                      id: item.id,
-                      completed: !item.completed,
-                    })
-                  }
+                  onToggle={() => {
+                    if (!item.completed && item.subSkillId) {
+                      openSession(
+                        { id: item.id, name: item.name, subSkillId: item.subSkillId },
+                        selectedDate,
+                      );
+                    } else {
+                      completeMutation.mutate({
+                        id: item.id,
+                        completed: !item.completed,
+                        occurrenceDate: selectedDate,
+                      });
+                    }
+                  }}
                 />
                 <View className="flex-1 ml-3">
                   <Text

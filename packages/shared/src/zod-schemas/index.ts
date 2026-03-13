@@ -4,4 +4,4 @@ export * from './task';
 export * from './clerk';
 export * from './skill';
 export * from './metrics';
-export * from './practice-evaluation';
+export * from './practice-session';
