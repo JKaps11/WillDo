@@ -253,6 +253,25 @@ export const userMetricsRepository = {
     });
   },
 
+  incrementPartnerCheckIns: async (
+    userId: string,
+    dbClient: DbClient = db,
+  ): Promise<UserMetrics | null> => {
+    return withDbError('userMetrics.incrementPartnerCheckIns', async () => {
+      await ensureMetricsExist(userId, dbClient);
+      const result = await dbClient
+        .update(userMetrics)
+        .set({
+          partnerCheckInsCompleted: sql`${userMetrics.partnerCheckInsCompleted} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(userMetrics.userId, userId))
+        .returning();
+
+      return result[0] ?? null;
+    });
+  },
+
   /* ---------- Streak Management ---------- */
 
   /**

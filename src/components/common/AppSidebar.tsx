@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Settings,
   Target,
+  Users,
 } from 'lucide-react';
 import { ClientOnly, Link, useRouterState } from '@tanstack/react-router';
 
@@ -36,6 +37,7 @@ const navItems: Array<{
   { title: 'Skill Hub', to: '/app/skills', icon: Target },
   { title: 'Todo List', to: '/app/todolist', icon: CheckSquare },
   { title: 'Reflections', to: '/app/reflections', icon: BookOpen },
+  { title: 'Partners', to: '/app/partners', icon: Users },
   { title: 'Settings', to: '/app/settings', icon: Settings },
   { title: 'Help', to: '/app/help', icon: HelpCircle },
 ];

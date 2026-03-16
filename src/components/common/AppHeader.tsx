@@ -37,6 +37,7 @@ import { HELP_TOPICS } from '@/components/help';
 import { UI_STORE_SETTINGS_TABS, uiStore, uiStoreActions } from '@/lib/store';
 
 import { ImportSkillModal } from '@/components/skills-hub/ImportSkillModal';
+import { NotificationBell } from '@/components/partners/NotificationBell';
 import TodoListConfig from '@/components/todo-list/TodoListConfig';
 import { useTRPC } from '@/integrations/trpc/react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -67,6 +68,13 @@ function getBreadcrumbs(pathname: string): Array<Breadcrumb> {
     return breadcrumbs;
   }
 
+  if (segment === 'partners' && pathname.split('/').length > 3) {
+    return [
+      { label: 'Partners', href: '/app/partners' },
+      { label: 'Partner Detail' },
+    ];
+  }
+
   // For non-skills pages, return single breadcrumb
   return [{ label: getPageTitle(pathname) }];
 }
@@ -85,6 +93,9 @@ function getPageTitle(pathname: string): PageTitle {
       return 'Skill Hub';
     case 'reflections':
       return 'Reflections';
+    case 'partners':
+      if (pathname.split('/').length > 3) return 'Partner Detail';
+      return 'Partners';
     case 'help':
       return 'Help';
     case 'settings':
@@ -296,6 +307,10 @@ export default function AppHeader(): React.ReactNode {
         break;
       case 'Reflections':
         break;
+      case 'Partners':
+        break;
+      case 'Partner Detail':
+        break;
       case 'Dashboard':
         break;
       case 'New Skill':
@@ -343,11 +358,10 @@ export default function AppHeader(): React.ReactNode {
           ))}
         </div>
       </div>
-      {headerMenuOptions.length > 0 && (
-        <div className="flex h-full items-center gap-4 p-2 border-1">
-          {headerMenuOptions}
-        </div>
-      )}
+      <div className="flex h-full items-center gap-4 p-2 border-1">
+        {headerMenuOptions}
+        <NotificationBell />
+      </div>
     </header>
   );
 }

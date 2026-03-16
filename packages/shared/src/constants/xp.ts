@@ -4,6 +4,17 @@ export const XP_TASK_COMPLETE = 10;
 export const XP_SUBSKILL_COMPLETE = 50;
 export const XP_SKILL_ARCHIVE = 200;
 
+// Partnership XP
+export const XP_CHECK_IN_SUBMITTED = 5;
+export const XP_CHECK_IN_YES_BONUS = 10;
+export const XP_SHARED_STREAK_DAY = 5;
+export const XP_SHARED_STREAK_7_DAY = 25;
+export const XP_SHARED_STREAK_30_DAY = 100;
+export const XP_DAMAGE_MISS = 5;
+
+export const SHARED_STREAK_MILESTONES = [7, 30, 60, 100] as const;
+export const MAX_ACTIVE_PARTNERS = 3;
+
 /* ---------- Level Thresholds ---------- */
 
 /**

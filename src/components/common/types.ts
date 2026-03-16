@@ -5,5 +5,7 @@ type PageTitle =
   | 'New Skill'
   | 'Skill Planner'
   | 'Reflections'
+  | 'Partners'
+  | 'Partner Detail'
   | 'Help'
   | 'Settings';

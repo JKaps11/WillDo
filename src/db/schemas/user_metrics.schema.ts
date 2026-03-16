@@ -28,6 +28,14 @@ export const userMetrics = pgTable('user_metrics', {
   weeklyCompleted: integer('weekly_completed').default(0).notNull(),
   weekStartDate: date('week_start_date', { mode: 'date' }),
 
+  // Partnership
+  partnerCheckInsCompleted: integer('partner_check_ins_completed')
+    .default(0)
+    .notNull(),
+  sharedStreakCurrent: integer('shared_streak_current').default(0).notNull(),
+  sharedStreakBest: integer('shared_streak_best').default(0).notNull(),
+  partnerBonusXp: integer('partner_bonus_xp').default(0).notNull(),
+
   // XP/Level system
   totalXp: integer('total_xp').default(0).notNull(),
 

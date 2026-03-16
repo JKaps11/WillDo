@@ -1,6 +1,7 @@
 import { ActiveSkill } from './ActiveSkill';
 import { CompletionChart } from './CompletionChart';
 import { MetricsTotals } from './MetricsTotals';
+import { PartnerMilestones } from './PartnerMilestones';
 import { TodaysTasks } from './TodaysTasks';
 import { WelcomeBlock } from './WelcomeBlock';
 
@@ -11,6 +12,7 @@ export function Dashboard(): React.ReactElement {
         <div className="flex flex-col gap-6">
           <WelcomeBlock />
           <ActiveSkill />
+          <PartnerMilestones />
         </div>
         <TodaysTasks className="lg:col-span-2" />
       </div>

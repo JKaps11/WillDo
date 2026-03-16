@@ -39,6 +39,37 @@ export const DAYS_OF_WEEK_VALUES = [
   'saturday',
 ] as const;
 
+export const PARTNERSHIP_STATUS_VALUES = [
+  'pending',
+  'active',
+  'paused',
+  'ended',
+] as const;
+
+export const CHECK_IN_FREQUENCY_VALUES = ['daily', 'weekly'] as const;
+
+export const SHARING_LEVEL_VALUES = ['none', 'summary', 'detailed'] as const;
+
+export const CHECK_IN_RESPONSE_VALUES = ['yes', 'no', 'partial'] as const;
+
+export const PARTNER_INVITE_STATUS_VALUES = [
+  'pending',
+  'accepted',
+  'expired',
+  'revoked',
+] as const;
+
+export const PARTNER_NOTIFICATION_TYPE_VALUES = [
+  'invite_received',
+  'invite_accepted',
+  'check_in_reminder',
+  'partner_checked_in',
+  'partner_missed',
+  'streak_milestone',
+  'shared_streak_milestone',
+  'partner_level_up',
+] as const;
+
 export const APPEARANCE_THEME_VALUES = ['light', 'dark', 'system'] as const;
 
 export const TODO_LIST_TIME_SPAN_VALUES = ['day', 'week'] as const;
@@ -56,6 +87,14 @@ export type Priority = (typeof PRIORITY_VALUES)[number];
 export type RecurrenceEndType = (typeof RECURRENCE_END_TYPE_VALUES)[number];
 export type RecurrenceFrequency = (typeof RECURRENCE_FREQUENCY_VALUES)[number];
 export type DaysOfWeek = (typeof DAYS_OF_WEEK_VALUES)[number];
+export type PartnershipStatus = (typeof PARTNERSHIP_STATUS_VALUES)[number];
+export type CheckInFrequency = (typeof CHECK_IN_FREQUENCY_VALUES)[number];
+export type SharingLevel = (typeof SHARING_LEVEL_VALUES)[number];
+export type CheckInResponse = (typeof CHECK_IN_RESPONSE_VALUES)[number];
+export type PartnerInviteStatus =
+  (typeof PARTNER_INVITE_STATUS_VALUES)[number];
+export type PartnerNotificationType =
+  (typeof PARTNER_NOTIFICATION_TYPE_VALUES)[number];
 export type AppearanceTheme = (typeof APPEARANCE_THEME_VALUES)[number];
 export type TodoListTimeSpan = (typeof TODO_LIST_TIME_SPAN_VALUES)[number];
 export type TodoListSortBy = (typeof TODO_LIST_SORT_BY_VALUES)[number];
