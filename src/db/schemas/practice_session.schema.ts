@@ -100,7 +100,7 @@ export const stillTrueResponses = pgTable(
       .references(() => practiceSessions.id, { onDelete: 'cascade' }),
     sourceSessionId: uuid('source_session_id')
       .notNull()
-      .references(() => practiceSessions.id),
+      .references(() => practiceSessions.id, { onDelete: 'cascade' }),
     sourceResponseId: uuid('source_response_id').references(
       () => sessionReflectionResponses.id,
     ),

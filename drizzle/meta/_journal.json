@@ -43,6 +43,13 @@
       "when": 1771771388128,
       "tag": "0005_cultured_firedrake",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1773619886482,
+      "tag": "0006_spotty_wiccan",
+      "breakpoints": true
     }
   ]
 }

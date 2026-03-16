@@ -32,7 +32,11 @@ export function selectPrompts(
   // Select distinct prompts via weighted random sampling
   const selected: Array<ReflectionPrompt> = [];
   const usedKeys = new Set<string>();
-  const shuffled = [...weighted].sort(() => Math.random() - 0.5);
+  const shuffled = [...weighted];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
 
   for (const prompt of shuffled) {
     if (usedKeys.has(prompt.key)) continue;

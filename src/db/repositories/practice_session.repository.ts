@@ -115,7 +115,7 @@ export const practiceSessionRepository = {
             eq(practiceSessions.userId, userId),
           ),
         )
-        .orderBy(desc(practiceSessions.createdAt)),
+        .orderBy(desc(practiceSessions.occurrenceDate)),
     );
   },
 
@@ -246,7 +246,7 @@ export const practiceSessionRepository = {
     const sessionIds = completedSessions.map((s) => s.id);
 
     // Get reflections from self_assessment and forward_looking categories
-    // that haven't been marked as 'resolved' in a still_true_response
+    // that haven't already been followed up in a still_true_response
     const reflections = await withDbError(
       'practiceSession.getUnresolvedReflections',
       () =>
@@ -264,6 +264,10 @@ export const practiceSessionRepository = {
                 'self_assessment',
                 'forward_looking',
               ]),
+              sql`NOT EXISTS (
+                SELECT 1 FROM ${stillTrueResponses}
+                WHERE ${stillTrueResponses.sourceResponseId} = ${sessionReflectionResponses.id}
+              )`,
             ),
           )
           .orderBy(sql`RANDOM()`)
@@ -304,7 +308,7 @@ export const practiceSessionRepository = {
     const latestRows = await withDbError(
       'practiceSession.findLatestByTaskId',
       () =>
-        db
+        dbClient
           .select()
           .from(practiceSessions)
           .where(
