@@ -19,17 +19,10 @@ interface StillTrueAnswer {
   response: StillTrueResponseValue;
 }
 
-interface ReflectionPrompt {
-  key: string;
-  text: string;
-  category: string;
-}
-
 interface PrePracticeFlowProps {
   microWin: string | null;
   momentumText: string;
   stillTrueCards: Array<StillTrueCardData>;
-  selectedPrompts: Array<ReflectionPrompt>;
   preConfidence: number;
   onConfidenceChange: (value: number) => void;
   onStillTrueRespond: (answer: StillTrueAnswer) => void;

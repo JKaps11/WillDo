@@ -16,17 +16,14 @@ export function Slider({
   max = 10,
 }: SliderProps): React.ReactElement {
   const trackWidth = useRef(0);
-  const trackX = useRef(0);
 
   function handleLayout(e: LayoutChangeEvent): void {
     trackWidth.current = e.nativeEvent.layout.width;
-    trackX.current = e.nativeEvent.layout.x;
   }
 
   const clampToStep = useCallback(
-    (pageX: number): number => {
-      const x = pageX - trackX.current;
-      const ratio = Math.max(0, Math.min(1, x / trackWidth.current));
+    (localX: number): number => {
+      const ratio = Math.max(0, Math.min(1, localX / trackWidth.current));
       return Math.round(ratio * (max - min) + min);
     },
     [min, max],

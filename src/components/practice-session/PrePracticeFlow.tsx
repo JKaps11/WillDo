@@ -2,7 +2,6 @@ import { ConfidenceSlider } from './ConfidenceSlider';
 import { MicroWinBanner } from './MicroWinBanner';
 import { MomentumFrame } from './MomentumFrame';
 import { StillTrueCard } from './StillTrueCard';
-import type { ReflectionPrompt } from '@/lib/constants/reflection-prompts';
 import type { StillTrueResponseValue } from '@willdo/shared';
 import { Button } from '@/components/ui/button';
 
@@ -23,7 +22,6 @@ interface PrePracticeFlowProps {
   microWin: string | null;
   momentumText: string;
   stillTrueCards: Array<StillTrueCardData>;
-  selectedPrompts: Array<ReflectionPrompt>;
   preConfidence: number;
   onConfidenceChange: (value: number) => void;
   onStillTrueRespond: (answer: StillTrueAnswer) => void;

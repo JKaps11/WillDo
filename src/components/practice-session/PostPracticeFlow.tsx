@@ -1,5 +1,4 @@
 import { ConfidenceSlider } from './ConfidenceSlider';
-import { ConfidenceComparison } from './ConfidenceComparison';
 import { ReflectionPromptInput } from './ReflectionPromptInput';
 import type { ReflectionPrompt } from '@/lib/constants/reflection-prompts';
 import { Button } from '@/components/ui/button';
@@ -50,12 +49,6 @@ export function PostPracticeFlow({
         onChange={onPostConfidenceChange}
         comparisonValue={preConfidence}
         label="How confident are you now?"
-      />
-
-      {/* Pre vs post comparison */}
-      <ConfidenceComparison
-        preConfidence={preConfidence}
-        postConfidence={postConfidence}
       />
 
       {/* Submit */}

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -7,7 +7,7 @@ import { useTRPC } from '@/lib/trpc/client';
 import { Button } from '@/components/ui';
 import { PrePracticeFlow } from './PrePracticeFlow';
 import { PostPracticeFlow } from './PostPracticeFlow';
-import type { StillTrueResponseValue, UserMetricsResponse } from '@willdo/shared';
+import type { StillTrueResponseValue, UserMetricsResponse, UserSettings } from '@willdo/shared';
 import { DEFAULT_USER_SETTINGS } from '@willdo/shared';
 import { checkAndFireCelebrations, rescheduleAllNotifications } from '@/lib/notifications';
 
@@ -77,6 +77,10 @@ export function PracticeSessionSheet({
   const [formState, setFormState] = useState<SessionFormState>(INITIAL_FORM_STATE);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const previousMetricsRef = useRef<UserMetricsResponse | null>(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -113,7 +117,7 @@ export function PracticeSessionSheet({
           trpc.metrics.getUserMetrics.queryKey(),
         );
         const prev = previousMetricsRef.current;
-        const userData = userQuery.data as { settings?: { notifications?: typeof DEFAULT_USER_SETTINGS.notifications } } | undefined;
+        const userData = userQuery.data as { settings?: UserSettings } | undefined;
         const notifSettings =
           userData?.settings?.notifications ??
           DEFAULT_USER_SETTINGS.notifications;
@@ -142,8 +146,8 @@ export function PracticeSessionSheet({
   const handleClose = useCallback(() => {
     bottomSheetRef.current?.close();
     setFormState(INITIAL_FORM_STATE);
-    onClose();
-  }, [onClose]);
+    onCloseRef.current();
+  }, []);
 
   function handlePreConfidenceChange(value: number): void {
     setFormState((prev) => ({
@@ -185,10 +189,9 @@ export function PracticeSessionSheet({
   }
 
   function handleSubmit(): void {
-    if (!task || !occurrenceDate || !prePracticeData) return;
+    if (!task || !occurrenceDate || !typedPre) return;
 
-    const data = prePracticeData as PrePracticeData;
-    const reflections = data.selectedPrompts
+    const reflections = typedPre.selectedPrompts
       .map((prompt: ReflectionPrompt, i: number) => ({
         promptKey: prompt.key,
         promptText: prompt.text,
@@ -215,6 +218,8 @@ export function PracticeSessionSheet({
       },
     });
   }
+
+  const typedPre = prePracticeData as PrePracticeData | undefined;
 
   if (!isOpen) return null;
 
@@ -247,12 +252,11 @@ export function PracticeSessionSheet({
         </View>
 
         {/* Content */}
-        {formState.step === 'pre' && prePracticeData ? (
+        {formState.step === 'pre' && typedPre ? (
           <PrePracticeFlow
-            microWin={(prePracticeData as PrePracticeData).microWin}
-            momentumText={(prePracticeData as PrePracticeData).momentumText}
-            stillTrueCards={(prePracticeData as PrePracticeData).stillTrueCards}
-            selectedPrompts={(prePracticeData as PrePracticeData).selectedPrompts}
+            microWin={typedPre.microWin}
+            momentumText={typedPre.momentumText}
+            stillTrueCards={typedPre.stillTrueCards}
             preConfidence={formState.preConfidence}
             onConfidenceChange={handlePreConfidenceChange}
             onStillTrueRespond={handleStillTrueRespond}
@@ -286,9 +290,9 @@ export function PracticeSessionSheet({
           </View>
         ) : null}
 
-        {formState.step === 'post' && prePracticeData ? (
+        {formState.step === 'post' && typedPre ? (
           <PostPracticeFlow
-            selectedPrompts={(prePracticeData as PrePracticeData).selectedPrompts}
+            selectedPrompts={typedPre.selectedPrompts}
             reflectionAnswers={formState.reflectionAnswers}
             onReflectionChange={handleReflectionChange}
             preConfidence={formState.preConfidence}

@@ -11,6 +11,7 @@ export function ReflectionPromptInput({
   promptText,
   value,
   onChange,
+  index,
 }: ReflectionPromptInputProps): React.ReactElement {
   return (
     <View className="gap-2">
@@ -18,6 +19,7 @@ export function ReflectionPromptInput({
         {promptText}
       </Text>
       <TextInput
+        nativeID={`reflection-${index}`}
         value={value}
         onChangeText={onChange}
         placeholder="Write your reflection..."

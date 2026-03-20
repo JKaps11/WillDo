@@ -13,7 +13,7 @@ export const Route = createFileRoute('/app')({
   component: AppLayout,
 });
 
-export function AppLayout() {
+export function AppLayout(): React.ReactElement {
   return (
     <SignedIn>
       <SidebarProvider defaultOpen={false}>

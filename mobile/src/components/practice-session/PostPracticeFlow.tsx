@@ -1,7 +1,6 @@
-import { View, Text, ScrollView } from 'react-native';
+import { Text, ScrollView } from 'react-native';
 import { Button } from '@/components/ui';
 import { ConfidenceSlider } from './ConfidenceSlider';
-import { ConfidenceComparison } from './ConfidenceComparison';
 import { ReflectionPromptInput } from './ReflectionPromptInput';
 
 interface ReflectionPrompt {
@@ -61,12 +60,6 @@ export function PostPracticeFlow({
         onChange={onPostConfidenceChange}
         comparisonValue={preConfidence}
         label="How confident are you now?"
-      />
-
-      {/* Pre vs post comparison */}
-      <ConfidenceComparison
-        preConfidence={preConfidence}
-        postConfidence={postConfidence}
       />
 
       {/* Submit */}

@@ -20,7 +20,7 @@ export function ConfidenceComparison({
         </Text>
       </View>
       <View className="items-center">
-        <Text className="text-xs text-transparent">_</Text>
+        <View style={{ height: 16 }} />
         <Text
           className={`text-lg font-semibold ${
             delta > 0

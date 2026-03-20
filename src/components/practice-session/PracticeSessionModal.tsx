@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useStore } from '@tanstack/react-store';
 import { Play } from 'lucide-react';
 
+import { toast } from 'sonner';
 import { PrePracticeFlow } from './PrePracticeFlow';
 import { PostPracticeFlow } from './PostPracticeFlow';
 import type { StillTrueResponseValue } from '@willdo/shared';
@@ -137,7 +138,10 @@ export function PracticeSessionModal(): React.ReactElement | null {
       }))
       .filter((r) => r.responseText.length > 0);
 
-    if (reflections.length === 0) return;
+    if (reflections.length === 0) {
+      toast.error('Please answer at least one reflection prompt');
+      return;
+    }
 
     completeWithSessionMutation.mutate({
       taskId: task.id,
@@ -177,7 +181,6 @@ export function PracticeSessionModal(): React.ReactElement | null {
             microWin={prePracticeData.microWin}
             momentumText={prePracticeData.momentumText}
             stillTrueCards={prePracticeData.stillTrueCards}
-            selectedPrompts={prePracticeData.selectedPrompts}
             preConfidence={formState.preConfidence}
             onConfidenceChange={handlePreConfidenceChange}
             onStillTrueRespond={handleStillTrueRespond}

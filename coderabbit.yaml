@@ -14,7 +14,7 @@ reviews:
   review_status: true
   review_details: false
   commit_status: true
-  fail_commit_status: false
+  fail_commit_status: true
   collapse_walkthrough: true
   changed_files_summary: true
   sequence_diagrams: false
@@ -108,7 +108,7 @@ reviews:
     opengrep:
       enabled: false
     semgrep:
-      enabled: false
+      enabled: true
     circleci:
       enabled: false
     clippy:
@@ -116,7 +116,7 @@ reviews:
     sqlfluff:
       enabled: false
     trivy:
-      enabled: false
+      enabled: true
     prismaLint:
       enabled: false
     pylint:
@@ -136,7 +136,7 @@ reviews:
     checkmake:
       enabled: false
     osvScanner:
-      enabled: false
+      enabled: true
     blinter:
       enabled: false
     psscriptanalyzer:
