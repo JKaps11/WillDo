@@ -30,7 +30,9 @@ export function ConfidenceSlider({
         min={1}
         max={10}
         value={[value]}
-        onValueChange={(vals: Array<number>) => onChange(vals[0])}
+        onValueChange={(val: number | readonly number[]) =>
+          onChange(Array.isArray(val) ? val[0] : val)
+        }
       />
       <p className="text-xs text-muted-foreground italic">
         {getAdaptiveMessage(value)}

@@ -75,9 +75,6 @@ export function PracticeSessionModal(): React.ReactElement | null {
         queryClient.invalidateQueries({
           queryKey: ['skill'],
         });
-        queryClient.invalidateQueries({
-          queryKey: trpc.user.getMetrics.queryKey(),
-        });
         handleClose();
       },
     }),
