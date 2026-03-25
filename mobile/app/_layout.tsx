@@ -2,8 +2,10 @@ import { useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-expo';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AppClerkProvider from '@/lib/auth/clerk-provider';
 import { TRPCQueryProvider } from '@/lib/trpc/provider';
+import { PracticeSessionProvider } from '@/components/practice-session';
 // TODO: Re-enable notifications when using a development build instead of Expo Go
 // import { useNotificationSetup } from '@/lib/notifications';
 import '../global.css';
@@ -33,13 +35,17 @@ function AuthGuard({ children }: { children: React.ReactNode }): React.ReactElem
 
 export default function RootLayout(): React.ReactElement {
   return (
-    <AppClerkProvider>
-      <TRPCQueryProvider>
-        <AuthGuard>
-          <StatusBar style="auto" />
-          <Slot />
-        </AuthGuard>
-      </TRPCQueryProvider>
-    </AppClerkProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AppClerkProvider>
+        <TRPCQueryProvider>
+          <PracticeSessionProvider>
+            <AuthGuard>
+              <StatusBar style="auto" />
+              <Slot />
+            </AuthGuard>
+          </PracticeSessionProvider>
+        </TRPCQueryProvider>
+      </AppClerkProvider>
+    </GestureHandlerRootView>
   );
 }

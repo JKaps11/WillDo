@@ -49,10 +49,10 @@ export function TaskCard({ task }: TaskCardProps): React.ReactElement {
 
     if (task.subSkillId) {
       if (checked) {
-        // Completing: open evaluation modal instead of mutating directly
-        // Dashboard tasks are always today's tasks
+        // Completing: open session modal instead of mutating directly
+        // Dashboard tasks are always today's occurrences
         const occurrenceDate = new Date();
-        uiStoreActions.openEvaluationModal(
+        uiStoreActions.openSessionModal(
           {
             id: task.id,
             name: task.name,

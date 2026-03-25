@@ -1,10 +1,10 @@
 import { TRPCError } from '@trpc/server';
 import { protectedProcedure } from '../init';
 import type { Task } from '@/db/schemas/task.schema';
-import type { PracticeEvaluation } from '@/db/schemas/practice_evaluation.schema';
+import type { PracticeSession } from '@/db/schemas/practice_session.schema';
 import {
-  completeTaskWithEvaluationSchema,
   completeTaskWithMetricUpdateSchema,
+  completeTaskWithSessionSchema,
   createTaskSchema,
   deleteTaskSchema,
   getTaskSchema,
@@ -12,7 +12,7 @@ import {
   updateTaskSchema,
 } from '@/lib/zod-schemas';
 import { db } from '@/db/index';
-import { practiceEvaluationRepository } from '@/db/repositories/practice_evaluation.repository';
+import { practiceSessionRepository } from '@/db/repositories/practice_session.repository';
 import { skillRepository } from '@/db/repositories/skill.repository';
 import { taskRepository } from '@/db/repositories/task.repository';
 import { subSkillRepository } from '@/db/repositories/sub_skill.repository';
@@ -194,22 +194,22 @@ export const taskRouter = {
             tx,
           );
 
-          // Clean up evaluation
+          // Clean up session
           if (input.occurrenceDate) {
-            await practiceEvaluationRepository.deleteByTaskAndDate(
+            await practiceSessionRepository.deleteByTaskAndDate(
               task.id,
               input.occurrenceDate,
               ctx.userId,
               tx,
             );
           } else {
-            await practiceEvaluationRepository.deleteLatestByTaskId(
+            await practiceSessionRepository.deleteLatestByTaskId(
               task.id,
               ctx.userId,
               tx,
             );
           }
-          addWide({ evaluation_deleted: true });
+          addWide({ session_deleted: true });
 
           addWide({
             completion_event_deleted: true,
@@ -221,14 +221,14 @@ export const taskRouter = {
       });
     }),
 
-  completeWithEvaluation: protectedProcedure
-    .input(completeTaskWithEvaluationSchema)
+  completeWithSession: protectedProcedure
+    .input(completeTaskWithSessionSchema)
     .mutation(
       async ({
         ctx,
         input,
-      }): Promise<{ task: Task; evaluation: PracticeEvaluation }> => {
-        addWide({ task_id: input.taskId, action: 'complete_with_evaluation' });
+      }): Promise<{ task: Task; session: PracticeSession }> => {
+        addWide({ task_id: input.taskId, action: 'complete_with_session' });
 
         const existingTask = await taskRepository.findById(
           input.taskId,
@@ -258,41 +258,56 @@ export const taskRouter = {
           });
         }
 
-        // Increment metric (read can stay outside tx)
-        const metrics = await skillRepository.findMetricsBySubSkillId(
-          existingTask.subSkillId,
-          ctx.userId,
-        );
+        // Get iteration count + metric (reads outside tx)
+        const [sessionCount, metrics] = await Promise.all([
+          practiceSessionRepository.countBySubSkillId(
+            existingTask.subSkillId,
+            ctx.userId,
+          ),
+          skillRepository.findMetricsBySubSkillId(
+            existingTask.subSkillId,
+            ctx.userId,
+          ),
+        ]);
 
         return db.transaction(async (tx) => {
-          // Create the practice evaluation
-          const evaluation = await practiceEvaluationRepository.create(
+          // Create the practice session with child rows
+          const session = await practiceSessionRepository.create(
             {
               userId: ctx.userId,
               taskId: input.taskId,
               subSkillId: existingTask.subSkillId,
               skillId,
               occurrenceDate: input.occurrenceDate,
-              ...input.evaluation,
+              title: input.session.title,
+              preConfidence: input.session.preConfidence,
+              postConfidence: input.session.postConfidence,
+              iterationNumber: sessionCount + 1,
+              completedAt: new Date(),
             },
+            input.session.reflections.map((r) => ({
+              promptKey: r.promptKey,
+              promptText: r.promptText,
+              promptCategory: r.promptCategory,
+              responseText: r.responseText,
+              sortOrder: r.sortOrder,
+            })),
+            (input.session.stillTrueResponses ?? []).map((s) => ({
+              sourceSessionId: s.sourceSessionId,
+              sourceResponseId: s.sourceResponseId,
+              sourceText: s.sourceText,
+              response: s.response,
+            })),
             tx,
           );
 
-          if (!evaluation) {
-            throw new TRPCError({
-              code: 'INTERNAL_SERVER_ERROR',
-              message: 'Failed to create evaluation',
-            });
-          }
-          addWide({ evaluation_id: evaluation.id });
+          addWide({ session_id: session.id });
 
-          // Now run existing completion logic: mark complete
+          // Mark task as completed
           const task = await taskRepository.update(
             input.taskId,
             ctx.userId,
-            {
-              completed: true,
-            },
+            { completed: true },
             tx,
           );
           if (!task) {
@@ -323,7 +338,7 @@ export const taskRouter = {
             xp_added: XP_TASK_COMPLETE,
           });
 
-          return { task, evaluation };
+          return { task, session };
         });
       },
     ),

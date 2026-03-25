@@ -20,7 +20,7 @@ The DB schema (`src/db/schemas/`) is the **canonical source of truth** for all d
 
 1. **DB schema types** (`$inferSelect` / `$inferInsert`) define the canonical field names and types.
 2. **Zod schemas** (`src/lib/zod-schemas/`) add runtime validation on top. They must:
-   - Include a `satisfies` assertion proving their inferred type is assignable to the corresponding DB type (e.g., `satisfies z.ZodType<Omit<NewPracticeEvaluation, 'id' | 'createdAt' | 'updatedAt'>>`).
+   - Include a `satisfies` assertion proving their inferred type is assignable to the corresponding DB type (e.g., `satisfies z.ZodType<Omit<NewPracticeSession, 'id' | 'createdAt' | 'updatedAt'>>`).
    - Derive enum values from DB enums (e.g., `z.enum(priorityEnum.enumValues)`), never re-declare them.
    - Use `.pick()` / `.omit()` / `.extend()` to create variants — never copy-paste fields into a new `z.object()`.
 3. **TypeScript types** elsewhere must derive from the highest available source:

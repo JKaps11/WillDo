@@ -16,11 +16,13 @@ import { getLevelName } from '@willdo/shared';
 import type { UserMetricsResponse } from '@willdo/shared';
 import { checkAndFireCelebrations, rescheduleAllNotifications } from '@/lib/notifications';
 import { DEFAULT_USER_SETTINGS } from '@willdo/shared';
+import { usePracticeSession } from '@/components/practice-session';
 
 export default function DashboardScreen(): React.ReactElement {
   const { user } = useUser();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { openSession } = usePracticeSession();
 
   const tasksQuery = useQuery(trpc.dashboard.getTodaysTasks.queryOptions());
   const metricsQuery = useQuery(trpc.metrics.getUserMetrics.queryOptions());
@@ -154,12 +156,19 @@ export default function DashboardScreen(): React.ReactElement {
             <View className="flex-row items-start">
               <Checkbox
                 checked={item.completed}
-                onToggle={() =>
-                  completeMutation.mutate({
-                    id: item.id,
-                    completed: !item.completed,
-                  })
-                }
+                onToggle={() => {
+                  if (!item.completed && item.subSkillId) {
+                    openSession(
+                      { id: item.id, name: item.name, subSkillId: item.subSkillId },
+                      new Date(),
+                    );
+                  } else {
+                    completeMutation.mutate({
+                      id: item.id,
+                      completed: !item.completed,
+                    });
+                  }
+                }}
               />
               <View className="flex-1 ml-3">
                 <Text

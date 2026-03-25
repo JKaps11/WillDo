@@ -181,7 +181,25 @@ export interface User {
   activeSkillId: string | null;
 }
 
-export interface PracticeEvaluation {
+export const PROMPT_CATEGORY_VALUES = [
+  'self_assessment',
+  'insight_extraction',
+  'forward_looking',
+  'meta_cognitive',
+] as const;
+
+export type PromptCategory = (typeof PROMPT_CATEGORY_VALUES)[number];
+
+export const STILL_TRUE_RESPONSE_VALUES = [
+  'still_struggling',
+  'improved',
+  'resolved',
+] as const;
+
+export type StillTrueResponseValue =
+  (typeof STILL_TRUE_RESPONSE_VALUES)[number];
+
+export interface PracticeSession {
   id: string;
   userId: string;
   taskId: string;
@@ -189,13 +207,31 @@ export interface PracticeEvaluation {
   skillId: string;
   occurrenceDate: Date;
   title: string;
-  wentWell: Array<string>;
-  struggled: Array<string>;
-  understandBetter: Array<string>;
-  feelings: Array<string>;
-  focusNextTime: Array<string>;
-  confidenceLevel: number;
-  completedAt: Date;
+  preConfidence: number;
+  postConfidence: number | null;
+  iterationNumber: number;
+  completedAt: Date | null;
   updatedAt: Date | null;
+  createdAt: Date;
+}
+
+export interface SessionReflectionResponse {
+  id: string;
+  sessionId: string;
+  promptKey: string;
+  promptText: string;
+  promptCategory: PromptCategory;
+  responseText: string;
+  sortOrder: number;
+  createdAt: Date;
+}
+
+export interface StillTrueResponse {
+  id: string;
+  sessionId: string;
+  sourceSessionId: string;
+  sourceResponseId: string | null;
+  sourceText: string;
+  response: StillTrueResponseValue;
   createdAt: Date;
 }
