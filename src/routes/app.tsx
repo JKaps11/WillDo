@@ -6,14 +6,14 @@ import {
   GlobalRecurringModal,
   MoveRecurringModal,
 } from '@/components/recurring';
-import { PracticeEvaluationModal } from '@/components/practice-evaluation';
+import { PracticeSessionModal } from '@/components/practice-session';
 import AppHeader from '@/components/common/AppHeader';
 
 export const Route = createFileRoute('/app')({
   component: AppLayout,
 });
 
-export function AppLayout() {
+export function AppLayout(): React.ReactElement {
   return (
     <SignedIn>
       <SidebarProvider defaultOpen={false}>
@@ -27,7 +27,7 @@ export function AppLayout() {
       </SidebarProvider>
       <GlobalRecurringModal />
       <MoveRecurringModal />
-      <PracticeEvaluationModal />
+      <PracticeSessionModal />
     </SignedIn>
   );
 }

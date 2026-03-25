@@ -96,9 +96,9 @@ export function Task({ task, className, dragSource }: TaskProps): ReactNode {
     // If task is linked to a sub-skill, use completeWithMetricUpdate
     if (task.subSkillId) {
       if (checked) {
-        // Completing: open evaluation modal instead of mutating directly
+        // Completing: open session modal instead of mutating directly
         const occurrenceDate = task.todoListDate ?? new Date();
-        uiStoreActions.openEvaluationModal(task, occurrenceDate);
+        uiStoreActions.openSessionModal(task, occurrenceDate);
       } else {
         // Uncompleting: optimistic update + mutation
         const occurrenceDate = task.todoListDate ?? undefined;

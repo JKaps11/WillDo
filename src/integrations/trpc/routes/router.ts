@@ -8,7 +8,7 @@ import { metricsRouter } from './metrics.trpc';
 import { skillRouter } from './skill.trpc';
 // import { eventRouter } from './event.trpc'; // DISABLED: Calendar feature
 import { userRouter } from './user.trpc';
-import { practiceEvaluationRouter } from './practice_evaluation.trpc';
+import { practiceSessionRouter } from './practice_session.trpc';
 import { taskRouter } from './task.trpc';
 import { partnershipRouter } from './partnership.trpc';
 import { checkInRouter } from './check_in.trpc';
@@ -26,7 +26,7 @@ export const trpcRouter = createTRPCRouter({
   skill: skillRouter,
   skillMetric: skillMetricRouter,
   subSkill: subSkillRouter,
-  practiceEvaluation: practiceEvaluationRouter,
+  practiceSession: practiceSessionRouter,
   // tag: tagRouter,
   task: taskRouter,
   todoList: todoListRouter,
