@@ -1,11 +1,13 @@
-import { and, count, desc, eq, lt, sql } from 'drizzle-orm';
+import { and, count, desc, eq, gte, lt, lte, sql } from 'drizzle-orm';
 import { startOfDay } from 'date-fns';
 
 import type { DbClient } from '@/db/index';
+import type { CheckIn } from '@/db/schemas/check_in.schema';
 import { db } from '@/db/index';
-import { checkIns, type CheckIn } from '@/db/schemas/check_in.schema';
+import { checkIns } from '@/db/schemas/check_in.schema';
 import { partnerships } from '@/db/schemas/partnership.schema';
 import { withDbError } from '@/db/withDbError';
+import { endOfWeek, startOfWeek } from '@/lib/dates';
 
 /* ---------- Projection Types ---------- */
 
@@ -67,7 +69,31 @@ export const checkInRepository = {
     });
   },
 
-  getTodayCheckIns: async (userId: string): Promise<CheckIn[]> => {
+  findByPartnershipInDateRange: async (
+    partnershipId: string,
+    userId: string,
+    rangeStart: Date,
+    rangeEnd: Date,
+  ): Promise<CheckIn | null> => {
+    return withDbError('checkIn.findByPartnershipInDateRange', async () => {
+      const result = await db
+        .select()
+        .from(checkIns)
+        .where(
+          and(
+            eq(checkIns.partnershipId, partnershipId),
+            eq(checkIns.userId, userId),
+            gte(checkIns.date, rangeStart),
+            lte(checkIns.date, rangeEnd),
+          ),
+        )
+        .limit(1);
+
+      return result[0] ?? null;
+    });
+  },
+
+  getTodayCheckIns: async (userId: string): Promise<Array<CheckIn>> => {
     return withDbError('checkIn.getTodayCheckIns', async () => {
       const today = startOfDay(new Date());
       return db
@@ -82,7 +108,7 @@ export const checkInRepository = {
     userId: string,
     cursor?: Date,
     limit: number = 20,
-  ): Promise<CheckIn[]> => {
+  ): Promise<Array<CheckIn>> => {
     return withDbError('checkIn.getHistory', async () => {
       const conditions = [
         eq(checkIns.partnershipId, partnershipId),
@@ -104,7 +130,7 @@ export const checkInRepository = {
 
   getPendingPartnerships: async (
     userId: string,
-  ): Promise<PendingCheckIn[]> => {
+  ): Promise<Array<PendingCheckIn>> => {
     return withDbError('checkIn.getPendingPartnerships', async () => {
       const today = startOfDay(new Date());
 
@@ -122,19 +148,51 @@ export const checkInRepository = {
           ),
         );
 
-      // Filter out partnerships where user has already checked in today
+      // Filter out partnerships where user has already checked in for the current period
       const todayCheckIns = await db
         .select({ partnershipId: checkIns.partnershipId })
         .from(checkIns)
         .where(and(eq(checkIns.userId, userId), eq(checkIns.date, today)));
 
-      const checkedInIds = new Set(
+      const checkedInTodayIds = new Set(
         todayCheckIns.map((c) => c.partnershipId),
       );
 
-      return activePartnerships.filter(
-        (p) => !checkedInIds.has(p.partnershipId),
+      // For weekly partnerships, also check if checked in this week
+      const weeklyPartnerships = activePartnerships.filter(
+        (p) =>
+          p.checkInFrequency === 'weekly' &&
+          !checkedInTodayIds.has(p.partnershipId),
       );
+
+      let checkedInThisWeekIds = new Set<string>();
+      if (weeklyPartnerships.length > 0) {
+        const weekStart = startOfWeek(today);
+        const weekEnd = endOfWeek(today);
+        const weekCheckIns = await db
+          .select({ partnershipId: checkIns.partnershipId })
+          .from(checkIns)
+          .where(
+            and(
+              eq(checkIns.userId, userId),
+              gte(checkIns.date, weekStart),
+              lte(checkIns.date, weekEnd),
+            ),
+          );
+        checkedInThisWeekIds = new Set(
+          weekCheckIns.map((c) => c.partnershipId),
+        );
+      }
+
+      return activePartnerships.filter((p) => {
+        if (p.checkInFrequency === 'weekly') {
+          return (
+            !checkedInThisWeekIds.has(p.partnershipId) &&
+            !checkedInTodayIds.has(p.partnershipId)
+          );
+        }
+        return !checkedInTodayIds.has(p.partnershipId);
+      });
     });
   },
 

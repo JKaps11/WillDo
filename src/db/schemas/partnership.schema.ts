@@ -1,5 +1,6 @@
 import {
   boolean,
+  check,
   index,
   pgEnum,
   pgTable,
@@ -7,6 +8,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 
 import { resourceTimestamps } from './utils.schema';
 import { users } from './user.schema';
@@ -35,8 +37,7 @@ export const sharingLevelEnum = pgEnum('sharing_level', [
 
 export type PartnershipStatus =
   (typeof partnershipStatusEnum.enumValues)[number];
-export type CheckInFrequency =
-  (typeof checkInFrequencyEnum.enumValues)[number];
+export type CheckInFrequency = (typeof checkInFrequencyEnum.enumValues)[number];
 export type SharingLevel = (typeof sharingLevelEnum.enumValues)[number];
 
 /* ---------- Partnership Table ---------- */
@@ -60,12 +61,16 @@ export const partnerships = pgTable(
     ...resourceTimestamps,
   },
   (table) => [
+    // DB has a symmetric expression index using LEAST/GREATEST instead of this
+    // directional one. Kept for Drizzle schema awareness since expression indexes
+    // aren't supported in the DSL. See migration 0008_partnership_symmetric_constraints.sql
     uniqueIndex('partnership_inviter_invitee_idx').on(
       table.inviterId,
       table.inviteeId,
     ),
     index('partnership_inviter_idx').on(table.inviterId),
     index('partnership_invitee_idx').on(table.inviteeId),
+    check('partnership_no_self', sql`inviter_id <> invitee_id`),
   ],
 );
 

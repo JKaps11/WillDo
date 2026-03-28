@@ -3,14 +3,14 @@ import { startOfDay } from 'date-fns';
 
 import { protectedProcedure, publicProcedure } from '../init';
 import {
-  createInviteSchema,
   acceptInviteSchema,
-  revokeInviteSchema,
+  createInviteSchema,
   getInviteByTokenSchema,
   getPartnershipSchema,
-  updateSharingPrefsSchema,
-  updatePartnershipSettingsSchema,
   partnershipActionSchema,
+  revokeInviteSchema,
+  updatePartnershipSettingsSchema,
+  updateSharingPrefsSchema,
 } from '@/lib/zod-schemas';
 import { db } from '@/db/index';
 import { partnershipRepository } from '@/db/repositories/partnership.repository';
@@ -19,6 +19,12 @@ import { partnerNotificationRepository } from '@/db/repositories/partner_notific
 import { userMetricsRepository } from '@/db/repositories/user_metrics.repository';
 import { MAX_ACTIVE_PARTNERS } from '@/lib/constants/xp';
 import { addWide } from '@/lib/logging/wideEventStore.server';
+
+function maskEmail(email: string): string {
+  const [local, domain] = email.split('@');
+  if (!domain) return '***';
+  return `${local[0]}***@${domain}`;
+}
 
 export const partnershipRouter = {
   /* ---------- Invites ---------- */
@@ -59,7 +65,7 @@ export const partnershipRouter = {
   getInviteByToken: publicProcedure
     .input(getInviteByTokenSchema)
     .query(async ({ input }) => {
-      const invite = await partnershipRepository.findInviteByToken(
+      const invite = await partnershipRepository.findInviteByTokenPublic(
         input.token,
       );
 
@@ -81,7 +87,12 @@ export const partnershipRouter = {
         });
       }
 
-      return { inviterId: invite.inviterId, inviteeEmail: invite.inviteeEmail };
+      return {
+        inviterName: invite.inviterName,
+        inviteeEmail: invite.inviteeEmail
+          ? maskEmail(invite.inviteeEmail)
+          : null,
+      };
     }),
 
   acceptInvite: protectedProcedure
@@ -89,9 +100,7 @@ export const partnershipRouter = {
     .mutation(async ({ ctx, input }) => {
       addWide({ action: 'accept_partner_invite' });
 
-      const invite = await partnershipRepository.findInviteByToken(
-        input.token,
-      );
+      const invite = await partnershipRepository.findInviteByToken(input.token);
 
       if (!invite) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Invite not found' });
@@ -234,11 +243,10 @@ export const partnershipRouter = {
           : partnership.inviterId;
 
       // Get partner's sharing prefs (what they allow us to see)
-      const partnerSharingPrefs =
-        await partnershipRepository.getSharingPrefs(
-          partnership.id,
-          partnerId,
-        );
+      const partnerSharingPrefs = await partnershipRepository.getSharingPrefs(
+        partnership.id,
+        partnerId,
+      );
 
       // Get our sharing prefs
       const mySharingPrefs = await partnershipRepository.getSharingPrefs(
@@ -308,12 +316,11 @@ export const partnershipRouter = {
         ctx.userId,
         today,
       );
-      const partnerCheckIn =
-        await checkInRepository.findByPartnershipAndDate(
-          partnership.id,
-          partnerId,
-          today,
-        );
+      const partnerCheckIn = await checkInRepository.findByPartnershipAndDate(
+        partnership.id,
+        partnerId,
+        today,
+      );
 
       (dashboard.partnerData as Record<string, unknown>).todayCheckIn = {
         myResponse: myCheckIn?.response ?? null,

@@ -2,9 +2,11 @@ import { TRPCError } from '@trpc/server';
 import { startOfDay } from 'date-fns';
 
 import { protectedProcedure } from '../init';
+import { endOfWeek, startOfWeek } from '@/lib/dates';
+
 import {
-  submitCheckInSchema,
   getCheckInHistorySchema,
+  submitCheckInSchema,
 } from '@/lib/zod-schemas';
 import { db } from '@/db/index';
 import { partnershipRepository } from '@/db/repositories/partnership.repository';
@@ -12,12 +14,12 @@ import { checkInRepository } from '@/db/repositories/check_in.repository';
 import { partnerNotificationRepository } from '@/db/repositories/partner_notification.repository';
 import { userMetricsRepository } from '@/db/repositories/user_metrics.repository';
 import {
+  SHARED_STREAK_MILESTONES,
   XP_CHECK_IN_SUBMITTED,
   XP_CHECK_IN_YES_BONUS,
-  XP_SHARED_STREAK_DAY,
-  XP_SHARED_STREAK_7_DAY,
   XP_SHARED_STREAK_30_DAY,
-  SHARED_STREAK_MILESTONES,
+  XP_SHARED_STREAK_7_DAY,
+  XP_SHARED_STREAK_DAY,
 } from '@/lib/constants/xp';
 import { addWide } from '@/lib/logging/wideEventStore.server';
 
@@ -59,6 +61,26 @@ export const checkInRouter = {
         });
       }
 
+      // For weekly partnerships, enforce one check-in per week
+      if (partnership.checkInFrequency === 'weekly') {
+        const weekStart = startOfWeek(today);
+        const weekEnd = endOfWeek(today);
+        const existingThisWeek =
+          await checkInRepository.findByPartnershipInDateRange(
+            input.partnershipId,
+            ctx.userId,
+            weekStart,
+            weekEnd,
+          );
+
+        if (existingThisWeek) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Already checked in this week for this partnership',
+          });
+        }
+      }
+
       // Calculate XP
       let xpAwarded = XP_CHECK_IN_SUBMITTED;
       if (input.response === 'yes') {
@@ -91,12 +113,11 @@ export const checkInRouter = {
             ? partnership.inviteeId
             : partnership.inviterId;
 
-        const partnerCheckIn =
-          await checkInRepository.findByPartnershipAndDate(
-            input.partnershipId,
-            partnerId,
-            today,
-          );
+        const partnerCheckIn = await checkInRepository.findByPartnershipAndDate(
+          input.partnershipId,
+          partnerId,
+          today,
+        );
 
         if (partnerCheckIn) {
           // Both checked in today — increment shared streak bonus

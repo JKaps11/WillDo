@@ -1,22 +1,18 @@
+import crypto from 'node:crypto';
 import { and, count, eq, or, sql } from 'drizzle-orm';
-import crypto from 'crypto';
 import { addDays } from 'date-fns';
 
 import type { DbClient } from '@/db/index';
-import { db } from '@/db/index';
-import {
-  partnerships,
-  type Partnership,
-  type NewPartnership,
+import type {
+  NewPartnership,
+  Partnership,
 } from '@/db/schemas/partnership.schema';
-import {
-  partnershipSharing,
-  type PartnershipSharing,
-} from '@/db/schemas/partnership_sharing.schema';
-import {
-  partnerInvites,
-  type PartnerInvite,
-} from '@/db/schemas/partner_invite.schema';
+import type { PartnershipSharing } from '@/db/schemas/partnership_sharing.schema';
+import type { PartnerInvite } from '@/db/schemas/partner_invite.schema';
+import { db } from '@/db/index';
+import { partnerships } from '@/db/schemas/partnership.schema';
+import { partnershipSharing } from '@/db/schemas/partnership_sharing.schema';
+import { partnerInvites } from '@/db/schemas/partner_invite.schema';
 import { users } from '@/db/schemas/user.schema';
 import { withDbError } from '@/db/withDbError';
 
@@ -32,10 +28,7 @@ export interface PartnershipWithPartner extends Partnership {
 export const partnershipRepository = {
   /* ---------- Partnership CRUD ---------- */
 
-  findById: async (
-    id: string,
-    userId: string,
-  ): Promise<Partnership | null> => {
+  findById: async (id: string, userId: string): Promise<Partnership | null> => {
     return withDbError('partnership.findById', async () => {
       const result = await db
         .select()
@@ -55,7 +48,9 @@ export const partnershipRepository = {
     });
   },
 
-  listActive: async (userId: string): Promise<PartnershipWithPartner[]> => {
+  listActive: async (
+    userId: string,
+  ): Promise<Array<PartnershipWithPartner>> => {
     return withDbError('partnership.listActive', async () => {
       const result = await db
         .select({
@@ -92,7 +87,7 @@ export const partnershipRepository = {
     });
   },
 
-  listAll: async (userId: string): Promise<PartnershipWithPartner[]> => {
+  listAll: async (userId: string): Promise<Array<PartnershipWithPartner>> => {
     return withDbError('partnership.listAll', async () => {
       const result = await db
         .select({
@@ -317,6 +312,31 @@ export const partnershipRepository = {
     });
   },
 
+  findInviteByTokenPublic: async (
+    token: string,
+  ): Promise<{
+    inviterName: string;
+    status: PartnerInvite['status'];
+    expiresAt: Date;
+    inviteeEmail: string | null;
+  } | null> => {
+    return withDbError('partnership.findInviteByTokenPublic', async () => {
+      const result = await db
+        .select({
+          inviterName: users.name,
+          status: partnerInvites.status,
+          expiresAt: partnerInvites.expiresAt,
+          inviteeEmail: partnerInvites.inviteeEmail,
+        })
+        .from(partnerInvites)
+        .innerJoin(users, eq(partnerInvites.inviterId, users.id))
+        .where(eq(partnerInvites.token, token))
+        .limit(1);
+
+      return result[0] ?? null;
+    });
+  },
+
   findInviteById: async (
     id: string,
     inviterId: string,
@@ -337,7 +357,7 @@ export const partnershipRepository = {
     });
   },
 
-  listInvites: async (userId: string): Promise<PartnerInvite[]> => {
+  listInvites: async (userId: string): Promise<Array<PartnerInvite>> => {
     return withDbError('partnership.listInvites', async () => {
       return db
         .select()

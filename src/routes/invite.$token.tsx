@@ -4,12 +4,7 @@ import { useAuth } from '@clerk/tanstack-react-start';
 import { useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTRPC } from '@/integrations/trpc/react';
 
 export const Route = createFileRoute('/invite/$token')({
@@ -78,7 +73,9 @@ function InviteAcceptPage(): React.ReactNode {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm">
-            You've been invited to become an accountability partner on Will Do!
+            {inviteInfo?.inviterName
+              ? `${inviteInfo.inviterName} has invited you to become an accountability partner on Will Do!`
+              : "You've been invited to become an accountability partner on Will Do!"}
           </p>
           {inviteInfo?.inviteeEmail && (
             <p className="text-sm text-muted-foreground">
