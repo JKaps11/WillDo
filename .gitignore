@@ -21,4 +21,4 @@ playwright-report/
 scripts/ai-plan-results/
 
 # Claude Code
-.claude/plans/
+claude/plans/

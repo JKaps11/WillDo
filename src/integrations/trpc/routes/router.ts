@@ -10,13 +10,19 @@ import { skillRouter } from './skill.trpc';
 import { userRouter } from './user.trpc';
 import { practiceSessionRouter } from './practice_session.trpc';
 import { taskRouter } from './task.trpc';
+import { partnershipRouter } from './partnership.trpc';
+import { checkInRouter } from './check_in.trpc';
+import { partnerNotificationRouter } from './partner_notification.trpc';
 // import { tagRouter } from './tag.trpc';
 
 export const trpcRouter = createTRPCRouter({
   // event: eventRouter, // DISABLED: Calendar feature
   aiPlanning: aiPlanningRouter,
+  checkIn: checkInRouter,
   dashboard: dashboardRouter,
   metrics: metricsRouter,
+  partnership: partnershipRouter,
+  partnerNotification: partnerNotificationRouter,
   skill: skillRouter,
   skillMetric: skillMetricRouter,
   subSkill: subSkillRouter,

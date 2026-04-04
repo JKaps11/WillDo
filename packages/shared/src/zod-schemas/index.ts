@@ -5,3 +5,4 @@ export * from './clerk';
 export * from './skill';
 export * from './metrics';
 export * from './practice-session';
+export * from './partnership';

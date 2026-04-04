@@ -12,13 +12,16 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as AppTodolistRouteImport } from './routes/app/todolist'
 import { Route as AppSkillsRouteImport } from './routes/app/skills'
 import { Route as AppSettingsRouteImport } from './routes/app/settings'
 import { Route as AppReflectionsRouteImport } from './routes/app/reflections'
+import { Route as AppPartnersRouteImport } from './routes/app/partners'
 import { Route as AppHelpRouteImport } from './routes/app/help'
 import { Route as AppDashboardRouteImport } from './routes/app/dashboard'
 import { Route as AppSkillsNewRouteImport } from './routes/app/skills_.new'
+import { Route as AppPartnersIdRouteImport } from './routes/app/partners_.$id'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
 import { Route as AppSkillsIdPlannerRouteImport } from './routes/app/skills_.$id.planner'
 
@@ -36,6 +39,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const InviteTokenRoute = InviteTokenRouteImport.update({
+  id: '/invite/$token',
+  path: '/invite/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppTodolistRoute = AppTodolistRouteImport.update({
   id: '/todolist',
@@ -57,6 +65,11 @@ const AppReflectionsRoute = AppReflectionsRouteImport.update({
   path: '/reflections',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPartnersRoute = AppPartnersRouteImport.update({
+  id: '/partners',
+  path: '/partners',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppHelpRoute = AppHelpRouteImport.update({
   id: '/help',
   path: '/help',
@@ -70,6 +83,11 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
 const AppSkillsNewRoute = AppSkillsNewRouteImport.update({
   id: '/skills_/new',
   path: '/skills/new',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPartnersIdRoute = AppPartnersIdRouteImport.update({
+  id: '/partners_/$id',
+  path: '/partners/$id',
   getParentRoute: () => AppRoute,
 } as any)
 const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
@@ -88,12 +106,15 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/app/dashboard': typeof AppDashboardRoute
   '/app/help': typeof AppHelpRoute
+  '/app/partners': typeof AppPartnersRoute
   '/app/reflections': typeof AppReflectionsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/skills': typeof AppSkillsRoute
   '/app/todolist': typeof AppTodolistRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/app/': typeof AppIndexRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/app/partners/$id': typeof AppPartnersIdRoute
   '/app/skills/new': typeof AppSkillsNewRoute
   '/app/skills/$id/planner': typeof AppSkillsIdPlannerRoute
 }
@@ -101,12 +122,15 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/help': typeof AppHelpRoute
+  '/app/partners': typeof AppPartnersRoute
   '/app/reflections': typeof AppReflectionsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/skills': typeof AppSkillsRoute
   '/app/todolist': typeof AppTodolistRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/app': typeof AppIndexRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/app/partners/$id': typeof AppPartnersIdRoute
   '/app/skills/new': typeof AppSkillsNewRoute
   '/app/skills/$id/planner': typeof AppSkillsIdPlannerRoute
 }
@@ -116,12 +140,15 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/app/dashboard': typeof AppDashboardRoute
   '/app/help': typeof AppHelpRoute
+  '/app/partners': typeof AppPartnersRoute
   '/app/reflections': typeof AppReflectionsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/skills': typeof AppSkillsRoute
   '/app/todolist': typeof AppTodolistRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/app/': typeof AppIndexRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/app/partners_/$id': typeof AppPartnersIdRoute
   '/app/skills_/new': typeof AppSkillsNewRoute
   '/app/skills_/$id/planner': typeof AppSkillsIdPlannerRoute
 }
@@ -132,12 +159,15 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/dashboard'
     | '/app/help'
+    | '/app/partners'
     | '/app/reflections'
     | '/app/settings'
     | '/app/skills'
     | '/app/todolist'
+    | '/invite/$token'
     | '/app/'
     | '/api/trpc/$'
+    | '/app/partners/$id'
     | '/app/skills/new'
     | '/app/skills/$id/planner'
   fileRoutesByTo: FileRoutesByTo
@@ -145,12 +175,15 @@ export interface FileRouteTypes {
     | '/'
     | '/app/dashboard'
     | '/app/help'
+    | '/app/partners'
     | '/app/reflections'
     | '/app/settings'
     | '/app/skills'
     | '/app/todolist'
+    | '/invite/$token'
     | '/app'
     | '/api/trpc/$'
+    | '/app/partners/$id'
     | '/app/skills/new'
     | '/app/skills/$id/planner'
   id:
@@ -159,12 +192,15 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/dashboard'
     | '/app/help'
+    | '/app/partners'
     | '/app/reflections'
     | '/app/settings'
     | '/app/skills'
     | '/app/todolist'
+    | '/invite/$token'
     | '/app/'
     | '/api/trpc/$'
+    | '/app/partners_/$id'
     | '/app/skills_/new'
     | '/app/skills_/$id/planner'
   fileRoutesById: FileRoutesById
@@ -172,6 +208,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  InviteTokenRoute: typeof InviteTokenRoute
   ApiTrpcSplatRoute: typeof ApiTrpcSplatRoute
 }
 
@@ -197,6 +234,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/invite/$token': {
+      id: '/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof InviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/app/todolist': {
       id: '/app/todolist'
@@ -226,6 +270,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppReflectionsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/partners': {
+      id: '/app/partners'
+      path: '/partners'
+      fullPath: '/app/partners'
+      preLoaderRoute: typeof AppPartnersRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/help': {
       id: '/app/help'
       path: '/help'
@@ -245,6 +296,13 @@ declare module '@tanstack/react-router' {
       path: '/skills/new'
       fullPath: '/app/skills/new'
       preLoaderRoute: typeof AppSkillsNewRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/partners_/$id': {
+      id: '/app/partners_/$id'
+      path: '/partners/$id'
+      fullPath: '/app/partners/$id'
+      preLoaderRoute: typeof AppPartnersIdRouteImport
       parentRoute: typeof AppRoute
     }
     '/api/trpc/$': {
@@ -267,11 +325,13 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppHelpRoute: typeof AppHelpRoute
+  AppPartnersRoute: typeof AppPartnersRoute
   AppReflectionsRoute: typeof AppReflectionsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppSkillsRoute: typeof AppSkillsRoute
   AppTodolistRoute: typeof AppTodolistRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppPartnersIdRoute: typeof AppPartnersIdRoute
   AppSkillsNewRoute: typeof AppSkillsNewRoute
   AppSkillsIdPlannerRoute: typeof AppSkillsIdPlannerRoute
 }
@@ -279,11 +339,13 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppHelpRoute: AppHelpRoute,
+  AppPartnersRoute: AppPartnersRoute,
   AppReflectionsRoute: AppReflectionsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppSkillsRoute: AppSkillsRoute,
   AppTodolistRoute: AppTodolistRoute,
   AppIndexRoute: AppIndexRoute,
+  AppPartnersIdRoute: AppPartnersIdRoute,
   AppSkillsNewRoute: AppSkillsNewRoute,
   AppSkillsIdPlannerRoute: AppSkillsIdPlannerRoute,
 }
@@ -293,6 +355,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  InviteTokenRoute: InviteTokenRoute,
   ApiTrpcSplatRoute: ApiTrpcSplatRoute,
 }
 export const routeTree = rootRouteImport

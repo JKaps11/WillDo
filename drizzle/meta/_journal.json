@@ -50,6 +50,20 @@
       "when": 1773619886482,
       "tag": "0006_spotty_wiccan",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1774403488795,
+      "tag": "0007_graceful_shotgun",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1774915200000,
+      "tag": "0008_partnership_symmetric_constraints",
+      "breakpoints": true
     }
   ]
 }
